@@ -1,0 +1,8 @@
+streamlit
+requests
+pytz
+timezonefinder
+astral
+plotly
+folium
+streamlit-folium
