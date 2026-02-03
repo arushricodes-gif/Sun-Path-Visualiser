@@ -10,7 +10,6 @@ import plotly.graph_objects as go
 import folium
 from streamlit_folium import st_folium
 import streamlit.components.v1 as components 
-# --- NEW IMPORT FOR GPS ---
 from streamlit_js_eval import get_geolocation
 
 #----------------------------------------------------------------
@@ -55,11 +54,10 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 #----------------------------------------------------------------
-# 2. GPS DETECTION & LOGIC
+# 2. GPS DETECTION & GEOCODING
 #----------------------------------------------------------------
-# Initialize coordinates with a default, but try to get GPS first
 if 'coords' not in st.session_state:
-    st.session_state.coords = [0, 0] # Default fallback
+    st.session_state.coords = [12.9817, 77.710] # Fallback
     st.session_state.gps_requested = False
 
 # Request GPS location once per session
@@ -69,6 +67,18 @@ if not st.session_state.gps_requested:
         st.session_state.coords = [loc['coords']['latitude'], loc['coords']['longitude']]
         st.session_state.gps_requested = True
         st.rerun()
+
+# Helper for City Search (Geocoding)
+def search_city(city_name):
+    try:
+        url = f"https://nominatim.openstreetmap.org/search?q={city_name}&format=json&limit=1"
+        headers = {'User-Agent': 'SolarPathVisualizer_v1'} # Required by Nominatim
+        resp = requests.get(url, headers=headers).json()
+        if resp:
+            return [float(resp[0]['lat']), float(resp[0]['lon'])]
+    except:
+        return None
+    return None
 
 lat, lon = st.session_state.coords
 
@@ -102,17 +112,28 @@ local_tz = pytz.timezone(tz_name)
 city = LocationInfo(timezone=tz_name, latitude=lat, longitude=lon)
 
 #---------------------------------------------------------------
-# 3. SIDEBAR & TIME CONTROL
+# 3. SIDEBAR (GPS, SEARCH & TIME)
 #---------------------------------------------------------------
 with st.sidebar:
     st.header("⚙️ Settings")
+    
+    # --- WORKING SEARCH BAR ---
+    with st.form("city_search"):
+        search_query = st.text_input("🔍 Search City", placeholder="e.g. Paris, France")
+        search_btn = st.form_submit_button("Search")
+        if search_btn and search_query:
+            coords = search_city(search_query)
+            if coords:
+                st.session_state.coords = coords
+                st.rerun()
+            else:
+                st.error("City not found!")
+
     if st.button("📍 Reset to My GPS"):
         st.session_state.gps_requested = False
         st.rerun()
         
     target_date = st.date_input("Select Date", date.today())
-    if target_date != date.today():
-        st.warning("Weather/AQI data reflects LIVE conditions.")
     radius_meters = st.slider("Visual Radius (m)", 50, 500, 150)
     
     try:
@@ -139,11 +160,11 @@ with top_col1:
         <div class="obs-card">
             <h4 style="color:#F7DF88; margin-top:0;">📋 How it works</h4>
             <p style="color:#ccc; font-size:0.95rem; line-height:1.6;">
-                Tracking solar trajectory at <b>{lat:.4f}, {lon:.4f}</b>: Select your particular location on <b>Tab 1</b>. Switch to the <b>2nd Tab</b> to see the solar path animation.<br>
-                The <span style="color:#e74c3c; font-weight:bold;">red line</span> represents sunrise, 
-                <span style="color:#3498db; font-weight:bold;">blue</span> shows sunset, 
-                <span style="color:#808080; font-weight:bold;">grey</span> shows the shadow line and the 
-                <span style="color:#f39c12; font-weight:bold;">orange arc</span> shows the sun path on the paritcular dayandtime selected.
+                Tracking solar trajectory at <b>{lat:.4f}, {lon:.4f}</b>. Use the sidebar search or click on the map below.<br>
+                The <span style="color:#e74c3c; font-weight:bold;">red line</span> is sunrise, 
+                <span style="color:#3498db; font-weight:bold;">blue</span> is sunset, 
+                <span style="color:#808080; font-weight:bold;">grey</span> is the shadow line and the 
+                <span style="color:#f39c12; font-weight:bold;">orange arc</span> is the path.
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -194,6 +215,10 @@ with tab2:
         curr += timedelta(minutes=5)
 
     m_slat, m_slon, m_shlat, m_shlon, m_az, m_el = get_solar_pos(sim_time, radius_meters, lat, lon)
+
+    # --- SUN BELOW HORIZON MESSAGE ---
+    if m_el <= 0:
+        st.warning(f"🌙 The sun is currently below the horizon ({m_el:.1f}°). Check back during daylight!")
 
     map_html = f"""
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
