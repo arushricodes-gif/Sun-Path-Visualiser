@@ -57,7 +57,7 @@ st.markdown("""
 # 2. GPS DETECTION & GEOCODING
 #----------------------------------------------------------------
 if 'coords' not in st.session_state:
-    st.session_state.coords = [12.9817, 77.710] # Fallback
+    st.session_state.coords = [0, 0] # Fallback
     st.session_state.gps_requested = False
 
 # Request GPS location once per session
