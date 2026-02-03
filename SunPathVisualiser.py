@@ -59,7 +59,7 @@ st.markdown("""
 #----------------------------------------------------------------
 # Initialize coordinates with a default, but try to get GPS first
 if 'coords' not in st.session_state:
-    st.session_state.coords = [12.9817, 77.710] # Default fallback
+    st.session_state.coords = [0, 0] # Default fallback
     st.session_state.gps_requested = False
 
 # Request GPS location once per session
