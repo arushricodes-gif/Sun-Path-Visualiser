@@ -1,4 +1,3 @@
-# ---------------------------------------------------------------
 import streamlit as st 
 import math
 import requests
@@ -11,9 +10,11 @@ import plotly.graph_objects as go
 import folium
 from streamlit_folium import st_folium
 import streamlit.components.v1 as components 
+# --- NEW IMPORT FOR GPS ---
+from streamlit_js_eval import get_geolocation
 
 #----------------------------------------------------------------
-# 1. UI STYLING (The "Solar Path Analyzer" look from your Image)
+# 1. UI STYLING
 #----------------------------------------------------------------
 st.set_page_config(layout="wide", page_title="Solar Path Visualizer", page_icon="☀️")
 
@@ -54,10 +55,20 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 #----------------------------------------------------------------
-# 2. LOGIC & DATA FETCHING
+# 2. GPS DETECTION & LOGIC
 #----------------------------------------------------------------
+# Initialize coordinates with a default, but try to get GPS first
 if 'coords' not in st.session_state:
-    st.session_state.coords = [12.9817, 77.710]
+    st.session_state.coords = [12.9817, 77.710] # Default fallback
+    st.session_state.gps_requested = False
+
+# Request GPS location once per session
+if not st.session_state.gps_requested:
+    loc = get_geolocation()
+    if loc:
+        st.session_state.coords = [loc['coords']['latitude'], loc['coords']['longitude']]
+        st.session_state.gps_requested = True
+        st.rerun()
 
 lat, lon = st.session_state.coords
 
@@ -95,6 +106,10 @@ city = LocationInfo(timezone=tz_name, latitude=lat, longitude=lon)
 #---------------------------------------------------------------
 with st.sidebar:
     st.header("⚙️ Settings")
+    if st.button("📍 Reset to My GPS"):
+        st.session_state.gps_requested = False
+        st.rerun()
+        
     target_date = st.date_input("Select Date", date.today())
     if target_date != date.today():
         st.warning("Weather/AQI data reflects LIVE conditions.")
@@ -241,28 +256,22 @@ with tab2:
     components.html(map_html, height=570)
 
 #---------------------------------------------------------------
-# 5. METRICS & CHART
-#---------------------------------------------------------------
-#---------------------------------------------------------------
 # 5. METRICS, AQI BAR & CHART
 #---------------------------------------------------------------
 st.markdown("---")
 
-# Row 1: Solar Metrics
 m_col1, m_col2, m_col3, m_col4 = st.columns(4)
 m_col1.metric("Selected Time", sim_time.strftime('%H:%M'))
 m_col2.metric("Azimuth", f"{m_az:.1f}°")
 m_col3.metric("Elevation", f"{m_el:.1f}°")
 m_col4.metric("Solar Noon", noon_t.strftime('%H:%M'))
 
-# Row 2: Weather & AQI Metrics
 w_col1, w_col2, w_col3, w_col4 = st.columns(4)
 w_col1.metric("🌡️ Temp", f"{env_data['temp']}°C")
 w_col2.metric("💧 Humidity", f"{env_data['hum']}%")
 w_col3.metric("🌬️ Wind", f"{env_data['wind']} m/s")
+w_col4.metric("💨 AQI", env_data["aqi"], delta=env_data["label"], delta_color="inverse")
 
-# --- AQI COLOR PROGRESS BAR ---
-# We calculate the percentage of the bar (max 300 for scale)
 aqi_val = env_data['aqi'] if isinstance(env_data['aqi'], int) else 0
 bar_percentage = min((aqi_val / 300) * 100, 100) 
 
@@ -287,7 +296,6 @@ st.markdown(f"""
     </div>
     """, unsafe_allow_html=True)
 
-# Row 3: Elevation Chart
 st.markdown("<br>", unsafe_allow_html=True)
 curve_times = [rise_t + timedelta(minutes=10*i) for i in range(len(path_data))]
 curve_els = [d['el'] for d in path_data]
@@ -302,7 +310,6 @@ fig.add_trace(go.Scatter(
     fillcolor='rgba(243, 156, 18, 0.1)'
 ))
 
-# Zone overlays for Golden Hour and Twilight
 fig.add_hrect(y0=0, y1=6, fillcolor="gold", opacity=0.1, line_width=0, annotation_text="Golden Hour")
 fig.add_hrect(y0=-6, y1=0, fillcolor="royalblue", opacity=0.1, line_width=0, annotation_text="Twilight")
 
@@ -316,5 +323,3 @@ fig.update_layout(
     yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.05)', title="Elevation (°)")
 )
 st.plotly_chart(fig, use_container_width=True)
-w_col4.metric("💨 AQI", env_data["aqi"], delta=env_data["label"], delta_color="inverse")
-
