@@ -6,4 +6,4 @@ astral
 plotly
 folium
 streamlit-folium
-streamlit_js_eval
+streamlit-js-eval
