@@ -94,7 +94,7 @@ def render_dashboard_footer(key_suffix):
 st.markdown('<h1 class="main-title">☀️SOLAR PATH VISUALIZER☀️</h1>', unsafe_allow_html=True)
 top_col1, top_col2 = st.columns([2.5, 1])
 with top_col1:
-    st.markdown(f'<div class="obs-card"><h4 style="color:#F7DF88; margin-top:0;">🗺️Where are you?</h4><p style="color:#ccc; font-size:0.95rem; line-height:1.6;">Tracking solar trajectory at <b>{lat:.4f}, {lon:.4f}</b>.<br>The <span style="color:#e74c3c; font-weight:bold;">red line</span> is sunrise, <span style="color:#3498db; font-weight:bold;">blue</span> is sunset, <span style="color:#808080; font-weight:bold;">grey</span> is the shadow line.</p></div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="obs-card"><h4 style="color:#F7DF88; margin-top:0;">🗺️Where are you?</h4><p style="color:#ffffff; font-size:0.95rem; line-height:1.6;">Tracking solar trajectory at <b>{lat:.4f}, {lon:.4f}</b>.<br>The <span style="color:#e74c3c; font-weight:bold;">red line</span> is sunrise, <span style="color:#3498db; font-weight:bold;">blue</span> is sunset, <span style="color:#808080; font-weight:bold;">grey</span> is the shadow line.</p></div>', unsafe_allow_html=True)
 with top_col2:
     st.markdown(f'<div class="sun-card">🌅 Sunrise: {rise_t.strftime("%H:%M")}<br><br>🌇 Sunset: {set_t.strftime("%H:%M")}<br><br>💨AQI: {env_data["aqi"] if enable_aqi else "Disabled"}</div>', unsafe_allow_html=True)
 
@@ -136,11 +136,11 @@ with tab_info:
     st.markdown("""
         <div class="theory-section">
             <h2 class="theory-header">☀️ About Solar Path Visualizer</h2>
-            <p style="color:#ccc; line-height:1.6;">
+            <p style="color:#ffffff; line-height:1.6;">
                 Have you ever wondered about the exact movement of the sun or how much sunlight a specific spot on Earth receives? 
                 This tool is designed to showcase the <b>solar trajectory and sunlight availability</b> for any location.
             </p>
-            <p style="color:#ccc; line-height:1.6;">
+            <p style="color:#ffffff; line-height:1.6;">
                 The sun’s movement shifts significantly based on the seasons. Understanding these patterns is essential 
                 for practical decisions—from <b>solar panel installation</b> and <b>garden landscaping</b> to ensuring a 
                 potential <b>new home</b> receives enough natural light year-round.
