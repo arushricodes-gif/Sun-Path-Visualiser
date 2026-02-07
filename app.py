@@ -42,7 +42,7 @@ city_info = LocationInfo(timezone=tz_name, latitude=lat, longitude=lon)
 with st.sidebar:
     st.header("⚙️ Settings")
     with st.form("city_search"):
-        search_query = st.text_input("🔍 Search City", placeholder="e.g. Paris, France")
+        search_query = st.text_input("🔍 Search for place", placeholder="e.g. Paris, France")
         if st.form_submit_button("Search") and search_query:
             coords = solarlogic.search_city(search_query)
             if coords: 
@@ -56,7 +56,7 @@ with st.sidebar:
     date_preset = st.selectbox("Key Celestial Dates", list(celestial_dates.keys()))
     target_date = celestial_dates[date_preset] if date_preset != "Manual Selection" else st.date_input("Select Date", date.today())
     radius_meters = 250
-    enable_aqi = st.toggle("Show Live AQI & Weather", value=False)
+    enable_aqi = st.toggle("AQI and Live Weather\n(Available for live data only)", value=False)
     shour = st.slider("Hour", 0, 23, datetime.now(local_tz).hour)
     smin = st.slider("Minute", 0, 59, 0)
     sim_time = local_tz.localize(datetime.combine(target_date, datetime.min.time())) + timedelta(hours=shour, minutes=smin)
@@ -98,16 +98,17 @@ with top_col1:
 with top_col2:
     st.markdown(f'<div class="sun-card">🌅 Sunrise: {rise_t.strftime("%H:%M")}<br><br>🌇 Sunset: {set_t.strftime("%H:%M")}<br><br>💨AQI: {env_data["aqi"] if enable_aqi else "Disabled"}</div>', unsafe_allow_html=True)
 
-tab1, tab2, tab_info = st.tabs(["📍 Location Setup", "🚀 Live Visualization", "📖 How it works?"])
+tab1, tab2, tab_info = st.tabs(["Step 1: 📍 Location Setup", "Step 2: 🚀 Live Visualization", "📖 How it works?"])
 
 
 with tab1:
-    m = folium.Map(location=st.session_state.coords, zoom_start=17, tiles=None)
+    m = folium.Map(location=st.session_state.coords, zoom_start=17)
+    st.markdown("Select your location on the map and follow on to step 2.")
     folium.TileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}', attr='Esri', name='Satellite').add_to(m)
     folium.TileLayer('openstreetmap', name='Street').add_to(m)
     folium.LayerControl().add_to(m)
     folium.Marker(st.session_state.coords, icon=folium.Icon(color='orange', icon='sun', prefix='fa')).add_to(m)
-    map_data = st_folium(m, height=1000, use_container_width=True, key="selection_map")
+    map_data = st_folium(m, height=700, use_container_width=True, key="selection_map")
     if map_data and map_data.get("last_clicked"):
         st.session_state.coords = [map_data["last_clicked"]["lat"], map_data["last_clicked"]["lng"]]
         st.rerun()
