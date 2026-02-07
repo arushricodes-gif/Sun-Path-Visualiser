@@ -188,3 +188,4 @@ with tab_info:
                 The shortest day of the year and the sun's lowest path.
             </div>
         """, unsafe_allow_html=True)
+
