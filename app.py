@@ -115,7 +115,7 @@ with tab1:
     render_dashboard_footer("location")
 
 with tab2:
-    animate_trigger = st.toggle("🚀 Start Animation", key="anim_toggle")
+    animate_trigger = st.toggle("🚀 Start Animation", value=True, key="anim_toggle")
     path_data = []
     curr = rise_t
     while curr <= set_t:
@@ -188,4 +188,3 @@ with tab_info:
                 The shortest day of the year and the sun's lowest path.
             </div>
         """, unsafe_allow_html=True)
-
