@@ -141,28 +141,41 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger, si
     components.html(map_html, height=720)
 
 def render_seasonal_map(lat, lon, radius, seasonal_paths):
-    # Colors mapped exactly to your legend
     colors = {
-        "Summer": "#FF0000",   # Red
-        "Autumn": "#FF8C00",   # Orange
-        "Spring": "#FFD700",   # Gold
-        "Winter": "#FFFF00"    # Yellow
+        "Summer": "#FF0000", 
+        "Autumn": "#FF8C00", 
+        "Spring": "#FFD700", 
+        "Winter": "#FFFF00"
     }
     
     paths_js = ""
-    for name, coords in seasonal_paths.items():
+    for season_id, data in seasonal_paths.items():
+        coords = data["coords"]
+        label = data["label"] # This is the "Season (Date)" string
+        
         if coords:
             paths_js += f"""
             L.polyline({coords}, {{
-                color: '{colors.get(name, "#FFFFFF")}', 
-                weight: 5, 
-                opacity: 0.9
-            }}).addTo(map_s).bindTooltip('{name}', {{sticky: true}});
+                color: '{colors.get(season_id, "#FFFFFF")}', 
+                weight: 6, 
+                opacity: 0.8
+            }}).addTo(map_s).bindTooltip('<b>{label}</b>', {{
+                sticky: true, 
+                className: 'custom-tooltip'
+            }});
             """
 
     html_content = f"""
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <style>
+            .custom-tooltip {{
+                background-color: #333 !important;
+                color: white !important;
+                border: 1px solid #777 !important;
+                font-family: sans-serif;
+            }}
+        </style>
         <div id="map_s" style="height: 600px; width: 100%; border-radius: 15px; background: #000;"></div>
         <script>
             var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}');
@@ -176,7 +189,7 @@ def render_seasonal_map(lat, lon, radius, seasonal_paths):
 
             L.control.layers({{"Satellite": satellite, "Street": street}}).addTo(map_s);
             
-            // The Black Sun Circle
+            // Black Sun Circle
             L.circle([{lat}, {lon}], {{
                 radius: {radius}, 
                 color: 'white', 
