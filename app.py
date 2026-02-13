@@ -192,16 +192,17 @@ with tab_info:
 with tab_summary:
     st.markdown('<div class="theory-section"><h2 class="theory-header">📅 Seasonal Comparison</h2></div>', unsafe_allow_html=True)
     
-    # Names here must match the keys in visuals.py
-    milestones = {
-        "Summer": date(2026, 6, 21),
-        "Autumn": date(2026, 10, 31),
-        "Spring": date(2026, 3, 20),
-        "Winter": date(2026, 12, 21)
-    }
+    # We use a list of dictionaries so we can keep the ID separate from the Display Name
+    milestones = [
+        {"id": "Summer", "label": "Summer (June 21)", "date": date(2026, 6, 21)},
+        {"id": "Autumn", "label": "Autumn (Oct 31)", "date": date(2026, 10, 31)},
+        {"id": "Spring", "label": "Spring (March 20)", "date": date(2026, 3, 20)},
+        {"id": "Winter", "label": "Winter (Dec 21)", "date": date(2026, 12, 21)}
+    ]
     
     seasonal_data = {}
-    for name, m_date in milestones.items():
+    for m in milestones:
+        m_date = m["date"]
         m_r = sunrise(city_info.observer, date=m_date, tzinfo=local_tz)
         m_s = sunset(city_info.observer, date=m_date, tzinfo=local_tz)
         pts = []
@@ -210,12 +211,13 @@ with tab_summary:
             lat_p, lon_p, _, _, _, _ = solarlogic.get_solar_pos(city_info, c, radius_meters, lat, lon)
             pts.append([lat_p, lon_p])
             c += timedelta(minutes=20)
-        seasonal_data[name] = pts
+        # Store both the points and the label
+        seasonal_data[m["id"]] = {"coords": pts, "label": m["label"]}
 
     visuals.render_seasonal_map(lat, lon, radius_meters, seasonal_data)
     
     st.markdown("""
-    <div style="display: flex; justify-content: space-around; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px;">
+    <div style="display: flex; justify-content: space-around; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-top: 10px;">
         <div style="color:#FF0000;">● Summer</div>
         <div style="color:#FF8C00;">● Autumn</div>
         <div style="color:#FFD700;">● Spring</div>
