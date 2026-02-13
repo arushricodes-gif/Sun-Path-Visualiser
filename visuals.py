@@ -139,4 +139,56 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger, si
         </style>
     """
     components.html(map_html, height=720)
+
+def render_seasonal_map(lat, lon, radius, seasonal_paths):
+    # Colors mapped exactly to your legend
+    colors = {
+        "Summer": "#FF0000",   # Red
+        "Autumn": "#FF8C00",   # Orange
+        "Spring": "#FFD700",   # Gold
+        "Winter": "#FFFF00"    # Yellow
+    }
+    
+    paths_js = ""
+    for name, coords in seasonal_paths.items():
+        if coords:
+            paths_js += f"""
+            L.polyline({coords}, {{
+                color: '{colors.get(name, "#FFFFFF")}', 
+                weight: 5, 
+                opacity: 0.9
+            }}).addTo(map_s).bindTooltip('{name}', {{sticky: true}});
+            """
+
+    html_content = f"""
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <div id="map_s" style="height: 600px; width: 100%; border-radius: 15px; background: #000;"></div>
+        <script>
+            var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}');
+            var street = L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png');
+
+            var map_s = L.map('map_s', {{
+                center: [{lat}, {lon}],
+                zoom: 17,
+                layers: [satellite]
+            }});
+
+            L.control.layers({{"Satellite": satellite, "Street": street}}).addTo(map_s);
+            
+            // The Black Sun Circle
+            L.circle([{lat}, {lon}], {{
+                radius: {radius}, 
+                color: 'white', 
+                weight: 1, 
+                fillColor: 'black', 
+                fillOpacity: 0.4
+            }}).addTo(map_s);
+
+            L.circle([{lat}, {lon}], {{radius: 2, color: 'white', fillOpacity: 1}}).addTo(map_s);
+            
+            {paths_js}
+        </script>
+    """
+    st.components.v1.html(html_content, height=620)
     
