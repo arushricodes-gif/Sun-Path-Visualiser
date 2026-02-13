@@ -98,7 +98,7 @@ with top_col1:
 with top_col2:
     st.markdown(f'<div class="sun-card">🌅 Sunrise: {rise_t.strftime("%H:%M")}<br><br>🌇 Sunset: {set_t.strftime("%H:%M")}<br><br>💨AQI: {env_data["aqi"] if enable_aqi else "Disabled"}</div>', unsafe_allow_html=True)
 
-tab1, tab2, tab_info = st.tabs(["Step 1: 📍 Location Setup", "Step 2: 🚀 Live Visualization", "📖 How it works?"])
+tab1, tab2, tab_info, tab_summary = st.tabs(["Step 1: 📍 Location Setup", "Step 2: 🚀 Live Visualization", "📖 How it works?", "Year Round Summary"])
 
 
 with tab1:
@@ -189,3 +189,35 @@ with tab_info:
             </div>
         """, unsafe_allow_html=True)
 
+with tab_summary:
+    st.markdown('<div class="theory-section"><h2 class="theory-header">📅 Seasonal Comparison</h2></div>', unsafe_allow_html=True)
+    
+    # Names here must match the keys in visuals.py
+    milestones = {
+        "Summer": date(2026, 6, 21),
+        "Autumn": date(2026, 10, 31),
+        "Spring": date(2026, 3, 20),
+        "Winter": date(2026, 12, 21)
+    }
+    
+    seasonal_data = {}
+    for name, m_date in milestones.items():
+        m_r = sunrise(city_info.observer, date=m_date, tzinfo=local_tz)
+        m_s = sunset(city_info.observer, date=m_date, tzinfo=local_tz)
+        pts = []
+        c = m_r
+        while c <= m_s:
+            lat_p, lon_p, _, _, _, _ = solarlogic.get_solar_pos(city_info, c, radius_meters, lat, lon)
+            pts.append([lat_p, lon_p])
+            c += timedelta(minutes=20)
+        seasonal_data[name] = pts
+
+    visuals.render_seasonal_map(lat, lon, radius_meters, seasonal_data)
+    
+    st.markdown("""
+    <div style="display: flex; justify-content: space-around; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px;">
+        <div style="color:#FF0000;">● Summer</div>
+        <div style="color:#FF8C00;">● Autumn</div>
+        <div style="color:#FFD700;">● Spring</div>
+        <div style="color:#FFFF00;">● Winter</div>
+    </div>""", unsafe_allow_html=True)
