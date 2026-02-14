@@ -16,6 +16,7 @@ def search_city(city_name):
 def get_environmental_data(lat, lon):
     api_key = "d4b056a2-a4bc-48d0-9a38-3f5a2c675ea7"
     url = f"http://api.airvisual.com/v2/nearest_city?lat={lat}&lon={lon}&key={api_key}"
+    # Default values to prevent dashboard errors
     env = {"aqi": "N/A", "temp": "N/A", "hum": "N/A", "wind": "N/A", "color": "#444", "label": "Unknown"}
     try:
         r = requests.get(url, timeout=5).json()
@@ -43,3 +44,5 @@ def get_solar_pos(city_info, t, r, clat, clon):
 def get_edge(lat, lon, az_input, radius):
     rad = math.radians(az_input)
     return [lat + (radius/111111)*math.cos(rad), lon + (radius/(111111*math.cos(math.radians(lat))))*math.sin(rad)]
+
+
