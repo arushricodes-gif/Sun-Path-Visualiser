@@ -21,7 +21,8 @@ if 'coords' not in st.session_state:
 
 if not st.session_state.gps_requested:
     loc = get_geolocation()
-    if loc:
+    # Logic fix to prevent KeyError
+    if loc and 'coords' in loc:
         st.session_state.coords = [loc['coords']['latitude'], loc['coords']['longitude']]
         st.session_state.gps_requested = True
         st.rerun()
@@ -68,7 +69,7 @@ try:
 except:
     rise_t = sim_time.replace(hour=6, minute=0); set_t = sim_time.replace(hour=18, minute=0); noon_t = sim_time.replace(hour=12, minute=0)
 
-# --- FOOTER RENDERER (PRESERVED) ---
+# --- FOOTER RENDERER ---
 def render_dashboard_footer(key_suffix):
     st.markdown("---")
     m_slat, m_slon, m_shlat, m_shlon, m_az, m_el = solarlogic.get_solar_pos(city_info, sim_time, radius_meters, lat, lon)
@@ -100,11 +101,10 @@ with top_col2:
 
 tab1, tab2, tab_info, tab_summary = st.tabs(["Step 1: 📍 Location Setup", "Step 2: 🚀 Live Visualization", "📖 How it works?", "Year Round Summary"])
 
-
 with tab1:
     m = folium.Map(location=st.session_state.coords, zoom_start=17)
     st.markdown("Select your location on the map and follow on to step 2.")
-    folium.TileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}', attr='Esri', name='Satellite').add_to(m)
+    folium.TileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr='Esri', name='Satellite').add_to(m)
     folium.TileLayer('openstreetmap', name='Street').add_to(m)
     folium.LayerControl().add_to(m)
     folium.Marker(st.session_state.coords, icon=folium.Icon(color='orange', icon='sun', prefix='fa')).add_to(m)
@@ -125,7 +125,6 @@ with tab2:
     m_slat, m_slon, m_shlat, m_shlon, m_az, m_el = solarlogic.get_solar_pos(city_info, sim_time, radius_meters, lat, lon)
     if m_el <= 0: st.warning(f"🌙 The sun is currently below the horizon ({m_el:.1f}°).")
     
-    # Passing edges to visualizer
     rise_edge = solarlogic.get_edge(lat, lon, azimuth(city_info.observer, rise_t), radius_meters)
     set_edge = solarlogic.get_edge(lat, lon, azimuth(city_info.observer, set_t), radius_meters)
     
@@ -223,3 +222,4 @@ with tab_summary:
         <div style="color:#FFD700;">● Spring</div>
         <div style="color:#FFFF00;">● Winter</div>
     </div>""", unsafe_allow_html=True)
+    
