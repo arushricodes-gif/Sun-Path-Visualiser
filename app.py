@@ -113,7 +113,7 @@ def render_dashboard_footer(key_suffix):
 st.markdown('<h3 class="main-title">☀️ SOLAR PATH VISUALIZER ☀️</h3>', unsafe_allow_html=True)
 top_col1, top_col2 = st.columns([2.5, 1])
 
-tab_info, tab1, tab2, tab_summary = st.tabs(["📖 How it works?", "Step 1: 📍 Location Setup", "Step 2: 🚀 Live Visualization",  "Year Round Summary"])
+tab_info, tab1, tab2, tab_summary = st.tabs(["📖 How it works?", "Step 1: 📍 Location Setup", "Step 2: 🚀 Live Visualization",  "🗺️ Year Round Summary"])
 
 with tab_info:
     st.markdown("""
