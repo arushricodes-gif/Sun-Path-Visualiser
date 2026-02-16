@@ -217,3 +217,4 @@ with tab_summary:
         <div style="color:#FFD700;">● Spring</div>
         <div style="color:#FFFF00;">● Winter</div>
     </div>""", unsafe_allow_html=True)
+
