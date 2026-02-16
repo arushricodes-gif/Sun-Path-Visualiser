@@ -113,7 +113,62 @@ def render_dashboard_footer(key_suffix):
 st.markdown('<h3 class="main-title">☀️ SOLAR PATH VISUALIZER ☀️</h3>', unsafe_allow_html=True)
 top_col1, top_col2 = st.columns([2.5, 1])
 
-tab1, tab2, tab_info, tab_summary = st.tabs(["Step 1: 📍 Location Setup", "Step 2: 🚀 Live Visualization", "📖 How it works?", "Year Round Summary"])
+tab_info, tab1, tab2, tab_summary = st.tabs(["📖 How it works?", "Step 1: 📍 Location Setup", "Step 2: 🚀 Live Visualization",  "Year Round Summary"])
+
+with tab_info:
+    st.markdown("""
+<div style="color: white; font-family: 'Inter', sans-serif;">
+<h2 style="color: white;">🤩 See Your Sunlight Before You Build, Buy, or Plant</h2>
+<p>Ever wondered how much sunlight your <b>bedroom, balcony, terrace garden,</b> or <b>solar panels</b> will get throughout the year? Now you don't have to guess.</p>
+
+<hr style="border-top: 1px solid rgba(255,255,255,0.2); margin: 20px 0;">
+
+<h3 style="color: white;">🌍 What Solar Path Visualizer Does</h3>
+<p>A simple, educational, purpose-built tool that <b>instantly shows how sunlight moves across any location on Earth</b>, across <b>all seasons</b>, in a clean, intuitive interface. Use it to make confident, informed decisions whether you are:</p>
+<ul style="list-style-type: none; padding-left: 20px; line-height: 2;">
+    <li>🏠 <b>Buying a new home</b></li>
+    <li>🌿 <b>Planning a balcony or terrace garden</b></li>
+    <li>☀️ <b>Installing a solar geyser or solar panels</b></li>
+    <li>🏙️ <b>Checking how sunlight enters a specific window or corner</b></li>
+</ul>
+
+<hr style="border-top: 1px solid rgba(255,255,255,0.2); margin: 20px 0;">
+
+<h3 style="color: white;">☀️ Why This Matters</h3>
+<p>The sun's position changes every day. <b>Solstices, equinoxes, and shifting sunrise and sunset angles</b> all affect how light reaches your spaces. A room that's bright in winter may be dim in summer. A terrace perfect for plants in spring may be shaded in autumn. This tool shows you <b>exact sun behavior</b>, so you can plan smarter.</p>
+
+<hr style="border-top: 1px solid rgba(255,255,255,0.2); margin: 20px 0;">
+
+<h3 style="color: white;">🔍 How to Use Solar Path Visualizer</h3>
+
+<p>📍 <b>Select Your Location</b></p>
+<p style="padding-left: 20px;">Go to the <b>Location Setup</b> tab. Search for a city or <b>double-click anywhere on the map</b> to lock in coordinates.</p>
+
+<p>⏯️ <b>Visualize the Movement</b></p>
+<p style="padding-left: 20px;">Switch to <b>Live Visualization</b>. Toggle the <b>Start Animation</b> button to watch the sun sweep across the sky for your chosen date and time.</p>
+
+<p>🗺️ <b>Understand the Map</b></p>
+<ul style="list-style-type: none; padding-left: 20px; line-height: 2;">
+    <li><span style="color: #e74c3c; font-size: 20px;">●</span> <b>Red Line:</b> Direction of <b>Sunrise</b></li>
+    <li><span style="color: #3498db; font-size: 20px;">●</span> <b>Blue Line:</b> Direction of <b>Sunset</b></li>
+    <li><span style="color: #808080; font-size: 20px;">●</span> <b>Grey Line: Shadow Line</b> showing where shadows will fall</li>
+    <li><span style="color: #f39c12; font-size: 20px;">●</span> <b>Orange Arc:</b> The actual <b>Sun Path</b> for your selected date</li>
+</ul>
+
+<hr style="border-top: 1px solid rgba(255,255,255,0.2); margin: 20px 0;">
+
+<h3 style="color: white;">🧭 Quick Use Cases</h3>
+<ul style="list-style-type: none; padding-left: 10px; line-height: 1.8;">
+    <li>🏠 <b>Home Buyers:</b> Compare sunlight for different apartments or orientations before you commit.</li>
+    <li>🌱 <b>Gardeners:</b> Pick the best spots and plant types for balconies and terraces.</li>
+    <li>🔌 <b>Solar planners:</b> Estimate panel exposure and optimize placement for maximum yield.</li>
+    <li>📐 <b>Architects and renovators:</b> Design with daylighting and occupant comfort in mind.</li>
+</ul>
+</div>
+""", unsafe_allow_html=True)
+
+
+
 
 with tab1:
     m = folium.Map(location=st.session_state.coords, zoom_start=17)
@@ -152,39 +207,9 @@ with tab2:
     )
     render_dashboard_footer("visualisation")
 
-with tab_info:
-    # Restored Your Original Info Content
-    st.markdown("""
-        <div class="theory-section">
-            <h1 class="theory-header">☀️ About Solar Path Visualizer</h1>
-            <p>Have you ever wondered about the exact movement of the sun or how much sunlight a specific spot on Earth receives? This tool is designed to showcase the <b>solar trajectory and sunlight availability</b> for any location.</p>
-            <p>The sun’s movement shifts significantly based on the seasons. Understanding these patterns is essential for practical decisions—from <b>solar panel installation</b> and <b>garden landscaping</b> to ensuring a potential <b>new home</b> receives enough natural light year-round.</p>
-        </div>
-
-        <h2 class="theory-header">🔍 How to Use</h2>
-        <div class="milestone-card"><b>1. Select Your Location:</b> Go to Location Setup tab. Search or double-click the map.</div>
-        <div class="milestone-card"><b>2. Visualize:</b> Switch to Live Visualization. Toggle 'Start Animation'.</div>
-        
-        <h2 class="theory-header">🗺️ Line Index (Map Legend)</h2>
-        <div class="legend-container">
-            <div class="legend-item" style="color:#e74c3c;">🔴 Sunrise Line</div>
-            <div class="legend-item" style="color:#3498db;">🔵 Sunset Line</div>
-            <div class="legend-item" style="color:#808080;">⚪ Shadow Line</div>
-            <div class="legend-item" style="color:#f39c12;">🟠 Solar Path</div>
-        </div>
-
-        <h2 class="theory-header" style="margin-top:30px;">📅 Celestial Milestones</h2>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
-            <div class="milestone-card"><b>Spring Equinox (Mar 20)</b><br>Day and night equal length.</div>
-            <div class="milestone-card"><b>Summer Solstice (Jun 21)</b><br>Longest day, highest path.</div>
-            <div class="milestone-card"><b>Autumnal Equinox (Sep 22)</b><br>Equal day and night.</div>
-            <div class="milestone-card"><b>Winter Solstice (Dec 21)</b><br>Shortest day, lowest path.</div>
-        </div>
-    """, unsafe_allow_html=True)
-
 
 with tab_summary:
-    st.markdown('<div class="theory-section"><h2 class="theory-header">📅 Seasonal Comparison</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="theory-section"><h2 class="theory-header">Seasonal Comparison</h2></div>', unsafe_allow_html=True)
     
     # We use a list of dictionaries so we can keep the ID separate from the Display Name
     milestones = [
@@ -217,4 +242,3 @@ with tab_summary:
         <div style="color:#FFD700;">● Spring</div>
         <div style="color:#FFFF00;">● Winter</div>
     </div>""", unsafe_allow_html=True)
-
