@@ -82,46 +82,88 @@ def apply_styles():
         </style>
     """, unsafe_allow_html=True)
 
-def render_map_component(lat, lon, radius_meters, path_data, animate_trigger, sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el, rise_edge, set_edge):
+def render_map_component(lat, lon, radius_meters, path_data, animate_trigger, sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el, rise_edge, set_edge, rise_time, set_time, aqi_val):
     map_html = f"""
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-        <div id="map2" style="height: 700px; width: 100%; border-radius: 15px; border: 1px solid #333;"></div>
+        <div id="map2" style="height: 700px; width: 100%; border-radius: 15px; border: 1px solid #333; position: relative;"></div>
         <script>
             var street = L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png');
             var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}');
-            var map2 = L.map('map2', {{ center: [{lat}, {lon}], zoom: 17, layers: [street] }});
-            L.control.layers({{"Street": street, "Satellite": satellite}}).addTo(map2);
+            var map2 = L.map('map2', {{ center: [{lat}, {lon}], zoom: 17, layers: [street], zoomControl: false }});
+            
+            L.control.zoom({{ position: 'bottomright' }}).addTo(map2);
+            L.control.layers({{"Street": street, "Satellite": satellite}}, null, {{ collapsed: false, position: 'topleft' }}).addTo(map2);
+            
+            // --- CUSTOM MAP OVERLAY ---
+            var infoControl = L.control({{position: 'topright'}});
+            infoControl.onAdd = function (map) {{
+                var div = L.DomUtil.create('div', 'map-stats-card');
+                div.innerHTML = `
+                    <div style="margin-bottom: 5px;">🌅Sunrise: <b>{rise_time}</b></div>
+                    <div style="margin-bottom: 5px;">🌇Sunset: <b>{set_time}</b></div>
+                    <div style="border-top: 1px solid rgba(255,255,255,0.2); padding-top: 5px; color: #F39C12;">💨 AQI: <b>{aqi_val}</b></div>
+                `;
+                return div;
+            }};
+            infoControl.addTo(map2);
+
             L.circle([{lat}, {lon}], {{radius: {radius_meters}, color: 'white', weight: 1, fillOpacity: 0.1}}).addTo(map2);
             var pathData = {path_data};
             L.polyline(pathData.map(p => [p.lat, p.lon]), {{color: 'orange', weight: 5, dashArray: '5, 10', opacity: 0.6}}).addTo(map2);
             L.polyline([[{lat}, {lon}], {rise_edge}], {{color: '#e74c3c', weight: 3}}).addTo(map2);
             L.polyline([[{lat}, {lon}], {set_edge}], {{color: '#3498db', weight: 3}}).addTo(map2);
+
             var sunIcon = L.divIcon({{ 
                 html: `<div class="sun-container"><div id="sun-time-label" class="pointing-box">--:--</div><div class="sun-emoji">☀️</div></div>`, 
                 iconSize: [80, 80], iconAnchor: [40, 62], className: 'custom-sun-icon' 
             }});
+
             var sunMarker = L.marker([0, 0], {{icon: sunIcon}}).addTo(map2);
             var shadowLine = L.polyline([[{lat}, {lon}], [{lat}, {lon}]], {{color: 'grey', weight: 5, opacity: 0.5}}).addTo(map2);
+
             function updateFrame(pos) {{
                 if (pos) {{
                     sunMarker.setLatLng([pos.lat, pos.lon]);
                     shadowLine.setLatLngs([[{lat}, {lon}], [pos.shlat, pos.shlon]]);
                     document.getElementById('sun-time-label').innerHTML = pos.time;
                     sunMarker.setOpacity(pos.el < 0 ? 0 : 1);
+                    shadowLine.setStyle({{opacity: pos.el < 0 ? 0 : 0.5}});
                 }}
             }}
+
             if ({str(animate_trigger).lower()}) {{
-                var i = 0; function doAnimate() {{ updateFrame(pathData[i]); i = (i + 1) % pathData.length; setTimeout(doAnimate, 150); }} doAnimate();
-            }} else {{ updateFrame({{lat: {m_slat}, lon: {m_slon}, shlat: {m_shlat}, shlon: {m_shlon}, el: {m_el}, time: "{sim_time.strftime('%H:%M')}"}}); }}
+                var i = 0; 
+                function doAnimate() {{ 
+                    updateFrame(pathData[i]); 
+                    i = (i + 1) % pathData.length; 
+                    setTimeout(doAnimate, 150); 
+                }} 
+                doAnimate();
+            }} else {{ 
+                updateFrame({{lat: {m_slat}, lon: {m_slon}, shlat: {m_shlat}, shlon: {m_shlon}, el: {m_el}, time: "{sim_time.strftime('%H:%M')}"}}); 
+            }}
         </script>
         <style>
+            .map-stats-card {{
+                background: rgba(14, 17, 23, 0.85);
+                backdrop-filter: blur(10px);
+                padding: 12px 15px;
+                border-radius: 12px;
+                border: 1px solid rgba(243, 156, 18, 0.4);
+                color: white;
+                font-family: 'Inter', sans-serif;
+                font-size: 13px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                margin: 10px;
+            }}
             .custom-sun-icon {{ background: none; border: none; }}
-            .pointing-box {{ background: #f39c12; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 14px; }}
+            .pointing-box {{ background: #F39C12; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 13px; box-shadow: 0 2px 5px rgba(0,0,0,0.5); }}
             .sun-emoji {{ font-size: 32pt; }}
         </style>
     """
     components.html(map_html, height=720)
+
 
 def render_seasonal_map(lat, lon, radius, seasonal_paths):
     paths_js = ""
