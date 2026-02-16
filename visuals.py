@@ -22,8 +22,23 @@ def apply_styles():
             font-size: 2.5rem !important;
         }
 
-        /* Fix Input Fields (Search box, Date picker) */
-        /* This ensures the text isn't white-on-white */
+        /* Fix Metrics (Temp, AQI, etc.) - Forces them from Grey to White */
+        [data-testid="stMetricValue"] {
+            color: #FFFFFF !important;
+        }
+        [data-testid="stMetricLabel"] p {
+            color: #FFFFFF !important;
+        }
+        [data-testid="stMetricDelta"] {
+            color: #FFFFFF !important;
+        }
+
+        /* Target all headers specifically to override the grey */
+        h1, h2, h3, h4, h5, h6, [data-testid="stMarkdownContainer"] h2 {
+            color: #FFFFFF !important;
+        }
+
+        /* Fix Input Fields */
         [data-baseweb="input"], [data-baseweb="base-input"] {
             background-color: #1A1C24 !important;
             border-radius: 8px !important;
@@ -34,7 +49,7 @@ def apply_styles():
             -webkit-text-fill-color: #FFFFFF !important;
         }
 
-        /* Fix White-on-White Buttons (Search & Reset) */
+        /* Buttons */
         button[kind="secondaryFormSubmit"], 
         button[kind="secondary"], 
         [data-testid="stForm"] button {
@@ -44,7 +59,6 @@ def apply_styles():
             font-weight: 700 !important;
         }
         
-        /* Ensure Sidebar text and labels are visible */
         [data-testid="stSidebar"] {
             background-color: #0E1117 !important;
         }
@@ -53,39 +67,21 @@ def apply_styles():
             color: #FFFFFF !important;
         }
 
-        /* Fix Slider appearance */
         .stSlider [role="slider"] {
             background-color: #F39C12 !important;
         }
 
-        /* Tab visibility fix */
+        /* Tabs */
         button[data-baseweb="tab"] { color: white !important; }
         button[aria-selected="true"] { 
             color: #F39C12 !important; 
             border-bottom-color: #F39C12 !important; 
-
-        }
-        /* Target all headers specifically to override the grey */
-        h1, h2, h3, h4, h5, h6, [data-testid="stMarkdownContainer"] h2 {
-            color: #FFFFFF !important;
         }
 
-        /* Fix for the specific 'Seasonal Comparison' style header */
-        .theory-header, .main-title {
-            color: #F39C12 !important; /* Keep your gold color for main titles */
-        }
-
-        /* Ensure standard markdown text isn't inherited as grey */
+        /* Final check for standard text inherited as grey */
         .stMarkdown p {
             color: #FFFFFF !important;
         }
-        
-        /* Fix for the date icon next to headers if it appears grey */
-        [data-testid="stHeader"] {
-            background-color: rgba(0,0,0,0);
-            color: white !important;
-        }
-
         </style>
     """, unsafe_allow_html=True)
     
