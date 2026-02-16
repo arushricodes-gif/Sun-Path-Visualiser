@@ -40,15 +40,21 @@ local_tz = pytz.timezone(tz_name)
 city_info = LocationInfo(timezone=tz_name, latitude=lat, longitude=lon)
 
 # --- SIDEBAR ---
+# --- SIDEBAR SEARCH FIX ---
 with st.sidebar:
     st.header("⚙️ Settings")
     with st.form("city_search"):
         search_query = st.text_input("🔍 Search for place", placeholder="e.g. Paris, France")
-        if st.form_submit_button("Search") and search_query:
+        # The Submit button is required for st.form to work
+        submitted = st.form_submit_button("Search Location")
+        
+        if submitted and search_query:
             coords = solarlogic.search_city(search_query)
             if coords: 
                 st.session_state.coords = coords
                 st.rerun()
+            else:
+                st.error("Location not found.")
     if st.button("📍 Reset to My GPS"):
         st.session_state.gps_requested = False
         st.rerun()
@@ -88,16 +94,24 @@ def render_dashboard_footer(key_suffix):
         temp_curr += timedelta(minutes=15)
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=[p['time'] for p in path_pts], y=[p['el'] for p in path_pts], mode='lines', line=dict(color='#f39c12', width=3), fill='tozeroy', fillcolor='rgba(243, 156, 18, 0.1)'))
-    fig.update_layout(height=250, margin=dict(l=10, r=10, t=30, b=10), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color="white", xaxis=dict(showgrid=False), yaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.05)', title="Elevation (°)"))
+    fig.update_layout(
+        height=250, 
+        margin=dict(l=10, r=10, t=30, b=10), 
+        paper_bgcolor='rgba(0,0,0,0)', 
+        plot_bgcolor='rgba(0,0,0,0)', 
+        font_color="black", 
+        xaxis=dict(showgrid=False, color="black"), 
+        yaxis=dict(
+            showgrid=True, 
+            gridcolor='rgba(0,0,0,0.1)', 
+            title="Elevation (°)",
+            color="black"
+        )
+    )
     st.plotly_chart(fig, use_container_width=True, key=f"chart_{key_suffix}")
 
-# --- MAIN LAYOUT ---
-st.markdown('<h1 class="main-title">☀️SOLAR PATH VISUALIZER☀️</h1>', unsafe_allow_html=True)
+st.markdown('<h3 class="main-title">☀️ SOLAR PATH VISUALIZER ☀️</h3>', unsafe_allow_html=True)
 top_col1, top_col2 = st.columns([2.5, 1])
-with top_col1:
-    st.markdown(f'<div class="obs-card"><h4 style="color:#F7DF88; margin-top:0;">🗺️Where are you?</h4><p style="color:#ffffff; font-size:0.95rem; line-height:1.6;">Tracking solar trajectory at <b>{lat:.4f}, {lon:.4f}</b>.<br>The <span style="color:#e74c3c; font-weight:bold;">red line</span> is sunrise, <span style="color:#3498db; font-weight:bold;">blue</span> is sunset, <span style="color:#808080; font-weight:bold;">grey</span> is the shadow line.</p></div>', unsafe_allow_html=True)
-with top_col2:
-    st.markdown(f'<div class="sun-card">🌅 Sunrise: {rise_t.strftime("%H:%M")}<br><br>🌇 Sunset: {set_t.strftime("%H:%M")}<br><br>💨AQI: {env_data["aqi"] if enable_aqi else "Disabled"}</div>', unsafe_allow_html=True)
 
 tab1, tab2, tab_info, tab_summary = st.tabs(["Step 1: 📍 Location Setup", "Step 2: 🚀 Live Visualization", "📖 How it works?", "Year Round Summary"])
 
@@ -127,66 +141,42 @@ with tab2:
     
     rise_edge = solarlogic.get_edge(lat, lon, azimuth(city_info.observer, rise_t), radius_meters)
     set_edge = solarlogic.get_edge(lat, lon, azimuth(city_info.observer, set_t), radius_meters)
-    
+    st.markdown(f'<div class="sun-card">🌅 Sunrise: {rise_t.strftime("%H:%M")}<br><br>🌇 Sunset: {set_t.strftime("%H:%M")}<br><br>💨AQI: {env_data["aqi"] if enable_aqi else "Disabled"}</div>', unsafe_allow_html=True)
+
+
     visuals.render_map_component(lat, lon, radius_meters, path_data, animate_trigger, sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el, rise_edge, set_edge)
     render_dashboard_footer("visualisation")
 
 with tab_info:
+    # Restored Your Original Info Content
     st.markdown("""
         <div class="theory-section">
-            <h2 class="theory-header">☀️ About Solar Path Visualizer</h2>
-            <p style="color:#ffffff; line-height:1.6;">
-                Have you ever wondered about the exact movement of the sun or how much sunlight a specific spot on Earth receives? 
-                This tool is designed to showcase the <b>solar trajectory and sunlight availability</b> for any location.
-            </p>
-            <p style="color:#ffffff; line-height:1.6;">
-                The sun’s movement shifts significantly based on the seasons. Understanding these patterns is essential 
-                for practical decisions—from <b>solar panel installation</b> and <b>garden landscaping</b> to ensuring a 
-                potential <b>new home</b> receives enough natural light year-round.
-            </p>
+            <h1 class="theory-header">☀️ About Solar Path Visualizer</h1>
+            <p>Have you ever wondered about the exact movement of the sun or how much sunlight a specific spot on Earth receives? This tool is designed to showcase the <b>solar trajectory and sunlight availability</b> for any location.</p>
+            <p>The sun’s movement shifts significantly based on the seasons. Understanding these patterns is essential for practical decisions—from <b>solar panel installation</b> and <b>garden landscaping</b> to ensuring a potential <b>new home</b> receives enough natural light year-round.</p>
+        </div>
+
+        <h2 class="theory-header">🔍 How to Use</h2>
+        <div class="milestone-card"><b>1. Select Your Location:</b> Go to Location Setup tab. Search or double-click the map.</div>
+        <div class="milestone-card"><b>2. Visualize:</b> Switch to Live Visualization. Toggle 'Start Animation'.</div>
+        
+        <h2 class="theory-header">🗺️ Line Index (Map Legend)</h2>
+        <div class="legend-container">
+            <div class="legend-item" style="color:#e74c3c;">🔴 Sunrise Line</div>
+            <div class="legend-item" style="color:#3498db;">🔵 Sunset Line</div>
+            <div class="legend-item" style="color:#808080;">⚪ Shadow Line</div>
+            <div class="legend-item" style="color:#f39c12;">🟠 Solar Path</div>
+        </div>
+
+        <h2 class="theory-header" style="margin-top:30px;">📅 Celestial Milestones</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+            <div class="milestone-card"><b>Spring Equinox (Mar 20)</b><br>Day and night equal length.</div>
+            <div class="milestone-card"><b>Summer Solstice (Jun 21)</b><br>Longest day, highest path.</div>
+            <div class="milestone-card"><b>Autumnal Equinox (Sep 22)</b><br>Equal day and night.</div>
+            <div class="milestone-card"><b>Winter Solstice (Dec 21)</b><br>Shortest day, lowest path.</div>
         </div>
     """, unsafe_allow_html=True)
-
-    # User Guide Section
-    with st.expander("📖 HOW TO USE THE PORTAL", expanded=True):
-        st.markdown("""
-            1. **Select Your Location**: 
-               Go to the **Location Setup** tab. Search for a city or double-click anywhere on the map to lock in coordinates.
-            2. **Visualize the Movement**: 
-               Switch to **Live Visualization**. Toggle the **Start Animation** button to see the sun sweep across the sky.
-            3. **Understand the Map**:
-               * <span style="color:#e74c3c; font-weight:bold;">● Red Line</span>: Direction of **Sunrise**.
-               * <span style="color:#3498db; font-weight:bold;">● Blue Line</span>: Direction of **Sunset**.
-               * <span style="color:#808080; font-weight:bold;">● Grey Line</span>: **Shadow Line** (where shadows will fall).
-               * <span style="color:#f39c12; font-weight:bold;">● Orange Arc</span>: The actual **Sun Path** for your selected date.
-        """, unsafe_allow_html=True)
-
-    # Celestial Milestones Section
-    st.markdown('<h4 class="theory-header" style="margin-top:20px;">📅 Celestial Milestones</h4>', unsafe_allow_html=True)
     
-    col_eq1, col_eq2 = st.columns(2)
-    with col_eq1:
-        st.markdown("""
-            <div class="milestone-card">
-                <b style="color:#F7DF88;">Spring Equinox (Mar 20)</b><br>
-                Day and night are approximately equal in length.
-            </div>
-            <div class="milestone-card" style="border-left-color: #3498db;">
-                <b style="color:#72aee6;">Autumnal Equinox (Sep 22)</b><br>
-                Marks the beginning of fall; equal day and night.
-            </div>
-        """, unsafe_allow_html=True)
-    with col_eq2:
-        st.markdown("""
-            <div class="milestone-card">
-                <b style="color:#F7DF88;">Summer Solstice (Jun 21)</b><br>
-                The longest day of the year and the sun's highest path.
-            </div>
-            <div class="milestone-card" style="border-left-color: #3498db;">
-                <b style="color:#72aee6;">Winter Solstice (Dec 21)</b><br>
-                The shortest day of the year and the sun's lowest path.
-            </div>
-        """, unsafe_allow_html=True)
 
 with tab_summary:
     st.markdown('<div class="theory-section"><h2 class="theory-header">📅 Seasonal Comparison</h2></div>', unsafe_allow_html=True)
@@ -222,4 +212,3 @@ with tab_summary:
         <div style="color:#FFD700;">● Spring</div>
         <div style="color:#FFFF00;">● Winter</div>
     </div>""", unsafe_allow_html=True)
-    
