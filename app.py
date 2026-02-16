@@ -129,7 +129,7 @@ with tab1:
     render_dashboard_footer("location")
 
 with tab2:
-    animate_trigger = st.toggle("🚀 Start Animation", value=True, key="anim_toggle")
+    animate_trigger = st.toggle("Play Path", value=True, key="anim_toggle")
     path_data = []
     curr = rise_t
     while curr <= set_t:
@@ -141,10 +141,15 @@ with tab2:
     
     rise_edge = solarlogic.get_edge(lat, lon, azimuth(city_info.observer, rise_t), radius_meters)
     set_edge = solarlogic.get_edge(lat, lon, azimuth(city_info.observer, set_t), radius_meters)
-    st.markdown(f'<div class="sun-card">🌅 Sunrise: {rise_t.strftime("%H:%M")}<br><br>🌇 Sunset: {set_t.strftime("%H:%M")}<br><br>💨AQI: {env_data["aqi"] if enable_aqi else "Disabled"}</div>', unsafe_allow_html=True)
+    
 
-
-    visuals.render_map_component(lat, lon, radius_meters, path_data, animate_trigger, sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el, rise_edge, set_edge)
+    visuals.render_map_component(
+        lat, lon, radius_meters, path_data, animate_trigger, sim_time, 
+        m_slat, m_slon, m_shlat, m_shlon, m_el, rise_edge, set_edge,
+        rise_t.strftime("%H:%M"), 
+        set_t.strftime("%H:%M"), 
+        env_data["aqi"] if enable_aqi else "Off"
+    )
     render_dashboard_footer("visualisation")
 
 with tab_info:
@@ -176,7 +181,7 @@ with tab_info:
             <div class="milestone-card"><b>Winter Solstice (Dec 21)</b><br>Shortest day, lowest path.</div>
         </div>
     """, unsafe_allow_html=True)
-    
+
 
 with tab_summary:
     st.markdown('<div class="theory-section"><h2 class="theory-header">📅 Seasonal Comparison</h2></div>', unsafe_allow_html=True)
