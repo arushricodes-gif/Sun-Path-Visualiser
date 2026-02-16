@@ -108,11 +108,11 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger, si
             }};
             infoControl.addTo(map2);
 
-            L.circle([{lat}, {lon}], {{radius: {radius_meters}, color: 'white', weight: 1, fillOpacity: 0.1}}).addTo(map2);
+            L.circle([{lat}, {lon}], {{radius: {radius_meters}, color: 'black', weight: 4, fillOpacity: 0.1}}).addTo(map2);
             var pathData = {path_data};
             L.polyline(pathData.map(p => [p.lat, p.lon]), {{color: 'orange', weight: 5, dashArray: '5, 10', opacity: 0.6}}).addTo(map2);
-            L.polyline([[{lat}, {lon}], {rise_edge}], {{color: '#e74c3c', weight: 3}}).addTo(map2);
-            L.polyline([[{lat}, {lon}], {set_edge}], {{color: '#3498db', weight: 3}}).addTo(map2);
+            L.polyline([[{lat}, {lon}], {rise_edge}], {{color: '#e74c3c', weight: 5}}).addTo(map2);
+            L.polyline([[{lat}, {lon}], {set_edge}], {{color: '#3498db', weight: 5}}).addTo(map2);
 
             var sunIcon = L.divIcon({{ 
                 html: `<div class="sun-container"><div id="sun-time-label" class="pointing-box">--:--</div><div class="sun-emoji">☀️</div></div>`, 
@@ -181,8 +181,8 @@ def render_seasonal_map(lat, lon, radius, seasonal_paths):
             var street = L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png');
             var map_s = L.map('map_s', {{ center: [{lat}, {lon}], zoom: 17, layers: [satellite] }});
             L.control.layers({{"Satellite": satellite, "Street": street}}).addTo(map_s);
-            L.circle([{lat}, {lon}], {{ radius: {radius}, color: 'white', weight: 1, fillOpacity: 0.1 }}).addTo(map_s);
-            L.circle([{lat}, {lon}], {{radius: 3, color: 'white', fillOpacity: 1}}).addTo(map_s);
+            L.circle([{lat}, {lon}], {{ radius: {radius}, color: 'black', weight: 4, fillOpacity: 0.1 }}).addTo(map_s);
+            L.circle([{lat}, {lon}], {{radius: 5, color: 'black', fillOpacity: 1}}).addTo(map_s);
             {paths_js}
         </script>
     """
