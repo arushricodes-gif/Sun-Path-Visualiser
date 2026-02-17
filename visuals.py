@@ -1,74 +1,64 @@
 import streamlit as st
 import streamlit.components.v1 as components
-
 def apply_styles():
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         
-        /* 1. FORCE GLOBAL DARK THEME */
+        /* 1. Global Backgrounds */
         .stApp { background-color: #0E1117 !important; }
         [data-testid="stSidebar"] { background-color: #000000 !important; }
 
-        /* 2. FIX SEARCH BAR & INPUT BOXES */
-        /* Make background light grey and TEXT PURE BLACK */
-        [data-baseweb="input"], [data-baseweb="select"] > div {
-            background-color: #D1D5DB !important; 
+        /* 2. SEARCH BAR: Light Grey Background with ORANGE TEXT */
+        div[data-baseweb="input"] {
+            background-color: #D1D5DB !important; /* Soft Grey Box */
             border-radius: 8px !important;
-            border: none !important;
         }
         
-        /* This is the critical fix for invisible text */
+        /* THIS IS THE FIX: Typed text will now be Orange */
         input {
-            color: #000000 !important;
-            font-weight: 500 !important;
-            -webkit-text-fill-color: #000000 !important;
+            color: #F39C12 !important; 
+            -webkit-text-fill-color: #F39C12 !important;
+            font-weight: 700 !important;
+        }
+        
+        /* Placeholder text (e.g., "Paris, France") stays dark for contrast */
+        input::placeholder {
+            color: #444444 !important;
+            -webkit-text-fill-color: #444444 !important;
         }
 
-        /* 3. FIX THE "GHOST" BUTTONS (Search & Reset) */
-        /* We target all buttons in the sidebar to be Orange */
-        [data-testid="stSidebar"] button {
+        /* 3. SIDEBAR BUTTONS: Solid Orange with White Bold Text */
+        .stButton > button {
             background-color: #F39C12 !important;
             color: #FFFFFF !important;
             border: none !important;
             width: 100% !important;
-            height: 3em !important;
             transition: 0.3s !important;
         }
         
-        /* Force button text to be white, bold, and visible */
-        [data-testid="stSidebar"] button p, [data-testid="stSidebar"] button div {
+        .stButton > button p {
             color: #FFFFFF !important;
-            font-weight: 700 !important;
+            font-weight: 800 !important;
         }
         
-        /* Hover state so it doesn't turn white when touched */
-        [data-testid="stSidebar"] button:hover {
+        .stButton > button:hover {
             background-color: #e68a00 !important;
             border: none !important;
         }
 
-        /* 4. FIX GREY/DIMMED LABELS */
-        h1, h2, h3, h4, h5, h6, p, span, label {
+        /* 4. TABS & LABELS: Force White for visibility */
+        h1, h2, h3, h4, h5, h6, p, span, label, [data-testid="stWidgetLabel"] p {
             color: #FFFFFF !important;
-        }
-        [data-testid="stWidgetLabel"] p {
-            color: #FFFFFF !important;
-            font-weight: 600 !important;
+            opacity: 1 !important;
         }
 
-        /* 5. TABS STYLING */
-        button[data-baseweb="tab"] p {
-            color: #FFFFFF !important;
-        }
-        button[aria-selected="true"] {
-            border-bottom-color: #F39C12 !important;
-        }
+        /* Active Tab Color */
         button[aria-selected="true"] p {
             color: #F39C12 !important;
         }
 
-        /* 6. SLIDERS */
+        /* 5. SLIDERS: Orange theme */
         .stSlider [data-baseweb="slider"] > div > div {
             background: #F39C12 !important;
         }
@@ -76,6 +66,7 @@ def apply_styles():
         .main-title { color: #F39C12 !important; font-weight: 800; text-align: center; padding: 20px 0px; font-size: 2.5rem; }
         </style>
     """, unsafe_allow_html=True)
+    
 
 
 def render_map_component(lat, lon, radius_meters, path_data, animate_trigger, sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el, rise_edge, set_edge, rise_time, set_time, aqi_val):
