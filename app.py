@@ -110,15 +110,15 @@ def render_dashboard_footer(key_suffix):
     )
     st.plotly_chart(fig, use_container_width=True, key=f"chart_{key_suffix}")
 
-st.markdown('<h3 class="main-title">☀️ SOLAR PATH VISUALIZER ☀️</h3>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-title">☀️ SOLAR PATH VISUALIZER ☀️</h1>', unsafe_allow_html=True)
 top_col1, top_col2 = st.columns([2.5, 1])
 
-tab_info, tab1, tab2, tab_summary = st.tabs(["📖 How it works?", "Step 1: 📍 Location Setup", "Step 2: 🚀 Live Visualization",  "Year Round Summary"])
+tab_info, tab1, tab2, tab_summary = st.tabs(["📖 What's this?", "Step 1: 📍 Location Setup", "Step 2: 🚀 Live Visualization",  "Year Round Summary"])
 
 with tab_info:
     st.markdown("""
 <div style="color: white; font-family: 'Inter', sans-serif;">
-<h2 style="color: white;">🤩 See Your Sunlight Before You Build, Buy, or Plant</h2>
+<h2 style="color: white;">🤩 Let the Sun guide your next big decision. </h2>
 <p>Ever wondered how much sunlight your <b>bedroom, balcony, terrace garden,</b> or <b>solar panels</b> will get throughout the year? Now you don't have to guess.</p>
 
 <hr style="border-top: 1px solid rgba(255,255,255,0.2); margin: 20px 0;">
