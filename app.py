@@ -178,96 +178,73 @@ with tab_info:
 
 
 with tab1:
-    # 1. Prepare variables (ensuring target_date from sidebar is used)
+    # 1. Prepare variables
     display_lat = f"{st.session_state.coords[0]:.5f}"
     display_lon = f"{st.session_state.coords[1]:.5f}"
-    display_date = target_date.strftime("%B %d, %Y")
+    display_date = target_date.strftime("%B %d, %Y") 
     
-    # 2. Recreate your Step 2 Map Style (Leaflet + Satellite Toggle)
-    map_html_step1 = f"""
-        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-        <div id="map_step1" style="height: 700px; width: 100%; border-radius: 15px; border: 1px solid #333;"></div>
-        <script>
-            var street = L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png');
-            var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}');
-            
-            var map1 = L.map('map_step1', {{ 
-                center: [{lat}, {lon}], 
-                zoom: 17, 
-                layers: [satellite], 
-                zoomControl: true 
-            }});
-            
-            L.control.layers({{"Street": street, "Satellite": satellite}}, null, {{collapsed: false, position: 'topleft'}}).addTo(map1);
-            
-            // --- DATA OVERLAY (Like Step 2) ---
-            var info = L.control({{position: 'topright'}});
-            info.onAdd = function() {{
-                var div = L.DomUtil.create('div', 'map-stats-card');
-                div.innerHTML = `
-                    <div style="color:#F39C12; font-weight:bold; margin-bottom:5px;">📍 SELECTED LOCATION</div>
-                    <div>Lat: <b>{display_lat}</b></div>
-                    <div>Lon: <b>{display_lon}</b></div>
-                    <hr style="margin:5px 0; border:0; border-top:1px solid #555;">
-                    <div style="color:#F39C12; font-weight:bold; margin-bottom:5px;">📅 SELECTED DATE</div>
-                    <div><b>{display_date}</b></div>
-                `;
-                return div;
-            }};
-            info.addTo(map1);
+    # 2. Force map refresh when date/location changes
+    map_key = f"map_select_{target_date}_{st.session_state.coords[0]}"
+    
+    # Initialize with tiles=None to remove the default layer
+    m = folium.Map(location=st.session_state.coords, zoom_start=17, tiles=None)
 
-            // Add the orange marker
-            L.marker([{lat}, {lon}]).addTo(map1);
-            
-            // Re-capture clicks for Streamlit
-            map1.on('click', function(e) {{
-                window.parent.postMessage({{
-                    type: 'streamlit:setComponentValue',
-                    value: {{ last_clicked: {{ lat: e.latlng.lat, lng: e.latlng.lng }} }}
-                }}, '*');
-            }});
-        </script>
-        <style>
-            .map-stats-card {{ 
-                background: rgba(14, 17, 23, 0.9); 
-                padding: 15px; 
-                border-radius: 12px; 
-                border: 2px solid #F39C12; 
-                color: white; 
-                font-size: 13px; 
-                font-family: 'Inter', sans-serif;
-                min-width: 150px;
-            }}
-        </style>
-    """
+    # 3. Add ONLY the two requested layers with proper attribution
+    # Satellite Layer
+    folium.TileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 
+        attr='Esri', 
+        name='Satellite'
+    ).add_to(m)
     
-    st.markdown("Select your location and date/Season of interest [Default it picks your present location and present date]")
-    
-    # Render using components (same style as your step 2)
-    # Note: We use st_folium for the selection logic as it's more reliable for catching clicks
-    m = folium.Map(location=st.session_state.coords, zoom_start=17)
-    folium.TileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr='Esri', name='Satellite').add_to(m)
-    folium.TileLayer('openstreetmap', name='Street').add_to(m)
+    # Street Layer - Fixed with required attribution
+    folium.TileLayer(
+        'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', 
+        attr='&copy; OpenStreetMap contributors', 
+        name='Street'
+    ).add_to(m)
+
+    # Simplified Control (Only 2 options now)
     folium.LayerControl(position='topleft', collapsed=False).add_to(m)
+    
+    # 4. Marker
     folium.Marker(st.session_state.coords, icon=folium.Icon(color='orange', icon='sun', prefix='fa')).add_to(m)
 
-    # Use the same "Float" logic as Step 2
+    # 5. The HTML Overlay (Matches Step 2 Style)
     info_html = f'''
-        <div class="map-stats-card" style="
-            position: absolute; top: 10px; right: 10px; z-index: 1000;
-            background: rgba(14, 17, 23, 0.9); padding: 12px; border-radius: 10px;
-            border: 2px solid #F39C12; color: white; font-family: 'Inter', sans-serif; font-size: 13px;">
-            <div style="color:#F39C12; font-weight:bold;">📍 LOCATION</div>
-            {display_lat}, {display_lon}<br>
-            <div style="color:#F39C12; font-weight:bold; margin-top:8px;">📅 DATE</div>
-            {display_date}
+        <div style="
+            position: absolute; 
+            top: 10px; right: 10px; 
+            width: 180px;
+            background: rgba(14, 17, 23, 0.9); 
+            padding: 12px; 
+            border-radius: 10px;
+            border: 2px solid #F39C12; 
+            color: white; 
+            font-family: 'Inter', sans-serif; 
+            font-size: 13px;
+            z-index: 1000;
+            pointer-events: none;
+            ">
+            <div style="color:#F39C12; font-weight:bold; font-size: 11px; letter-spacing: 1px;">📍 LOCATION</div>
+            <div style="margin-bottom: 8px;">{display_lat}, {display_lon}</div>
+            <div style="color:#F39C12; font-weight:bold; font-size: 11px; letter-spacing: 1px;">📅 SELECTED DATE</div>
+            <div>{display_date}</div>
         </div>
     '''
     m.get_root().html.add_child(folium.Element(info_html))
 
-    map_data = st_folium(m, height=700, use_container_width=True, key="selection_map")
+    # 6. Render Map
+    st.markdown("Select your location and date/Season of interest [Default it picks your present location and present date]")
+    
+    map_data = st_folium(
+        m, 
+        height=700, 
+        use_container_width=True, 
+        key=map_key 
+    )
 
+    # 7. Coordinate Update Logic
     if map_data and map_data.get("last_clicked"):
         new_coords = [map_data["last_clicked"]["lat"], map_data["last_clicked"]["lng"]]
         if new_coords != st.session_state.coords:
@@ -336,4 +313,3 @@ with tab_summary:
         <div style="color:#FFD700;">● Spring</div>
         <div style="color:#FFFF00;">● Winter</div>
     </div>""", unsafe_allow_html=True)
-
