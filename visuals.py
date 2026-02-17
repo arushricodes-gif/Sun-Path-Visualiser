@@ -28,14 +28,26 @@ def apply_styles():
             -webkit-text-fill-color: #444444 !important;
         }
 
-        /* 3. SIDEBAR BUTTONS: Solid Orange with White Bold Text */
-        .stButton > button {
-            background-color: #F39C12 !important;
-            color: #FFFFFF !important;
-            border: none !important;
-            width: 100% !important;
-            transition: 0.3s !important;
-        }
+        /* Target the Search Location button specifically */
+button[kind="secondaryFormSubmit"], .stButton > button {
+    background-color: #F39C12 !important; /* SunScout Orange */
+    color: #FFFFFF !important;            /* Pure White Text */
+    border: none !important;
+    width: 100% !important;               /* Makes it full width in sidebar */
+    font-weight: 800 !important;          /* Makes text bold */
+    transition: 0.3s !important;          /* Smooth hover effect */
+}
+
+/* Ensure the text inside the button stays white */
+button[kind="secondaryFormSubmit"] p, .stButton > button p {
+    color: #FFFFFF !important;
+}
+
+/* Add a hover effect so it looks professional */
+button[kind="secondaryFormSubmit"]:hover, .stButton > button:hover {
+    background-color: #e68a00 !important; /* Slightly darker orange on hover */
+    color: #FFFFFF !important;
+}
         
         .stButton > button p {
             color: #FFFFFF !important;
@@ -66,7 +78,6 @@ def apply_styles():
         .main-title { color: #F39C12 !important; font-weight: 800; text-align: center; padding: 20px 0px; font-size: 2.5rem; }
         </style>
     """, unsafe_allow_html=True)
-    
 
 
 def render_map_component(lat, lon, radius_meters, path_data, animate_trigger, sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el, rise_edge, set_edge, rise_time, set_time, aqi_val):
@@ -205,5 +216,3 @@ def render_seasonal_map(lat, lon, radius, seasonal_paths):
     """
     st.components.v1.html(html_content, height=620)
     
-
-
