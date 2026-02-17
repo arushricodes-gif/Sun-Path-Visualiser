@@ -152,3 +152,4 @@ def render_seasonal_map(lat, lon, radius, seasonal_paths):
     """
     st.components.v1.html(html_content, height=620)
     
+    
