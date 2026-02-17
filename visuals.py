@@ -5,14 +5,63 @@ def apply_styles():
     st.markdown("""
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        
+        /* 1. Global Backgrounds */
         .stApp { background-color: #0E1117 !important; }
-        .main-title { color: #F39C12 !important; font-weight: 800; text-align: center; margin: 0px auto; padding: 20px 0px; font-size: 2.5rem; }
-        [data-testid="stMetricValue"] { color: #FFFFFF !important; }
-        [data-testid="stMetricLabel"] p { color: #FFFFFF !important; }
-        h1, h2, h3, h4, h5, h6, .stMarkdown p { color: #FFFFFF !important; }
-        [data-baseweb="input"] { background-color: #1A1C24 !important; }
-        input { color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; }
-        button[kind="secondaryFormSubmit"] { background-color: #F39C12 !important; color: #FFFFFF !important; }
+        [data-testid="stSidebar"] { background-color: #000000 !important; }
+
+        /* 2. Fix Input Boxes: Light Grey with Black Text */
+        [data-baseweb="input"], [data-baseweb="select"] > div {
+            background-color: #D1D5DB !important; 
+            border-radius: 8px !important;
+            border: none !important;
+        }
+        
+        /* Visible text in search/date boxes */
+        input {
+            color: #000000 !important;
+            -webkit-text-fill-color: #000000 !important;
+        }
+
+        /* 3. THE ULTIMATE BUTTON FIX */
+        /* This targets ALL sidebar buttons (Search, Reset, etc.) */
+        [data-testid="stSidebar"] button {
+            background-color: #F39C12 !important;
+            color: #FFFFFF !important;
+            border: none !important;
+            width: 100%;
+        }
+        
+        /* Ensure button text is ALWAYS white and bold */
+        [data-testid="stSidebar"] button p {
+            color: #FFFFFF !important;
+            font-weight: 700 !important;
+        }
+
+        /* 4. Global Text and Labels */
+        h1, h2, h3, h4, h5, h6, p, span, label {
+            color: #FFFFFF !important;
+        }
+        [data-testid="stWidgetLabel"] p {
+            color: #FFFFFF !important;
+            font-weight: 600 !important;
+        }
+
+        /* 5. Tab Navigation */
+        button[data-baseweb="tab"] p {
+            color: #FFFFFF !important;
+            font-size: 16px !important;
+        }
+        button[aria-selected="true"] p {
+            color: #F39C12 !important;
+        }
+
+        /* 6. Slider Customization */
+        .stSlider [data-baseweb="slider"] > div > div {
+            background: #F39C12 !important;
+        }
+
+        .main-title { color: #F39C12 !important; font-weight: 800; text-align: center; padding: 20px 0px; font-size: 2.5rem; }
         </style>
     """, unsafe_allow_html=True)
 
@@ -55,7 +104,7 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger, si
             var info = L.control({{position: 'topright'}});
             info.onAdd = function() {{
                 var div = L.DomUtil.create('div', 'map-stats-card');
-                div.innerHTML = `<div>🌅 Sunrise: <b>{rise_time}</b></div><div>🌇 Sunset: <b>{set_time}</b></div><div style="color:#F39C12;">💨 AQI: <b>{aqi_val}</b></div>`;
+                div.innerHTML = `<div>🌅Sunrise: <b>{rise_time}</b></div><div>🌇Sunset: <b>{set_time}</b></div><div style="color:#F39C12;">💨 AQI: <b>{aqi_val}</b></div>`;
                 return div;
             }};
             info.addTo(map2);
@@ -151,5 +200,4 @@ def render_seasonal_map(lat, lon, radius, seasonal_paths):
         </style>
     """
     st.components.v1.html(html_content, height=620)
-    
     
