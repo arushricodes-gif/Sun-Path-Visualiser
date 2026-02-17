@@ -61,7 +61,13 @@ with st.sidebar:
     
     celestial_dates = {"Manual Selection": None, "Spring Equinox (Mar 20)": date(2026, 3, 20), "Summer Solstice (Jun 21)": date(2026, 6, 21), "Autumnal Equinox (Sep 22)": date(2026, 9, 22), "Winter Solstice (Dec 21)": date(2026, 12, 21)}
     date_preset = st.selectbox("Key Celestial Dates", list(celestial_dates.keys()))
-    target_date = celestial_dates[date_preset] if date_preset != "Manual Selection" else st.date_input("Select Date", date.today())
+    
+    # FIX: Ensure target_date explicitly updates
+    if date_preset == "Manual Selection":
+        target_date = st.date_input("Select Date", date.today())
+    else:
+        target_date = celestial_dates[date_preset]
+        
     radius_meters = 250
     enable_aqi = st.toggle("AQI and Live Weather\n(Available for live data only)", value=False)
     shour = st.slider("Hour", 0, 23, datetime.now(local_tz).hour)
@@ -171,61 +177,106 @@ with tab_info:
 """, unsafe_allow_html=True)
 
 
-
-
 with tab1:
-    # 1. Format the data for display
+    # 1. Prepare variables (ensuring target_date from sidebar is used)
     display_lat = f"{st.session_state.coords[0]:.5f}"
     display_lon = f"{st.session_state.coords[1]:.5f}"
     display_date = target_date.strftime("%B %d, %Y")
+    
+    # 2. Recreate your Step 2 Map Style (Leaflet + Satellite Toggle)
+    map_html_step1 = f"""
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <div id="map_step1" style="height: 700px; width: 100%; border-radius: 15px; border: 1px solid #333;"></div>
+        <script>
+            var street = L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png');
+            var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}');
+            
+            var map1 = L.map('map_step1', {{ 
+                center: [{lat}, {lon}], 
+                zoom: 17, 
+                layers: [satellite], 
+                zoomControl: true 
+            }});
+            
+            L.control.layers({{"Street": street, "Satellite": satellite}}, null, {{collapsed: false, position: 'topleft'}}).addTo(map1);
+            
+            // --- DATA OVERLAY (Like Step 2) ---
+            var info = L.control({{position: 'topright'}});
+            info.onAdd = function() {{
+                var div = L.DomUtil.create('div', 'map-stats-card');
+                div.innerHTML = `
+                    <div style="color:#F39C12; font-weight:bold; margin-bottom:5px;">📍 SELECTED LOCATION</div>
+                    <div>Lat: <b>{display_lat}</b></div>
+                    <div>Lon: <b>{display_lon}</b></div>
+                    <hr style="margin:5px 0; border:0; border-top:1px solid #555;">
+                    <div style="color:#F39C12; font-weight:bold; margin-bottom:5px;">📅 SELECTED DATE</div>
+                    <div><b>{display_date}</b></div>
+                `;
+                return div;
+            }};
+            info.addTo(map1);
 
-    # 2. Create the Map
+            // Add the orange marker
+            L.marker([{lat}, {lon}]).addTo(map1);
+            
+            // Re-capture clicks for Streamlit
+            map1.on('click', function(e) {{
+                window.parent.postMessage({{
+                    type: 'streamlit:setComponentValue',
+                    value: {{ last_clicked: {{ lat: e.latlng.lat, lng: e.latlng.lng }} }}
+                }}, '*');
+            }});
+        </script>
+        <style>
+            .map-stats-card {{ 
+                background: rgba(14, 17, 23, 0.9); 
+                padding: 15px; 
+                border-radius: 12px; 
+                border: 2px solid #F39C12; 
+                color: white; 
+                font-size: 13px; 
+                font-family: 'Inter', sans-serif;
+                min-width: 150px;
+            }}
+        </style>
+    """
+    
+    st.markdown("Select your location and date/Season of interest [Default it picks your present location and present date]")
+    
+    # Render using components (same style as your step 2)
+    # Note: We use st_folium for the selection logic as it's more reliable for catching clicks
     m = folium.Map(location=st.session_state.coords, zoom_start=17)
-    
-    # 3. Add Tile Layers
-    folium.TileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 
-                     attr='Esri', name='Satellite').add_to(m)
+    folium.TileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', attr='Esri', name='Satellite').add_to(m)
     folium.TileLayer('openstreetmap', name='Street').add_to(m)
-    folium.LayerControl().add_to(m)
-    
-    # 4. Add Marker
-    folium.Marker(st.session_state.coords, 
-                  icon=folium.Icon(color='orange', icon='sun', prefix='fa'),
-                  tooltip="Selected Location").add_to(m)
+    folium.LayerControl(position='topleft', collapsed=False).add_to(m)
+    folium.Marker(st.session_state.coords, icon=folium.Icon(color='orange', icon='sun', prefix='fa')).add_to(m)
 
-    # 5. INJECT CUSTOM HTML OVERLAY
-    # This creates the floating white box on the top right of the map
+    # Use the same "Float" logic as Step 2
     info_html = f'''
-        <div style="
-            position: fixed; 
-            top: 10px; right: 50px; width: 220px; height: 90px; 
-            background-color: rgba(14, 17, 23, 0.9); 
-            border: 2px solid #F39C12;
-            z-index:9999; font-size:14px;
-            color: white;
-            padding: 10px;
-            border-radius: 10px;
-            font-family: 'Inter', sans-serif;
-            ">
-            <b>📍 Coordinates</b><br>
-            Lat: {display_lat}<br>
-            Lon: {display_lon}<br>
-            <b>📅 Date:</b> {display_date}
+        <div class="map-stats-card" style="
+            position: absolute; top: 10px; right: 10px; z-index: 1000;
+            background: rgba(14, 17, 23, 0.9); padding: 12px; border-radius: 10px;
+            border: 2px solid #F39C12; color: white; font-family: 'Inter', sans-serif; font-size: 13px;">
+            <div style="color:#F39C12; font-weight:bold;">📍 LOCATION</div>
+            {display_lat}, {display_lon}<br>
+            <div style="color:#F39C12; font-weight:bold; margin-top:8px;">📅 DATE</div>
+            {display_date}
         </div>
     '''
     m.get_root().html.add_child(folium.Element(info_html))
 
-    # 6. Render Map
-    st.markdown("Select your location on the map and follow on to step 2.")
     map_data = st_folium(m, height=700, use_container_width=True, key="selection_map")
-    
+
     if map_data and map_data.get("last_clicked"):
-        st.session_state.coords = [map_data["last_clicked"]["lat"], map_data["last_clicked"]["lng"]]
-        st.rerun()
-        
+        new_coords = [map_data["last_clicked"]["lat"], map_data["last_clicked"]["lng"]]
+        if new_coords != st.session_state.coords:
+            st.session_state.coords = new_coords
+            st.rerun()
+
     render_dashboard_footer("location")
 
-    
+
 with tab2:
     animate_trigger = st.toggle("Play Path", value=True, key="anim_toggle")
     path_data = []
@@ -285,3 +336,4 @@ with tab_summary:
         <div style="color:#FFD700;">● Spring</div>
         <div style="color:#FFFF00;">● Winter</div>
     </div>""", unsafe_allow_html=True)
+
