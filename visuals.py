@@ -6,39 +6,49 @@ def apply_styles():
         <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
         
-        /* 1. Global Backgrounds */
+        /* 1. FORCE GLOBAL DARK THEME */
         .stApp { background-color: #0E1117 !important; }
         [data-testid="stSidebar"] { background-color: #000000 !important; }
 
-        /* 2. Fix Input Boxes: Light Grey with Black Text */
+        /* 2. FIX SEARCH BAR & INPUT BOXES */
+        /* Make background light grey and TEXT PURE BLACK */
         [data-baseweb="input"], [data-baseweb="select"] > div {
             background-color: #D1D5DB !important; 
             border-radius: 8px !important;
             border: none !important;
         }
         
-        /* Visible text in search/date boxes */
+        /* This is the critical fix for invisible text */
         input {
             color: #000000 !important;
+            font-weight: 500 !important;
             -webkit-text-fill-color: #000000 !important;
         }
 
-        /* 3. THE ULTIMATE BUTTON FIX */
-        /* This targets ALL sidebar buttons (Search, Reset, etc.) */
+        /* 3. FIX THE "GHOST" BUTTONS (Search & Reset) */
+        /* We target all buttons in the sidebar to be Orange */
         [data-testid="stSidebar"] button {
             background-color: #F39C12 !important;
             color: #FFFFFF !important;
             border: none !important;
-            width: 100%;
+            width: 100% !important;
+            height: 3em !important;
+            transition: 0.3s !important;
         }
         
-        /* Ensure button text is ALWAYS white and bold */
-        [data-testid="stSidebar"] button p {
+        /* Force button text to be white, bold, and visible */
+        [data-testid="stSidebar"] button p, [data-testid="stSidebar"] button div {
             color: #FFFFFF !important;
             font-weight: 700 !important;
         }
+        
+        /* Hover state so it doesn't turn white when touched */
+        [data-testid="stSidebar"] button:hover {
+            background-color: #e68a00 !important;
+            border: none !important;
+        }
 
-        /* 4. Global Text and Labels */
+        /* 4. FIX GREY/DIMMED LABELS */
         h1, h2, h3, h4, h5, h6, p, span, label {
             color: #FFFFFF !important;
         }
@@ -47,16 +57,18 @@ def apply_styles():
             font-weight: 600 !important;
         }
 
-        /* 5. Tab Navigation */
+        /* 5. TABS STYLING */
         button[data-baseweb="tab"] p {
             color: #FFFFFF !important;
-            font-size: 16px !important;
+        }
+        button[aria-selected="true"] {
+            border-bottom-color: #F39C12 !important;
         }
         button[aria-selected="true"] p {
             color: #F39C12 !important;
         }
 
-        /* 6. Slider Customization */
+        /* 6. SLIDERS */
         .stSlider [data-baseweb="slider"] > div > div {
             background: #F39C12 !important;
         }
@@ -64,6 +76,7 @@ def apply_styles():
         .main-title { color: #F39C12 !important; font-weight: 800; text-align: center; padding: 20px 0px; font-size: 2.5rem; }
         </style>
     """, unsafe_allow_html=True)
+
 
 def render_map_component(lat, lon, radius_meters, path_data, animate_trigger, sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el, rise_edge, set_edge, rise_time, set_time, aqi_val):
     env = st.session_state.env_data
