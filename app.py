@@ -235,7 +235,7 @@ with tab1:
     m.get_root().html.add_child(folium.Element(info_html))
 
     # 6. Render Map
-    st.markdown("Select your location and date/Season of interest [Default it picks your present location and present date]")
+    st.markdown("Select your location and date/Season of interest [Default it picks your present location and present date]r")
     
     map_data = st_folium(
         m, 
