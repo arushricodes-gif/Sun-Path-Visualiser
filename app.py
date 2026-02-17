@@ -145,7 +145,7 @@ with tab_info:
 <p style="padding-left: 20px;">Go to the <b>Location Setup</b> tab. Search for a city or <b>double-click anywhere on the map</b> to lock in coordinates.</p>
 
 <p>⏯️ <b>Visualize the Movement</b></p>
-<p style="padding-left: 20px;">Switch to <b>Live Visualization</b>. Toggle the <b>Start Animation</b> button to watch the sun sweep across the sky for your chosen date and time.</p>
+<p style="padding-left: 20px;">Switch to <b>Live Visualization</b>. Toggle the <b>Play Path</b> button to watch the sun sweep across the sky for your chosen date and time.</p>
 
 <p>🗺️ <b>Understand the Map</b></p>
 <ul style="list-style-type: none; padding-left: 20px; line-height: 2;">
@@ -154,6 +154,9 @@ with tab_info:
     <li><span style="color: #808080; font-size: 20px;">●</span> <b>Grey Line: Shadow Line</b> showing where shadows will fall</li>
     <li><span style="color: #f39c12; font-size: 20px;">●</span> <b>Orange Arc:</b> The actual <b>Sun Path</b> for your selected date</li>
 </ul>
+
+<p>🔄 <b>Look at the Entire Year's Summary</b></p>
+<p style="padding-left: 20px;">On switching to this tab, you can see the key paths the sun follows at the selected location during the main four seasons.</p>
 
 <hr style="border-top: 1px solid rgba(255,255,255,0.2); margin: 20px 0;">
 
