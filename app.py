@@ -110,10 +110,10 @@ def render_dashboard_footer(key_suffix):
     )
     st.plotly_chart(fig, use_container_width=True, key=f"chart_{key_suffix}")
 
-st.markdown('<h1 class="main-title">☀️ SOLAR PATH VISUALIZER ☀️</h1>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-title">☀️ SunScout: The Solar Path Visualizer ☀️</h1>', unsafe_allow_html=True)
 top_col1, top_col2 = st.columns([2.5, 1])
 
-tab_info, tab1, tab2, tab_summary = st.tabs(["📖 What's this?", "Step 1: 📍 Location Setup", "Step 2: 🚀 Live Visualization",  "Year Round Summary"])
+tab_info, tab1, tab2, tab_summary = st.tabs(["📖 What's this?", "Step 1: 📍 Location Setup", "Step 2: 🚀 Live Visualization",  "🔄 Year Round Summary"])
 
 with tab_info:
     st.markdown("""
@@ -195,7 +195,7 @@ with tab2:
         path_data.append({"lat": slat, "lon": slon, "shlat": shlat, "shlon": shlon, "time": curr.strftime("%H:%M"), "el": el})
         curr += timedelta(minutes=10)
     m_slat, m_slon, m_shlat, m_shlon, m_az, m_el = solarlogic.get_solar_pos(city_info, sim_time, radius_meters, lat, lon)
-    if m_el <= 0: st.warning(f"🌙 The sun is currently below the horizon ({m_el:.1f}°).")
+    if m_el <= 0: st.warning(f"🌅 The sun is currently below the horizon ({m_el:.1f}°).")
     
     rise_edge = solarlogic.get_edge(lat, lon, azimuth(city_info.observer, rise_t), radius_meters)
     set_edge = solarlogic.get_edge(lat, lon, azimuth(city_info.observer, set_t), radius_meters)
