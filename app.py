@@ -176,7 +176,6 @@ with tab_info:
 </div>
 """, unsafe_allow_html=True)
 
-
 with tab1:
     # 1. Prepare variables
     display_lat = f"{st.session_state.coords[0]:.5f}"
@@ -235,7 +234,7 @@ with tab1:
     m.get_root().html.add_child(folium.Element(info_html))
 
     # 6. Render Map
-    st.markdown("Select your location and date/Season of interest [Default it picks your present location and present date]r")
+    st.markdown("Select your location and date/Season of interest [Default it picks your present location and present date]")
     
     map_data = st_folium(
         m, 
