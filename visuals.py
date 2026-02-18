@@ -159,6 +159,7 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger, si
     components.html(map_html, height=720)
 
 def render_seasonal_map(lat, lon, radius, seasonal_paths):
+    import math
     paths_js = ""
     color_map = {"Summer": "#FF0000", "Autumn": "#FF8C00", "Spring": "#FFD700", "Winter": "#FFFF00"}
     
@@ -166,18 +167,16 @@ def render_seasonal_map(lat, lon, radius, seasonal_paths):
         coords, label = data["coords"], data["label"]
         if coords:
             color = color_map.get(season_id, '#FFF')
-            
-            # 1. Draw the Path Line
             paths_js += f"L.polyline({coords}, {{color: '{color}', weight: 6, opacity: 0.8}}).addTo(map_s);"
-            
-            # 2. Sunrise Circle + Permanent Label (Season Name)
             paths_js += f"""
                 L.circleMarker({coords[0]}, {{radius: 7, color: 'white', weight: 2, fillColor: '{color}', fillOpacity: 1}}).addTo(map_s)
                  .bindTooltip('<b style="color:{color};">{season_id}</b>', {{permanent: true, direction: 'top', className: 'season-label'}});
             """
-            
-            # 3. Sunset Circle
             paths_js += f"L.circleMarker({coords[-1]}, {{radius: 7, color: 'white', weight: 2, fillColor: '{color}', fillOpacity: 1}}).addTo(map_s);"
+
+
+    set_coords = [lat, lon - 0.0055]
+    rise_coords = [lat, lon + 0.0035]
 
     html_content = f"""
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -191,28 +190,49 @@ def render_seasonal_map(lat, lon, radius, seasonal_paths):
             L.control.zoom({{ position: 'bottomright' }}).addTo(map_s);
             L.control.layers({{"Satellite": satellite, "Street": street}}, null, {{position: 'topleft'}}).addTo(map_s);
             
-            // Center location marker
             L.circle([{lat}, {lon}], {{ radius: {radius}, color: 'black', weight: 3, fillOpacity: 0.05 }}).addTo(map_s);
             L.circleMarker([{lat}, {lon}], {{radius: 5, color: 'white', fillColor: '#F39C12', fillOpacity: 1}}).addTo(map_s);
             
+            // Labels with updated coordinates
+            L.marker({set_coords}, {{ opacity: 0 }}).addTo(map_s)
+                .bindTooltip("SUNSET", {{ permanent: true, direction: 'center', className: 'loc-label sunset-vibrant' }});
+                
+            L.marker({rise_coords}, {{ opacity: 0 }}).addTo(map_s)
+                .bindTooltip("SUNRISE", {{ permanent: true, direction: 'center', className: 'loc-label sunrise-vibrant' }});
+
             {paths_js}
         </script>
         <style>
-            /* Styling the permanent labels */
             .season-label {{
-                background: rgba(0, 0, 0, 0.7) !important;
-                border: 1px solid rgba(255,255,255,0.1) !important;
-                box-shadow: none !important;
+                background: rgba(0, 0, 0, 0.8) !important;
+                border: 1px solid rgba(255,255,255,0.2) !important;
+                color: white !important;
                 font-family: 'Inter', sans-serif !important;
                 font-weight: bold !important;
-                font-size: 12px !important;
+                font-size: 11px !important;
                 padding: 2px 6px !important;
             }}
-            /* Remove the little arrow from the tooltip */
-            .leaflet-tooltip-top:before, .leaflet-tooltip-bottom:before {{
-                display: none !important;
+            .leaflet-tooltip-top:before {{ display: none !important; }}
+
+            .loc-label {{
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+                font-family: 'Inter', sans-serif !important;
+                font-weight: 900 !important;
+                font-size: 38px !important;
+                letter-spacing: 3px !important;
+                pointer-events: none !important;
+            }}
+            /* High-Intensity Colors and Heavy Shadows */
+            .sunrise-vibrant {{ 
+                color: #FF0000 !important; 
+                text-shadow: 0 0 20px rgba(255,0,0,0.4), 2px 2px 5px #000 !important; 
+            }}
+            .sunset-vibrant {{ 
+                color: #0070FF !important; 
+                text-shadow: 0 0 20px rgba(0,112,255,0.4), 2px 2px 5px #000 !important; 
             }}
         </style>
     """
     st.components.v1.html(html_content, height=620)
-    
