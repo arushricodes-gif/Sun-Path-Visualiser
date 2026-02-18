@@ -255,6 +255,7 @@ with tab1:
 
 with tab2:
     animate_trigger = st.toggle("Play Path", value=True, key="anim_toggle")
+    st.markdown("For selected date and time.")
     path_data = []
     curr = rise_t
     while curr <= set_t:
