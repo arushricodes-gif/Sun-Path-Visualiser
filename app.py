@@ -155,10 +155,10 @@ with tab_info:
 
 <p>🗺️ <b>Understand the Map</b></p>
 <ul style="list-style-type: none; padding-left: 20px; line-height: 2;">
-    <li><span style="color: #e74c3c; font-size: 20px;">●</span> <b>Red Line:</b> Direction of <b>Sunrise</b></li>
-    <li><span style="color: #3498db; font-size: 20px;">●</span> <b>Blue Line:</b> Direction of <b>Sunset</b></li>
-    <li><span style="color: #808080; font-size: 20px;">●</span> <b>Grey Line: Shadow Line</b> showing where shadows will fall</li>
-    <li><span style="color: #f39c12; font-size: 20px;">●</span> <b>Orange Arc:</b> The actual <b>Sun Path</b> for your selected date</li>
+    <li><span style="color: #e74c3c; font-size: 20px;">🔴</span> <b>Red Line:</b> Direction of <b>Sunrise</b></li>
+    <li><span style="color: #3498db; font-size: 20px;">🔵</span> <b>Blue Line:</b> Direction of <b>Sunset</b></li>
+    <li><span style="color: #808080; font-size: 20px;">⚪</span> <b>Grey Line: Shadow Line</b> showing where shadows will fall</li>
+    <li><span style="color: #f39c12; font-size: 20px;">🟠</span> <b>Orange Arc:</b> The actual <b>Sun Path</b> for your selected date</li>
 </ul>
 
 <p>🔄 <b>Look at the Entire Year's Summary</b></p>
