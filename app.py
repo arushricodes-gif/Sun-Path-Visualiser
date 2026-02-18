@@ -302,14 +302,23 @@ with tab_summary:
     </div>""", unsafe_allow_html=True)
 
 
-# --- FILE PATH ---
+import json
+import os
+import requests
+from datetime import datetime
+
+# --- CONFIGURATION ---
 COMMENTS_FILE = "user_comments.json"
-# Replace your previous ADMIN_PASSWORD line with this:
-try:
-    ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
-except:
-    # Fallback if secrets aren't set up yet
-    ADMIN_PASSWORD = "temporary_dev_password"
+# 1. Update this to your actual email to get alerts!
+MY_EMAIL = "your-email@example.com" 
+
+# 2. MATCHING YOUR SECRET NAME
+if "MY_PASSWORD" in st.secrets:
+    CORRECT_PASSWORD = st.secrets["MY_PASSWORD"]
+else:
+    # This is the fallback if secrets are not found
+    CORRECT_PASSWORD = "admin" 
+
 # --- HELPER FUNCTIONS ---
 def load_comments():
     if os.path.exists(COMMENTS_FILE):
@@ -330,17 +339,18 @@ def save_comment(user_name, comment_text):
     comments.append(new_comment)
     with open(COMMENTS_FILE, "w") as f:
         json.dump(comments, f)
+    return new_comment
 
 # --- THE COMMENTS TAB ---
 with tab_comments:
     st.markdown("### 💬 User Feedback & Comments")
     
-    # 1. SECURE ADMIN TOOLS
+    # 1. SECURE ADMIN TOOLS (Access via URL ?admin=true)
     if st.query_params.get("admin") == "true":
-        with st.expander("🔐 Admin Authentication", expanded=True):
+        with st.expander("🔐 Admin JSON Management", expanded=True):
             password_guess = st.text_input("Enter Admin Password", type="password")
             
-            if password_guess == ADMIN_PASSWORD:
+            if password_guess == CORRECT_PASSWORD:
                 st.success("Access Granted")
                 col_a, col_b = st.columns(2)
                 
@@ -349,51 +359,60 @@ with tab_comments:
                         raw_data = f.read()
                     
                     col_a.download_button(
-                        label="📥 Download JSON File",
+                        label="📥 Download JSON Backup",
                         data=raw_data,
                         file_name="user_comments.json",
                         mime="application/json"
                     )
                     
-                    if col_b.button("🗑️ Wipe All Comments"):
+                    if col_b.button("🗑️ Clear All Comments"):
                         with open(COMMENTS_FILE, "w") as f:
                             json.dump([], f)
                         st.success("JSON cleared!")
                         st.rerun()
                     
-                    st.markdown("**Live JSON Preview:**")
+                    st.markdown("**Current Data:**")
                     st.json(load_comments())
-                else:
-                    st.info("No comments file found yet.")
             elif password_guess != "":
                 st.error("Incorrect Password")
 
-    # 2. COMMENT FORM (Visible to everyone)
+    # 2. COMMENT FORM
     with st.form("comment_form", clear_on_submit=True):
-        st.write("We'd love to hear from you!")
-        u_name = st.text_input("Your Name", placeholder="Alex")
-        u_text = st.text_area("Message", placeholder="Write your thoughts here...")
+        st.write("Post a comment or suggestion below:")
+        u_name = st.text_input("Name", placeholder="Your Name")
+        u_text = st.text_area("Message", placeholder="What do you think of SunScout?")
         submitted = st.form_submit_button("Post Comment")
         
         if submitted:
             if u_name and u_text:
-                save_comment(u_name, u_text)
-                st.toast("Comment posted successfully!") # A small popup notification
+                # Save locally to JSON
+                new_data = save_comment(u_name, u_text)
+                
+                # Email Notification
+                try:
+                    requests.post(f"https://formsubmit.co/ajax/{MY_EMAIL}", 
+                                  data={"Name": u_name, "Comment": u_text, "Time": new_data['time']})
+                except:
+                    pass 
+                
+                st.toast(f"Thanks {u_name}! Your comment is live.")
                 st.rerun()
             else:
                 st.warning("Please fill in both fields.")
 
     st.markdown("---")
     
-    # 3. DISPLAY COMMENTS (Public view)
+    # 3. DISPLAY COMMENTS (Public)
     display_data = load_comments()
     if not display_data:
         st.info("No comments yet. Be the first to start the conversation!")
     else:
+        # Show newest comments at the top
         for c in reversed(display_data):
             st.markdown(f"""
                 <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #F39C12;">
                     <strong style="color: #F39C12;">{c['name']}</strong> <small style="color: #888;">({c['time']})</small><br>
-                    <p style="margin-top: 5px; color: white; line-height: 1.5;">{c['text']}</p>
+                    <p style="margin-top: 5px; color: white; line-height: 1.6;">{c['text']}</p>
                 </div>
             """, unsafe_allow_html=True)
+            
