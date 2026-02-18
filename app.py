@@ -8,6 +8,8 @@ from astral import LocationInfo
 from astral.sun import sunrise, sunset, noon, azimuth
 from streamlit_folium import st_folium
 from streamlit_js_eval import get_geolocation
+import json
+import os
 
 import visuals
 import solarlogic
@@ -115,7 +117,7 @@ def render_dashboard_footer(key_suffix):
 st.markdown('<h1 class="main-title">☀️ SunScout: The Solar Path Visualizer ☀️</h1>', unsafe_allow_html=True)
 top_col1, top_col2 = st.columns([2.5, 1])
 
-tab_info, tab1, tab2, tab_summary = st.tabs(["📖 What's this?", "Step 1: 📍 Location Setup", "Step 2: 🚀 Live Visualization",  "🔄 Year Round Summary"])
+tab_info, tab1, tab2, tab_summary, tab_comments = st.tabs(["📖 What's this?", "Step 1: 📍 Location Setup", "Step 2: 🚀 Live Visualization",  "🔄 Year Round Summary", "👤 User Comments"])
 
 with tab_info:
     st.markdown("""
@@ -298,3 +300,60 @@ with tab_summary:
         <div style="color:#FFD700;">● Spring</div>
         <div style="color:#FFFF00;">● Winter</div>
     </div>""", unsafe_allow_html=True)
+
+
+COMMENTS_FILE = "user_comments.json"
+
+def load_comments():
+    if os.path.exists(COMMENTS_FILE):
+        with open(COMMENTS_FILE, "r") as f:
+            return json.load(f)
+    return []
+
+def save_comment(user_name, comment_text):
+    comments = load_comments()
+    new_comment = {
+        "name": user_name,
+        "text": comment_text,
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M")
+    }
+    comments.append(new_comment)
+    with open(COMMENTS_FILE, "w") as f:
+        json.dump(comments, f)
+
+# --- ADD TO YOUR TABS ---
+# Update your tabs line:
+# tab_info, tab1, tab2, tab_summary, tab_comments = st.tabs(["📖 What's this?", ..., "💬 Feedback"])
+
+with tab_comments:
+    st.markdown("### 💬 User Feedback & Comments")
+    st.write("Let us know how SunScout is helping you or suggest a new feature!")
+
+    # 1. Input Form
+    with st.form("comment_form", clear_on_submit=True):
+        u_name = st.text_input("Your Name", placeholder="e.g., Alex G.")
+        u_comment = st.text_area("Your Comment", placeholder="This helped me plan my garden!")
+        submit_comment = st.form_submit_button("Post Comment")
+
+        if submit_comment:
+            if u_name and u_comment:
+                save_comment(u_name, u_comment)
+                st.success("Thank you! Your comment has been posted.")
+                st.rerun()
+            else:
+                st.error("Please fill in both fields.")
+
+    st.markdown("---")
+    
+    # 2. Display Comments
+    all_comments = load_comments()
+    if not all_comments:
+        st.info("No comments yet. Be the first to say something!")
+    else:
+        for c in reversed(all_comments): # Show newest first
+            st.markdown(f"""
+                <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #F39C12;">
+                    <strong style="color: #F39C12;">{c['name']}</strong> <small style="color: #888;">({c['time']})</small><br>
+                    <p style="margin-top: 5px;">{c['text']}</p>
+                </div>
+            """, unsafe_allow_html=True)
