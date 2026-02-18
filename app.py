@@ -304,8 +304,12 @@ with tab_summary:
 
 # --- FILE PATH ---
 COMMENTS_FILE = "user_comments.json"
-ADMIN_PASSWORD = "Uk7fky$$"  # <--- CHANGE YOUR PASSWORD HERE
-
+# Replace your previous ADMIN_PASSWORD line with this:
+try:
+    ADMIN_PASSWORD = st.secrets["ADMIN_PASSWORD"]
+except:
+    # Fallback if secrets aren't set up yet
+    ADMIN_PASSWORD = "temporary_dev_password"
 # --- HELPER FUNCTIONS ---
 def load_comments():
     if os.path.exists(COMMENTS_FILE):
