@@ -127,8 +127,8 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger, si
             L.circle([{lat}, {lon}], {{radius: {radius_meters}, color: 'black', weight: 4, fillOpacity: 0.1}}).addTo(map2);
             {wind_js}
 
-            var pathData = {path_data};
-            L.polyline(pathData.map(p => [p.lat, p.lon]), {{color: 'orange', weight: 5, dashArray: '5, 10', opacity: 0.6}}).addTo(map2);
+            var pathData = {path_data};            
+            L.polyline(pathData.map(p => [p.lat, p.lon]), {{color: '#FF7518', weight: 7, dashArray: '5, 10', opacity: 0.6}}).addTo(map2);
             L.polyline([[{lat}, {lon}], {rise_edge}], {{color: '#e74c3c', weight: 5}}).addTo(map2);
             L.polyline([[{lat}, {lon}], {set_edge}], {{color: '#3498db', weight: 5}}).addTo(map2);
 
