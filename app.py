@@ -223,7 +223,7 @@ with tab1:
     '''
     m.get_root().html.add_child(folium.Element(info_html))
 
-    st.markdown("Select your location and date/Season of interest [Default it picks your present location and present date]")
+    st.markdown("Select your location and date/Season of interest [Default it picks your present location and present date]. Then switch to Step 2: Live Visualization to see the Sun's Path.")
     
     map_data = st_folium(
         m, 
