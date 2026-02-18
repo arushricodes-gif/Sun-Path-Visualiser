@@ -21,7 +21,6 @@ if 'coords' not in st.session_state:
 
 if not st.session_state.gps_requested:
     loc = get_geolocation()
-    # Logic fix to prevent KeyError
     if loc and 'coords' in loc:
         st.session_state.coords = [loc['coords']['latitude'], loc['coords']['longitude']]
         st.session_state.gps_requested = True
