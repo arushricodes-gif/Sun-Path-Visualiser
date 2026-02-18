@@ -144,7 +144,7 @@ with tab_info:
 <h3 style="color: white;">🔍 How to Use Solar Path Visualizer</h3>
 
 <p>📍 <b>Select Your Location</b></p>
-<p style="padding-left: 20px;">Go to the <b>Location Setup</b> tab. Search for a city or <b>double-click anywhere on the map</b> to lock in coordinates.</p>
+<p style="padding-left: 20px;">Go to the <b>Location Setup</b> tab. Search for a city or <b>double-click anywhere on the map</b> to lock in coordinates. Also select the date or season you are looking for.</p>
 
 <p>⏯️ <b>Visualize the Movement</b></p>
 <p style="padding-left: 20px;">Switch to <b>Live Visualization</b>. Toggle the <b>Play Path</b> button to watch the sun sweep across the sky for your chosen date and time.</p>
