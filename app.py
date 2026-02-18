@@ -40,12 +40,10 @@ local_tz = pytz.timezone(tz_name)
 city_info = LocationInfo(timezone=tz_name, latitude=lat, longitude=lon)
 
 # --- SIDEBAR ---
-# --- SIDEBAR SEARCH FIX ---
 with st.sidebar:
     st.header("⚙️ Settings")
     with st.form("city_search"):
         search_query = st.text_input("🔍 Search for place", placeholder="e.g. Paris, France")
-        # The Submit button is required for st.form to work
         submitted = st.form_submit_button("Search Location")
         
         if submitted and search_query:
@@ -61,8 +59,7 @@ with st.sidebar:
     
     celestial_dates = {"Manual Selection": None, "Spring Equinox (Mar 20)": date(2026, 3, 20), "Summer Solstice (Jun 21)": date(2026, 6, 21), "Autumnal Equinox (Sep 22)": date(2026, 9, 22), "Winter Solstice (Dec 21)": date(2026, 12, 21)}
     date_preset = st.selectbox("Key Celestial Dates", list(celestial_dates.keys()))
-    
-    # FIX: Ensure target_date explicitly updates
+
     if date_preset == "Manual Selection":
         target_date = st.date_input("Select Date", date.today())
     else:
@@ -81,7 +78,7 @@ try:
 except:
     rise_t = sim_time.replace(hour=6, minute=0); set_t = sim_time.replace(hour=18, minute=0); noon_t = sim_time.replace(hour=12, minute=0)
 
-# --- FOOTER RENDERER ---
+
 def render_dashboard_footer(key_suffix):
     st.markdown("---")
     m_slat, m_slon, m_shlat, m_shlon, m_az, m_el = solarlogic.get_solar_pos(city_info, sim_time, radius_meters, lat, lon)
@@ -177,18 +174,14 @@ with tab_info:
 """, unsafe_allow_html=True)
 
 with tab1:
-    # 1. Prepare variables
     display_lat = f"{st.session_state.coords[0]:.5f}"
     display_lon = f"{st.session_state.coords[1]:.5f}"
     display_date = target_date.strftime("%B %d, %Y") 
-    
-    # 2. Force map refresh when date/location changes
+  
     map_key = f"map_select_{target_date}_{st.session_state.coords[0]}"
     
-    # Initialize with tiles=None to remove the default layer
     m = folium.Map(location=st.session_state.coords, zoom_start=17, tiles=None)
 
-    # 3. Add ONLY the two requested layers with proper attribution
     # Satellite Layer
     folium.TileLayer(
         'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', 
@@ -196,20 +189,17 @@ with tab1:
         name='Satellite'
     ).add_to(m)
     
-    # Street Layer - Fixed with required attribution
+    # Street Layer
     folium.TileLayer(
         'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', 
         attr='&copy; OpenStreetMap contributors', 
         name='Street'
     ).add_to(m)
 
-    # Simplified Control (Only 2 options now)
     folium.LayerControl(position='topleft', collapsed=False).add_to(m)
-    
-    # 4. Marker
+
     folium.Marker(st.session_state.coords, icon=folium.Icon(color='orange', icon='sun', prefix='fa')).add_to(m)
 
-    # 5. The HTML Overlay (Matches Step 2 Style)
     info_html = f'''
         <div style="
             position: absolute; 
@@ -233,7 +223,6 @@ with tab1:
     '''
     m.get_root().html.add_child(folium.Element(info_html))
 
-    # 6. Render Map
     st.markdown("Select your location and date/Season of interest [Default it picks your present location and present date]")
     
     map_data = st_folium(
@@ -243,7 +232,6 @@ with tab1:
         key=map_key 
     )
 
-    # 7. Coordinate Update Logic
     if map_data and map_data.get("last_clicked"):
         new_coords = [map_data["last_clicked"]["lat"], map_data["last_clicked"]["lng"]]
         if new_coords != st.session_state.coords:
@@ -282,7 +270,6 @@ with tab2:
 with tab_summary:
     st.markdown('<div class="theory-section"><h2 class="theory-header">Seasonal Comparison</h2></div>', unsafe_allow_html=True)
     
-    # We use a list of dictionaries so we can keep the ID separate from the Display Name
     milestones = [
         {"id": "Summer", "label": "Summer (June 21)", "date": date(2026, 6, 21)},
         {"id": "Autumn", "label": "Autumn (Oct 31)", "date": date(2026, 10, 31)},
@@ -301,7 +288,6 @@ with tab_summary:
             lat_p, lon_p, _, _, _, _ = solarlogic.get_solar_pos(city_info, c, radius_meters, lat, lon)
             pts.append([lat_p, lon_p])
             c += timedelta(minutes=20)
-        # Store both the points and the label
         seasonal_data[m["id"]] = {"coords": pts, "label": m["label"]}
 
     visuals.render_seasonal_map(lat, lon, radius_meters, seasonal_data)
