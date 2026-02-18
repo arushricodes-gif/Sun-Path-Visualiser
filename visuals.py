@@ -34,7 +34,7 @@ button[kind="secondaryFormSubmit"], .stButton > button {
     color: #FFFFFF !important;            /* Pure White Text */
     border: none !important;
     width: 100% !important;               /* Makes it full width in sidebar */
-    font-weight: 800 !important;          /* Makes text bold */
+    font-weight: 1000 !important;          /* Makes text bold */
     transition: 0.3s !important;          /* Smooth hover effect */
 }
 
