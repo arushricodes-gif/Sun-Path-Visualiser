@@ -325,35 +325,84 @@ def save_comment(user_name, comment_text):
 # Update your tabs line:
 # tab_info, tab1, tab2, tab_summary, tab_comments = st.tabs(["📖 What's this?", ..., "💬 Feedback"])
 
+def load_comments():
+    if os.path.exists(COMMENTS_FILE):
+        try:
+            with open(COMMENTS_FILE, "r") as f:
+                return json.load(f)
+        except:
+            return []
+    return []
+
+def save_comment(user_name, comment_text):
+    comments = load_comments()
+    new_comment = {
+        "name": user_name,
+        "text": comment_text,
+        "time": datetime.now().strftime("%Y-%m-%d %H:%M")
+    }
+    comments.append(new_comment)
+    with open(COMMENTS_FILE, "w") as f:
+        json.dump(comments, f)
+
+# --- THE COMMENTS TAB ---
 with tab_comments:
     st.markdown("### 💬 User Feedback & Comments")
-    st.write("Let us know how SunScout is helping you or suggest a new feature!")
+    
+    # 1. ADMIN TOOLS (Hidden unless URL has ?admin=true)
+    if st.query_params.get("admin") == "true":
+        with st.expander("🛠️ Admin JSON Management", expanded=True):
+            col_a, col_b = st.columns(2)
+            
+            # View Raw JSON
+            if os.path.exists(COMMENTS_FILE):
+                with open(COMMENTS_FILE, "r") as f:
+                    raw_data = f.read()
+                
+                col_a.download_button(
+                    label="📥 Download user_comments.json",
+                    data=raw_data,
+                    file_name="user_comments.json",
+                    mime="application/json"
+                )
+                
+                if col_b.button("🗑️ Clear All Comments"):
+                    with open(COMMENTS_FILE, "w") as f:
+                        json.dump([], f)
+                    st.success("JSON cleared!")
+                    st.rerun()
+                
+                st.markdown("**Raw Data Preview:**")
+                st.json(load_comments())
+            else:
+                st.info("No JSON file exists yet (post a comment first).")
 
-    # 1. Input Form
+    # 2. COMMENT FORM
     with st.form("comment_form", clear_on_submit=True):
-        u_name = st.text_input("Your Name", placeholder="e.g., Alex G.")
-        u_comment = st.text_area("Your Comment", placeholder="This helped me plan my garden!")
-        submit_comment = st.form_submit_button("Post Comment")
-
-        if submit_comment:
-            if u_name and u_comment:
-                save_comment(u_name, u_comment)
-                st.success("Thank you! Your comment has been posted.")
+        st.write("Post a comment below:")
+        u_name = st.text_input("Name")
+        u_text = st.text_area("Message")
+        submitted = st.form_submit_button("Post Comment")
+        
+        if submitted:
+            if u_name and u_text:
+                save_comment(u_name, u_text)
+                st.success("Comment saved!")
                 st.rerun()
             else:
-                st.error("Please fill in both fields.")
+                st.warning("Please fill in both fields.")
 
     st.markdown("---")
     
-    # 2. Display Comments
-    all_comments = load_comments()
-    if not all_comments:
-        st.info("No comments yet. Be the first to say something!")
+    # 3. DISPLAY COMMENTS
+    display_data = load_comments()
+    if not display_data:
+        st.write("No comments yet.")
     else:
-        for c in reversed(all_comments): # Show newest first
+        for c in reversed(display_data):
             st.markdown(f"""
                 <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #F39C12;">
                     <strong style="color: #F39C12;">{c['name']}</strong> <small style="color: #888;">({c['time']})</small><br>
-                    <p style="margin-top: 5px;">{c['text']}</p>
+                    <p style="margin-top: 5px; color: white;">{c['text']}</p>
                 </div>
             """, unsafe_allow_html=True)
