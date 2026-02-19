@@ -42,6 +42,7 @@ city_info = LocationInfo(timezone=tz_name, latitude=lat, longitude=lon)
 
 # --- SIDEBAR ---
 with st.sidebar:
+    st.warning("Best viewed on laptop/PC.")
     st.header("⚙️ Settings")
     with st.form("city_search"):
         search_query = st.text_input("🔍 Search for place", placeholder="e.g. Paris, France")
