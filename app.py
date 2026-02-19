@@ -10,6 +10,8 @@ from streamlit_folium import st_folium
 from streamlit_js_eval import get_geolocation
 import json
 import os
+import requests
+from datetime import datetime
 
 import visuals
 import solarlogic
@@ -303,24 +305,15 @@ with tab_summary:
     </div>""", unsafe_allow_html=True)
 
 
-import json
-import os
-import requests
-from datetime import datetime
 
-# --- CONFIGURATION ---
 COMMENTS_FILE = "user_comments.json"
-# 1. Update this to your actual email to get alerts!
-MY_EMAIL = "your-email@example.com" 
+MY_EMAIL = st.secrets["MY_EMAIL"] 
 
-# 2. MATCHING YOUR SECRET NAME
 if "MY_PASSWORD" in st.secrets:
     CORRECT_PASSWORD = st.secrets["MY_PASSWORD"]
 else:
-    # This is the fallback if secrets are not found
     CORRECT_PASSWORD = "admin" 
 
-# --- HELPER FUNCTIONS ---
 def load_comments():
     if os.path.exists(COMMENTS_FILE):
         try:
@@ -342,7 +335,6 @@ def save_comment(user_name, comment_text):
         json.dump(comments, f)
     return new_comment
 
-# --- THE COMMENTS TAB ---
 with tab_comments:
     st.markdown("### 💬 User Feedback & Comments")
     
@@ -377,7 +369,6 @@ with tab_comments:
             elif password_guess != "":
                 st.error("Incorrect Password")
 
-    # 2. COMMENT FORM
     with st.form("comment_form", clear_on_submit=True):
         st.write("Post a comment or suggestion below:")
         u_name = st.text_input("Name", placeholder="Your Name")
@@ -386,10 +377,8 @@ with tab_comments:
         
         if submitted:
             if u_name and u_text:
-                # Save locally to JSON
                 new_data = save_comment(u_name, u_text)
-                
-                # Email Notification
+            
                 try:
                     requests.post(f"https://formsubmit.co/ajax/{MY_EMAIL}", 
                                   data={"Name": u_name, "Comment": u_text, "Time": new_data['time']})
@@ -403,12 +392,10 @@ with tab_comments:
 
     st.markdown("---")
     
-    # 3. DISPLAY COMMENTS (Public)
     display_data = load_comments()
     if not display_data:
         st.info("No comments yet. Be the first to start the conversation!")
     else:
-        # Show newest comments at the top
         for c in reversed(display_data):
             st.markdown(f"""
                 <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 10px; margin-bottom: 10px; border-left: 5px solid #F39C12;">
