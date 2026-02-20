@@ -78,29 +78,27 @@ button[kind="secondaryFormSubmit"]:hover, .stButton > button:hover {
         .main-title { color: #F39C12 !important; font-weight: 800; text-align: center; padding: 20px 0px; font-size: 2.5rem; }
         
         
-        /* MOBILE FIX: Adjust Map Height and Scrolling */
+        /* CLEAN MOBILE ALIGNMENT */
         @media (max-width: 768px) {
-            /* 1. Force the map container to a manageable height */
+            /* Fixes the map height on mobile */
             iframe {
-                height: 400px !important;
+                height: 450px !important;
             }
-
-            /* 2. Add side padding so users can 'grab' the page to scroll */
+            
+            /* Removes excessive padding at the bottom of the page */
             .main .block-container {
-                padding-left: 1rem !important;
-                padding-right: 1rem !important;
+                padding-bottom: 1rem !important;
             }
 
-            /* 3. Scale down titles for mobile */
-            .main-title {
-                font-size: 1.8rem !important;
-                padding: 10px 0px !important;
+            /* Ensures metrics and charts don't create huge gaps */
+            [data-testid="stMetric"] {
+                padding: 5px !important;
             }
         }
 
-        /* Prevent the map from 'trapping' the mouse/touch scroll */
-        .stFolium, div[data-testid="stHtml"] {
-            overflow: hidden !important;
+        /* Fixes the "iframe ghost gap" where height doesn't match content */
+        div[data-testid="stHtml"] {
+            margin-bottom: -30px !important;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -135,7 +133,7 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger, si
     map_html = f"""
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
         <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-        <div id="map2" style="height: 700px; width: 100%; border-radius: 15px; border: 1px solid #333;"></div>
+        <div id="map2" style="height: 550px; width: 95%; border-radius: 15px; border: 1px solid #333;"></div>
         <script>
             var street = L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png');
             var satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}');
@@ -182,7 +180,7 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger, si
             .sun-emoji {{ font-size: 32pt; }}
         </style>
     """
-    components.html(map_html, height=720)
+    components.html(map_html, height=550)
 
 def render_seasonal_map(lat, lon, radius, seasonal_paths):
     import math
