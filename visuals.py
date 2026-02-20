@@ -158,7 +158,7 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger, si
 
             var sunIcon = L.divIcon({{ html: `<div class="sun-container"><div id="sun-time-label" class="pointing-box">--:--</div><div class="sun-emoji">☀️</div></div>`, iconSize: [80, 80], iconAnchor: [40, 62], className: 'custom-sun-icon' }});
             var sunMarker = L.marker([0, 0], {{icon: sunIcon}}).addTo(map2);
-            var shadow = L.polyline([[{lat}, {lon}], [{lat}, {lon}]], {{color: '#4F4F4F', weight: 5, opacity: 0.5}}).addTo(map2);
+            var shadow = L.polyline([[{lat}, {lon}], [{lat}, {lon}]], {{color: '#4F4F4F', weight: 5, opacity: 1}}).addTo(map2);
 
             function update(pos) {{
                 if (pos) {{
