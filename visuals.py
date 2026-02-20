@@ -76,6 +76,32 @@ button[kind="secondaryFormSubmit"]:hover, .stButton > button:hover {
         }
 
         .main-title { color: #F39C12 !important; font-weight: 800; text-align: center; padding: 20px 0px; font-size: 2.5rem; }
+        
+        
+        /* MOBILE FIX: Adjust Map Height and Scrolling */
+        @media (max-width: 768px) {
+            /* 1. Force the map container to a manageable height */
+            iframe {
+                height: 400px !important;
+            }
+
+            /* 2. Add side padding so users can 'grab' the page to scroll */
+            .main .block-container {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+
+            /* 3. Scale down titles for mobile */
+            .main-title {
+                font-size: 1.8rem !important;
+                padding: 10px 0px !important;
+            }
+        }
+
+        /* Prevent the map from 'trapping' the mouse/touch scroll */
+        .stFolium, div[data-testid="stHtml"] {
+            overflow: hidden !important;
+        }
         </style>
     """, unsafe_allow_html=True)
 
