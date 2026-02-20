@@ -131,7 +131,7 @@ with tab_info:
 <hr style="border-top: 1px solid rgba(255,255,255,0.2); margin: 20px 0;">
 
 <h3 style="color: white;">🌍 What Solar Path Visualizer Does</h3>
-<p>A simple, educational, purpose-built tool that <b>instantly shows how sunlight moves across any location on Earth</b>, across <b>all seasons</b>, in a clean, intuitive interface. Use it to make confident, informed decisions whether you are:</p>
+<p>A simple, educational purpose-built tool that <b>instantly shows how sunlight moves across any location on Earth</b>, across <b>all seasons</b>, in a clean, intuitive interface. Use it to make confident, informed decisions whether you are:</p>
 <ul style="list-style-type: none; padding-left: 20px; line-height: 2;">
     <li>🏠 <b>Buying a new home</b></li>
     <li>🌿 <b>Planning a balcony or terrace garden</b></li>
@@ -272,7 +272,7 @@ with tab2:
 
 
 with tab_summary:
-    st.markdown('<div class="theory-section"><h2 class="theory-header">Seasonal Comparison</h2></div>', unsafe_allow_html=True)
+    st.markdown('<div class="theory-section"><h2 class="theory-header">Seasonal Comparison For Selected Location</h2></div>', unsafe_allow_html=True)
     
     milestones = [
         {"id": "Summer", "label": "Summer (June 21)", "date": date(2026, 6, 21)},
