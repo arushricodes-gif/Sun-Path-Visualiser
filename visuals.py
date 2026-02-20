@@ -119,8 +119,7 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger, si
             var info = L.control({{position: 'topright'}});
             info.onAdd = function() {{
                 var div = L.DomUtil.create('div', 'map-stats-card');
-                div.innerHTML = `<div>🌅Sunrise: <b>{rise_time}</b></div><div>🌇Sunset: <b>{set_time}</b></div><div style="color:#F39C12;">💨 AQI: <b>{aqi_val}</b></div>`;
-                div.innerHTML = `<div>🔴 Sunrise Line</div><div>🔵 Sunset Line</div><div>⚪ Shadow Line></div>`;
+                div.innerHTML = `<div>🌅Sunrise: <b>{rise_time}</b></div><div>🌇Sunset: <b>{set_time}</b></div><div style="color:#F39C12;">💨 AQI: <b>{aqi_val}</b></div><div>🔴 Sunrise Line</div><div>🔵 Sunset Line</div><div>⚪ Shadow Line></div>`;
                 return div;
             }};
             info.addTo(map2);
