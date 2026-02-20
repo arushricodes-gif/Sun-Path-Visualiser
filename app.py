@@ -372,7 +372,7 @@ with tab_comments:
     with st.form("comment_form", clear_on_submit=True):
         st.write("Post a comment or suggestion below:")
         u_name = st.text_input("Name", placeholder="Your Name")
-        u_text = st.text_area("Message", placeholder="What do you think of SunScout?")
+        u_text = st.text_area("Message", placeholder="What did you use SunScout for? What other features do you want to see?")
         submitted = st.form_submit_button("Post Comment")
         
         if submitted:
