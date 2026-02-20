@@ -231,7 +231,7 @@ with tab1:
     
     map_data = st_folium(
         m, 
-        height=700, 
+        height=550, 
         use_container_width=True, 
         key=map_key 
     )
