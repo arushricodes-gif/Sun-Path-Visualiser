@@ -85,14 +85,31 @@ except:
 
 def render_dashboard_footer(key_suffix):
     st.markdown("---")
-    m_slat, m_slon, m_shlat, m_shlon, m_az, m_el = solarlogic.get_solar_pos(city_info, sim_time, radius_meters, lat, lon)
+    m_slat, m_slon, m_shlat, m_shlon, m_az, m_el = solarlogic.get_solar_pos(
+        city_info, sim_time, radius_meters, lat, lon
+    )
+ 
+    radiation_wm2 = solarlogic.calculate_solar_radiation(m_el)
+
     m_col1, m_col2, m_col3, m_col4 = st.columns(4)
     m_col1.metric("Selected Time", sim_time.strftime('%H:%M'))
-    m_col2.metric("Azimuth", f"{m_az:.1f}°"); m_col3.metric("Elevation", f"{m_el:.1f}°"); m_col4.metric("Solar Noon", noon_t.strftime('%H:%M'))
+    m_col2.metric("Azimuth", f"{m_az:.1f}°")
+    m_col3.metric("Elevation", f"{m_el:.1f}°")
+    m_col4.metric("Solar Noon", noon_t.strftime('%H:%M'))
+
     if enable_aqi:
-        w_col1, w_col2, w_col3, w_col4 = st.columns(4)
-        w_col1.metric("🌡️ Temp", f"{env_data['temp']}°C"); w_col2.metric("💧 Humidity", f"{env_data['hum']}%"); w_col3.metric("🌬️ Wind", f"{env_data['wind']} m/s"); w_col4.metric("💨 AQI", env_data["aqi"], delta=env_data["label"], delta_color="inverse")
+        st.markdown("#### ⚡ Live Environmental & Solar Data")
+        w_col1, w_col2, w_col3, w_col4, w_col5 = st.columns(5)
+        
     
+        env = st.session_state.env_data
+        
+        w_col1.metric("Temp", f"{env['temp']}°C")
+        w_col2.metric("Humidity", f"{env['hum']}%")
+        w_col3.metric("Wind", f"{env['wind']} m/s")
+        w_col4.metric("AQI", env["aqi"], delta=env["label"], delta_color="inverse")
+    
+        w_col5.metric("Solar Radiation", f"{radiation_wm2} W/m²")
     path_pts = []
     temp_curr = rise_t
     while temp_curr <= set_t:
@@ -116,6 +133,28 @@ def render_dashboard_footer(key_suffix):
         )
     )
     st.plotly_chart(fig, use_container_width=True, key=f"chart_{key_suffix}")
+
+
+# 1. Define the radius for the sun-path visualization
+r = 0.01  # You can adjust this value based on how far you want the sun icon to appear
+
+# 2. Get the current time and localize it to the map's timezone
+import datetime
+import pytz
+
+# Create a timezone object from the tz_name we found earlier
+local_tz = pytz.timezone(tz_name) 
+
+# 't' is the localized datetime object the function is looking for
+t = datetime.datetime.now(local_tz)
+
+# 3. Now the call will work
+city = LocationInfo("Custom Loc", "Region", tz_name, lat, lon)
+az_val, el_val, slat, slon, shlat, shlon = solarlogic.get_solar_pos(city, t, r, lat, lon)
+
+# 4. Calculate radiation
+radiation_wm2 = solarlogic.calculate_solar_radiation(el_val)
+
 
 st.markdown('<h1 class="main-title">☀️ SunScout: The Solar Path Visualizer ☀️</h1>', unsafe_allow_html=True)
 top_col1, top_col2 = st.columns([2.5, 1])
