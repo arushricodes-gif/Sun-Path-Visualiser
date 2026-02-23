@@ -46,3 +46,27 @@ def get_edge(lat, lon, az_input, radius):
     return [lat + (radius/111111)*math.cos(rad), lon + (radius/(111111*math.cos(math.radians(lat))))*math.sin(rad)]
 
 
+
+
+def calculate_solar_radiation(elevation_deg):
+    """
+    Calculates estimated Global Horizontal Irradiance (W/m2).
+    """
+    if elevation_deg <= 0:
+        return 0
+    
+    # Convert elevation to radians
+    el_rad = math.radians(elevation_deg)
+    
+    # Air Mass calculation
+    air_mass = 1 / (math.sin(el_rad) + 0.001)
+    
+    # Solar Constant
+    I0 = 1367 
+    
+    # Clear sky transmission
+    transmission = 0.7 ** (air_mass ** 0.678)
+    radiation = I0 * math.sin(el_rad) * transmission
+    
+    return round(radiation, 2)
+    
