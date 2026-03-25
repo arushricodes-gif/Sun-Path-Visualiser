@@ -44,25 +44,23 @@ city_info = LocationInfo(timezone=tz_name, latitude=lat, longitude=lon)
 with st.sidebar:
     st.markdown("""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
-        @font-face { font-family:'Akira'; src:url('https://fonts.cdnfonts.com/s/62983/Akira Expanded Demo.woff'); }
-        html,body,[class*="st-at"],[class*="st-ae"] { font-family:'Poppins',sans-serif !important; }
         .flowstate-title {
             font-family:'Akira',sans-serif; font-size:80px; font-weight:900; color:#F39C12;
             text-align:center; text-transform:uppercase; letter-spacing:15px; line-height:1.1;
             margin-bottom:10px;
             background:linear-gradient(180deg,#F39C12 0%,#FFD06D 50%,#D35400 100%);
             -webkit-background-clip:text; -webkit-text-fill-color:transparent;
-            filter:drop-shadow(0px 0px 20px rgba(243,156,18,0.4));
         }
         .flowstate-subtitle {
-            font-family:'Poppins',sans-serif; color:#F39C12; text-align:center;
+            font-family:'Poppins',sans-serif; 
+            color:#FFFFFF !important; /* FORCED WHITE */
+            text-align:center;
             font-size:1.2rem; font-weight:300; letter-spacing:4px; text-transform:uppercase;
             margin-top:-20px; margin-bottom:40px;
         }
         </style>
         <h1 class="flowstate-title">SUN<br>SCOUT</h1>
-        <p class="flowstate-subtitle">Visualize the Light</p>
+        <p class="flowstate-subtitle">VISUALIZE THE LIGHT</p>
     """, unsafe_allow_html=True)
 
     st.warning("Best viewed on laptop/PC.")
