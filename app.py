@@ -192,31 +192,48 @@ with tab_info:
             border-radius: 15px;
             padding: 25px;
             margin-bottom: 20px;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', sans-serif !important;
         }
         .info-header {
-            font-family: 'Bebas Neue', sans-serif;
-            color: #F39C12;
-            font-size: 2rem;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
+            font-family: 'Bebas Neue', sans-serif !important;
+            color: #F39C12 !important;
+            font-size: 2rem !important;
+            letter-spacing: 2px !important;
+            margin-bottom: 10px !important;
+            text-transform: uppercase;
         }
         .info-sub {
-            font-family: 'JetBrains Mono', monospace;
-            color: #9CA3AF;
-            font-size: 0.85rem;
+            font-family: 'JetBrains Mono', monospace !important;
+            color: #9CA3AF !important;
+            font-size: 0.85rem !important;
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 20px;
         }
         .highlight { color: #F39C12; font-weight: 600; }
-        .code-font { font-family: 'JetBrains Mono', monospace; color: #E67E22; }
+        .use-case-item { margin-bottom: 15px; line-height: 1.6; }
     </style>
 
     <div class="info-card">
-        <div class="info-header">☀️ WELCOME TO SUN SCOUT</div>
+        <div class="info-header">WELCOME TO SUN SCOUT</div>
         <div class="info-sub">Your Guide to Visualizing the Light</div>
         <p>This tool helps you "see" the sun's journey across the sky. Whether you're planning a garden, buying a house, or setting up solar panels, we translate complex celestial mechanics into simple, visual insights.</p>
+    </div>
+
+    <div class="info-card">
+        <div class="info-header">WHY SHOULD ONE CARE?</div>
+        <div class="use-case-item">
+            <span class="highlight">Real Estate:</span> Ever wondered if that "sunny" balcony is actually in the shade by 4 PM? Now you can check for any day of the year.
+        </div>
+        <div class="use-case-item">
+            <span class="highlight">Gardening:</span> "Full Sun" plants need 6+ hours of direct light. Use the <b>Play Path</b> feature to see if your garden bed actually gets them.
+        </div>
+        <div class="use-case-item">
+            <span class="highlight">Solar Power:</span> Thinking of solar panels? Check if your neighbor's tall oak tree or a nearby building blocks your roof during peak hours.
+        </div>
+        <div class="use-case-item">
+            <span class="highlight">Photography:</span> Find the exact minute of the "Golden Hour" to get that perfect, glowing shot.
+        </div>
     </div>
 
     <div class="info-card">
@@ -246,7 +263,7 @@ with tab_info:
             </tr>
             <tr>
                 <td style="padding: 10px; color: #F39C12;"><b>Radiation</b></td>
-                <td style="padding: 10px; color: #9CA3AF;">The "strength" of the sunlight ($W/m^2$). Higher is better for solar panels.</td>
+                <td style="padding: 10px; color: #9CA3AF;">The "strength" of the sunlight (W/m^2). Higher is better for solar panels.</td>
             </tr>
         </table>
     </div>
