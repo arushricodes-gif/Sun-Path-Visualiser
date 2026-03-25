@@ -44,23 +44,39 @@ city_info = LocationInfo(timezone=tz_name, latitude=lat, longitude=lon)
 with st.sidebar:
     st.markdown("""
         <style>
+        /* 1. Force the Sidebar container to stop dimming text */
+        [data-testid="stSidebar"] .stMarkdown, 
+        [data-testid="stSidebar"] .flowstate-subtitle {
+            opacity: 1 !important;
+            -webkit-text-fill-color: #FFFFFF !important;
+            color: #FFFFFF !important;
+        }
+
+        /* 2. Re-apply the logo styles with high priority */
         .flowstate-title {
-            font-family:'Akira',sans-serif; font-size:80px; font-weight:900; color:#F39C12;
+            font-family:'Akira',sans-serif; font-size:80px; font-weight:900; 
             text-align:center; text-transform:uppercase; letter-spacing:15px; line-height:1.1;
             margin-bottom:10px;
-            background:linear-gradient(180deg,#F39C12 0%,#FFD06D 50%,#D35400 100%);
-            -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+            background: linear-gradient(180deg, #F39C12 0%, #FFD06D 50%, #D35400 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0px 0px 20px rgba(243,156,18,0.4));
         }
+
         .flowstate-subtitle {
             font-family:'Poppins',sans-serif; 
-            color:#FFFFFF !important; /* FORCED WHITE */
+            color: #FFFFFF !important; 
             text-align:center;
             font-size:1.2rem; font-weight:300; letter-spacing:4px; text-transform:uppercase;
             margin-top:-20px; margin-bottom:40px;
+            /* Prevents GitHub/Streamlit Cloud from "greying" the text */
+            opacity: 1 !important;
+            display: block !important;
         }
         </style>
+        
         <h1 class="flowstate-title">SUN<br>SCOUT</h1>
-        <p class="flowstate-subtitle">VISUALIZE THE LIGHT</p>
+        <p class="flowstate-subtitle">Visualize the Light</p>
     """, unsafe_allow_html=True)
 
     st.warning("Best viewed on laptop/PC.")
