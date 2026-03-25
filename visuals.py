@@ -417,28 +417,10 @@ def render_seasonal_map(lat, lon, radius, seasonal_paths):
     var sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}');
     var str=L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png');
     var ms=L.map('msmap',{{center:[{lat},{lon}],zoom:17,layers:[sat],zoomControl:false}});
-    
     L.control.zoom({{position:'bottomright'}}).addTo(ms);
     L.control.layers({{"🛰 Satellite":sat,"🗺 Street":str}},null,{{position:'topleft',collapsed:false}}).addTo(ms);
-    
-    // 1. The Light Orange Boundary Circle
-    L.circle([{lat},{lon}],{{
-        radius:{radius},
-        color:'rgba(243,156,18,.3)',
-        weight:2,
-        fillColor:'rgba(243,156,18,.05)',
-        fillOpacity:1
-    }}).addTo(ms);
-
-    // 2. The Solid Orange Center Point
-    L.circleMarker([{lat},{lon}],{{
-        radius:9,
-        color:'#FFFFFF',
-        weight:2,
-        fillColor:'#F39C12',
-        fillOpacity:1
-    }}).addTo(ms).bringToFront();
-
+    L.circle([{lat},{lon}],{{radius:{radius},color:'rgba(243,156,18,.15)',weight:1,fillOpacity:.02}}).addTo(ms);
+    L.circleMarker([{lat},{lon}],{{radius:8,color:'#F39C12',weight:2,fillColor:'#F39C12',fillOpacity:.9}}).addTo(ms);
     L.marker({sc},{{opacity:0}}).addTo(ms).bindTooltip("SUNSET",{{permanent:true,direction:'center',className:'loclbl ss'}});
     L.marker({rc},{{opacity:0}}).addTo(ms).bindTooltip("SUNRISE",{{permanent:true,direction:'center',className:'loclbl sr'}});
     {paths_js}
