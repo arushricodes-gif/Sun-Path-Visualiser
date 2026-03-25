@@ -2,63 +2,220 @@ import streamlit as st
 import streamlit.components.v1 as components
 import math
 
-# In visuals.py
+
 def apply_styles():
     st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
-    /* ── GLOBAL THEME LOCK (DARK) ── */
     :root {
         --gold:  #F39C12;
+        --gold2: #E67E22;
+        --dim:   #A06808;
+        --glow:  rgba(243,156,18,.15);
         --bg:    #0A0C10;
+        --s1:    #0F1218;
+        --s2:    #141820;
+        --s3:    #1C2230;
+        --b1:    rgba(255,255,255,.05);
+        --b2:    rgba(255,255,255,.08);
+        --b3:    rgba(243,156,18,.18);
         --t1:    #F0F2F5;
         --t2:    #9CA3AF;
+        --t3:    #4B5563;
     }
 
-    .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-        background-color: var(--bg) !important;
-        color: var(--t1) !important;
+    /* ── Base ── */
+    .stApp {
+        background: var(--bg) !important;
+        background-image:
+            radial-gradient(ellipse 100% 40% at 50% 0%, rgba(243,156,18,.055) 0%, transparent 65%) !important;
     }
 
-    /* ── INFO TAB STYLING ── */
-    /* This forces the headers in your HTML strings to stay gold */
-    .info-header {
-        color: var(--gold) !important;
+    /* ── Fonts ── */
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif !important;
+    }
+    h1, h2, h3 {
         font-family: 'Bebas Neue', sans-serif !important;
-        text-transform: uppercase;
-    }
-
-    .info-card {
-        background: rgba(20, 24, 32, 0.8) !important;
-        border: 1px solid rgba(243, 156, 18, 0.15) !important;
+        letter-spacing: .04em !important;
         color: var(--t1) !important;
     }
 
-    /* ── SIDEBAR STYLING ── */
+    /* ── Sidebar ── */
     [data-testid="stSidebar"] {
-        background-color: #070910 !important;
+        background: #070910 !important;
+        border-right: 1px solid rgba(243,156,18,.08) !important;
     }
 
-    /* Force "Visualize the Light" to absolute white */
-    .flowstate-subtitle {
-        color: #FFFFFF !important; 
-        opacity: 1 !important;
+    /* ── Tabs ── */
+    [data-testid="stTabs"] [role="tablist"] {
+        background: var(--s1) !important;
+        border: 1px solid var(--b1) !important;
+        border-radius: 14px !important;
+        padding: 5px !important;
+        gap: 3px !important;
     }
-
-    /* ── WIDGETS ── */
-    [data-testid="stMetricValue"] { color: var(--t1) !important; }
-    [data-testid="stMetricLabel"] p { color: var(--t2) !important; }
-    
-    /* Tabs font color fix */
-    [data-testid="stTabs"] button[role="tab"] p {
-        color: var(--t2) !important;
+    [data-testid="stTabs"] button[role="tab"] {
+        border-radius: 10px !important;
+        color: var(--t3) !important;
+        font-size: 12px !important;
+        font-weight: 500 !important;
+        padding: 9px 20px !important;
+        transition: all .2s !important;
+        border: none !important;
+        font-family: 'Inter', sans-serif !important;
     }
-    [data-testid="stTabs"] button[role="tab"][aria-selected="true"] p {
+    [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
+        background: var(--glow) !important;
         color: var(--gold) !important;
+        border: 1px solid var(--b3) !important;
+    }
+    [data-testid="stTabs"] button[role="tab"] p { color: inherit !important; }
+    button[aria-selected="true"] p { color: var(--gold) !important; }
+
+    /* ── Text inputs ── */
+    div[data-baseweb="input"] {
+        background: var(--s2) !important;
+        border: 1px solid var(--b2) !important;
+        border-radius: 10px !important;
+    }
+    div[data-baseweb="input"]:focus-within {
+        border-color: rgba(243,156,18,.35) !important;
+        box-shadow: 0 0 0 3px rgba(243,156,18,.08) !important;
+    }
+    input {
+        color: var(--gold) !important;
+        -webkit-text-fill-color: var(--gold) !important;
+        font-family: 'JetBrains Mono', monospace !important;
+        font-size: 13px !important;
+    }
+    input::placeholder {
+        color: var(--t3) !important;
+        -webkit-text-fill-color: var(--t3) !important;
+    }
+
+    /* ── Buttons ── */
+    button[kind="secondaryFormSubmit"], .stButton > button {
+        background: var(--gold) !important;
+        color: #000 !important;
+        border: none !important;
+        font-weight: 600 !important;
+        font-size: 12px !important;
+        letter-spacing: .04em !important;
+        border-radius: 10px !important;
+        padding: 10px 16px !important;
+        width: 100% !important;
+        transition: all .2s !important;
+        box-shadow: 0 4px 20px rgba(243,156,18,.2) !important;
+        font-family: 'Inter', sans-serif !important;
+    }
+    button[kind="secondaryFormSubmit"] p, .stButton > button p {
+        color: #000 !important; font-weight: 600 !important;
+    }
+    button[kind="secondaryFormSubmit"]:hover, .stButton > button:hover {
+        background: #FFB020 !important;
+        box-shadow: 0 6px 28px rgba(243,156,18,.35) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* ── Sliders ── */
+    .stSlider [data-baseweb="slider"] > div > div {
+        background: linear-gradient(90deg, var(--dim), var(--gold)) !important;
+        height: 3px !important;
+    }
+    .stSlider [data-baseweb="slider"] [role="slider"] {
+        background: var(--gold) !important;
+        border: 2px solid #000 !important;
+        box-shadow: 0 0 0 3px rgba(243,156,18,.25) !important;
+        width: 15px !important; height: 15px !important;
+    }
+    [data-testid="stSliderTickBar"] { display: none !important; }
+    [data-testid="stWidgetLabel"] p {
+        font-size: 10px !important;
+        letter-spacing: .1em !important;
+        text-transform: uppercase !important;
+        color: var(--t3) !important;
+        font-family: 'JetBrains Mono', monospace !important;
+    }
+
+    /* ── Toggle ── */
+    [data-testid="stToggle"] [data-checked="true"] { background: var(--gold) !important; }
+
+    /* ── Selectbox ── */
+    [data-testid="stSelectbox"] > div > div {
+        background: var(--s2) !important;
+        border: 1px solid var(--b2) !important;
+        border-radius: 10px !important;
+        color: var(--t1) !important;
+        font-size: 13px !important;
+    }
+
+    /* ── Radio ── */
+    [data-testid="stRadio"] label {
+        background: var(--s2) !important;
+        border: 1px solid var(--b1) !important;
+        border-radius: 10px !important;
+        padding: 7px 16px !important;
+        cursor: pointer !important;
+        transition: all .15s !important;
+    }
+    [data-testid="stRadio"] label:has(input:checked) {
+        border-color: rgba(243,156,18,.3) !important;
+        background: var(--glow) !important;
+    }
+    [data-testid="stRadio"] label span { color: var(--t1) !important; font-size: 12px !important; }
+
+    /* ── Alerts ── */
+    [data-testid="stAlert"] {
+        background: var(--s2) !important;
+        border-radius: 10px !important;
+        border: 1px solid var(--b1) !important;
+        font-size: 12px !important;
+    }
+
+    /* ── Metrics ── */
+    [data-testid="stMetric"] {
+        background: var(--s1) !important;
+        border: 1px solid var(--b1) !important;
+        border-radius: 14px !important;
+        padding: 16px !important;
+    }
+    [data-testid="stMetricValue"] {
+        color: var(--t1) !important;
+        font-family: 'Bebas Neue', sans-serif !important;
+        font-size: 28px !important;
+        letter-spacing: .04em !important;
+    }
+    [data-testid="stMetricLabel"] p {
+        font-size: 9px !important; letter-spacing: .14em !important;
+        text-transform: uppercase !important; color: var(--t3) !important;
+    }
+
+    /* ── Layout ── */
+    .main .block-container { padding-top: 1.5rem !important; max-width: 1440px !important; }
+    hr { border: none !important; height: 1px !important;
+         background: linear-gradient(90deg,transparent,var(--b2),transparent) !important; }
+    div[data-testid="stHtml"] { margin-bottom: -30px !important; }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 2px; }
+
+    /* ── Date input ── */
+    [data-testid="stDateInput"] > div {
+        background: var(--s2) !important; border: 1px solid var(--b2) !important;
+        border-radius: 10px !important;
+    }
+
+    @media (max-width: 768px) {
+        iframe { height: 450px !important; }
+        .main .block-container { padding-bottom: 1rem !important; }
     }
     </style>
     """, unsafe_allow_html=True)
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # MAP STYLES shared across all components
