@@ -1196,3 +1196,4 @@ cv.addEventListener('touchmove',e=>{{
 (function loop(){{ requestAnimationFrame(loop); rend.render(scene,cam); }})();
 </script></body></html>"""
     components.html(html, height=620)
+    
