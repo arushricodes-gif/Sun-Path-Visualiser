@@ -96,7 +96,7 @@ out center tags;
         resp.raise_for_status()
         data = resp.json()
     except Exception:
-        return [], False   # explicit failure
+        return [], False
 
     cos_lat   = math.cos(math.radians(lat))
     buildings = []
@@ -144,10 +144,6 @@ def floor_elevation_m(floor_number):
 
 
 def make_synthetic_buildings(surround_height_m, surround_dist_m=20):
-    """
-    Fallback ring of synthetic buildings when OSM is unavailable.
-    36 points, one every 10 degrees, at surround_dist_m distance.
-    """
     obs_angle = math.degrees(math.atan2(surround_height_m, surround_dist_m))
     return [
         {
@@ -161,10 +157,6 @@ def make_synthetic_buildings(surround_height_m, surround_dist_m=20):
 
 
 def get_obstruction_angle(buildings, sun_az, floor_m, angular_width_deg=30):
-    """
-    Max elevation (degrees) the sun needs to clear buildings
-    within ±angular_width_deg of sun_az, given observer at floor_m.
-    """
     if not buildings:
         return 0.0
     max_needed = 0.0
@@ -243,3 +235,4 @@ def compute_sunlight_window(city_info, obs_date, local_tz, buildings, floor_m,
         "peak_time":   peak_time,
         "hourly":      hourly,
     }
+                                
