@@ -14,7 +14,12 @@ import visuals
 import solarlogic
 
 st.set_page_config(layout="wide", page_title="Solar Path Visualizer", page_icon="☀️")
-visuals.apply_styles()
+
+# ── THEME STATE (must init before apply_styles) ───────────────────────────────
+if "theme" not in st.session_state:
+    st.session_state.theme = "dark"
+
+visuals.apply_styles(st.session_state.theme)
 
 # ── GPS / SESSION STATE INIT ──────────────────────────────────────────────────
 if 'coords' not in st.session_state:
@@ -22,8 +27,6 @@ if 'coords' not in st.session_state:
     st.session_state.gps_requested  = False
 
 # Camera persistence — read URL query params FIRST, before any widget renders.
-# history.replaceState (called inside the iframe JS) writes these synchronously,
-# so they are available in st.query_params on the very next Streamlit rerun.
 _qp = st.query_params
 if "cam_rot"  in _qp:
     try:    st.session_state["cam3d_rot"]  = float(_qp["cam_rot"])
@@ -32,7 +35,6 @@ if "cam_tilt" in _qp:
     try:    st.session_state["cam3d_tilt"] = float(_qp["cam_tilt"])
     except: pass
 
-# Initialise camera state defaults only if not yet set
 if "cam3d_rot"  not in st.session_state: st.session_state["cam3d_rot"]  = 0.0
 if "cam3d_tilt" not in st.session_state: st.session_state["cam3d_tilt"] = 45.0
 if "cam3d_zoom" not in st.session_state: st.session_state["cam3d_zoom"] = 1.3
@@ -56,39 +58,95 @@ tz_name = tf.timezone_at(lng=lon, lat=lat) or "UTC"
 local_tz  = pytz.timezone(tz_name)
 city_info = LocationInfo(timezone=tz_name, latitude=lat, longitude=lon)
 
+# ── Resolve theme-aware colours for inline use ────────────────────────────────
+_is_light    = st.session_state.theme == "light"
+_card_bg     = "rgba(255,255,255,0.85)" if _is_light else "rgba(20, 24, 32, 0.5)"
+_card_border = "rgba(212,134,10,.18)"   if _is_light else "rgba(243, 156, 18, 0.15)"
+_header_col  = "#C47A0C"                if _is_light else "#F39C12"
+_sub_col     = "#6B7280"                if _is_light else "#9CA3AF"
+_body_col    = "#111111"                if _is_light else "#D1D5DB"
+_hl_col      = "#C47A0C"                if _is_light else "#F39C12"
+_plot_bg     = st.session_state.get("_plot_bg",   "rgba(0,0,0,0)")
+_plot_grid   = st.session_state.get("_plot_grid", "rgba(0,0,0,0.1)")
+_plot_font   = st.session_state.get("_plot_font", "#F0F2F5")
+
 # ── SIDEBAR ───────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("""
+    _sidebar_text = "#111111" if _is_light else "#FFFFFF"
+    _title_glow   = "rgba(180,110,0,0.3)" if _is_light else "rgba(243,156,18,0.4)"
+
+    st.markdown(f"""
         <style>
-        [data-testid="stSidebar"] .stMarkdown, 
-        [data-testid="stSidebar"] .flowstate-subtitle {
+        [data-testid="stSidebar"] .stMarkdown,
+        [data-testid="stSidebar"] .flowstate-subtitle {{
             opacity: 1 !important;
-            -webkit-text-fill-color: #FFFFFF !important;
-            color: #FFFFFF !important;
-        }
-        .flowstate-title {
-            font-family:'Akira',sans-serif; font-size:80px; font-weight:900; 
+            color: {_sidebar_text} !important;
+            -webkit-text-fill-color: {_sidebar_text} !important;
+        }}
+        .flowstate-title {{
+            font-family:'Akira',sans-serif; font-size:80px; font-weight:900;
             text-align:center; text-transform:uppercase; letter-spacing:15px; line-height:1.1;
             margin-bottom:10px;
             background: linear-gradient(180deg, #F39C12 0%, #FFD06D 50%, #D35400 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0px 0px 20px rgba(243,156,18,0.4));
-        }
-        .flowstate-subtitle {
-            font-family:'Poppins',sans-serif; 
-            color: #FFFFFF !important; 
+            filter: drop-shadow(0px 0px 20px {_title_glow});
+        }}
+        .flowstate-subtitle {{
+            font-family:'Poppins',sans-serif;
+            color: {_sidebar_text} !important;
+            -webkit-text-fill-color: {_sidebar_text} !important;
             text-align:center;
             font-size:1.2rem; font-weight:300; letter-spacing:4px; text-transform:uppercase;
-            margin-top:-20px; margin-bottom:40px;
+            margin-top:-20px; margin-bottom:30px;
             opacity: 1 !important;
             display: block !important;
-        }
+        }}
+        /* Theme pill buttons */
+        .theme-pill {{
+            display: inline-flex; align-items: center; justify-content: center;
+            gap: 5px; padding: 7px 0; border-radius: 10px; cursor: pointer;
+            font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif;
+            transition: all .2s; width: 100%; border: none; letter-spacing: .04em;
+        }}
+        .theme-pill-dark {{
+            background: {"rgba(243,156,18,0.12)" if not _is_light else "rgba(0,0,0,0.05)"};
+            color: {"#F39C12" if not _is_light else "#777"};
+            border: 1px solid {"rgba(243,156,18,.3)" if not _is_light else "rgba(0,0,0,.08)"} !important;
+        }}
+        .theme-pill-light {{
+            background: {"rgba(0,0,0,0.05)" if not _is_light else "rgba(212,134,10,0.12)"};
+            color: {"#777" if not _is_light else "#C47A0C"};
+            border: 1px solid {"rgba(0,0,0,.08)" if not _is_light else "rgba(212,134,10,.3)"} !important;
+        }}
         </style>
-        
+
         <h1 class="flowstate-title">SUN<br>SCOUT</h1>
         <p class="flowstate-subtitle">Visualize the Light</p>
     """, unsafe_allow_html=True)
+
+    # ── Theme toggle ──────────────────────────────────────────────────────────
+    st.markdown(f"""
+        <div style="margin-bottom:6px;font-size:9px;letter-spacing:.14em;
+             text-transform:uppercase;color:{_sub_col};
+             font-family:'JetBrains Mono',monospace;">
+            Appearance
+        </div>
+    """, unsafe_allow_html=True)
+
+    _tc1, _tc2 = st.columns(2)
+    with _tc1:
+        if st.button("🌙  Dark", key="btn_dark",
+                     type="primary" if not _is_light else "secondary"):
+            st.session_state.theme = "dark"
+            st.rerun()
+    with _tc2:
+        if st.button("☀️  Light", key="btn_light",
+                     type="primary" if _is_light else "secondary"):
+            st.session_state.theme = "light"
+            st.rerun()
+
+    st.markdown("<div style='margin-bottom:12px;'></div>", unsafe_allow_html=True)
 
     st.warning("Best viewed on laptop/PC.")
     st.header("⚙️ Settings")
@@ -176,9 +234,10 @@ def render_dashboard_footer(key_suffix):
     fig.update_layout(
         height=250, margin=dict(l=10, r=10, t=30, b=10),
         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-        font_color="black",
-        xaxis=dict(showgrid=False, color="black"),
-        yaxis=dict(showgrid=True, gridcolor='rgba(0,0,0,0.1)', title="Elevation (°)", color="black")
+        font_color=_plot_font,
+        xaxis=dict(showgrid=False, color=_plot_font),
+        yaxis=dict(showgrid=True, gridcolor=_plot_grid,
+                   title="Elevation (°)", color=_plot_font)
     )
     st.plotly_chart(fig, use_container_width=True, key=f"chart_{key_suffix}")
 
@@ -196,6 +255,44 @@ def build_path_data():
     return pts
 
 
+# ── INFO CARD STYLES (theme-aware) ────────────────────────────────────────────
+_INFO_CARD_CSS = f"""
+<style>
+    .info-card {{
+        background: {_card_bg};
+        border: 1px solid {_card_border};
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        font-family: 'Inter', sans-serif !important;
+        backdrop-filter: blur(8px);
+    }}
+    .info-header {{
+        font-family: 'Bebas Neue', sans-serif !important;
+        color: {_header_col} !important;
+        font-size: 2rem !important;
+        letter-spacing: 2px !important;
+        margin-bottom: 10px !important;
+        text-transform: uppercase;
+    }}
+    .info-sub {{
+        font-family: 'JetBrains Mono', monospace !important;
+        color: {_sub_col} !important;
+        font-size: 0.85rem !important;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 20px;
+    }}
+    .highlight {{ color: {_hl_col}; font-weight: 600; }}
+    .use-case-item {{ margin-bottom: 15px; line-height: 1.6; color: {_body_col}; }}
+    .info-card p {{ color: {_body_col} !important; }}
+    .info-card li {{ color: {_body_col} !important; }}
+    .info-card td {{ color: {_body_col} !important; }}
+    td[style*="color: #F39C12"] {{ color: {_header_col} !important; }}
+    td[style*="color: #9CA3AF"] {{ color: {_sub_col} !important; }}
+</style>
+"""
+
 # ── TABS ──────────────────────────────────────────────────────────────────────
 tab_info, tab1, tab2, tab_summary = st.tabs([
     "Getting Started",
@@ -207,37 +304,9 @@ tab_info, tab1, tab2, tab_summary = st.tabs([
 # ══════════════════════════════════════════════════════════════════════════════
 # TAB 0 — INFO & HELP
 # ══════════════════════════════════════════════════════════════════════════════
-with tab_info: 
-    st.markdown("""
-    <style>
-        .info-card {
-            background: rgba(20, 24, 32, 0.5);
-            border: 1px solid rgba(243, 156, 18, 0.15);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            font-family: 'Inter', sans-serif !important;
-        }
-        .info-header {
-            font-family: 'Bebas Neue', sans-serif !important;
-            color: #F39C12 !important;
-            font-size: 2rem !important;
-            letter-spacing: 2px !important;
-            margin-bottom: 10px !important;
-            text-transform: uppercase;
-        }
-        .info-sub {
-            font-family: 'JetBrains Mono', monospace !important;
-            color: #9CA3AF !important;
-            font-size: 0.85rem !important;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
-        }
-        .highlight { color: #F39C12; font-weight: 600; }
-        .use-case-item { margin-bottom: 15px; line-height: 1.6; }
-    </style>
-
+with tab_info:
+    st.markdown(_INFO_CARD_CSS, unsafe_allow_html=True)
+    st.markdown(f"""
     <div class="info-card">
         <div class="info-header">WELCOME TO SUN SCOUT</div>
         <div class="info-sub">Your Guide to Visualizing the Light</div>
@@ -263,9 +332,9 @@ with tab_info:
     <div class="info-card">
         <div class="info-header">UNDERSTANDING THE VIEWS</div>
         <ul style="list-style-type: none; padding-left: 0;">
-            <li style="margin-bottom: 15px;"><span class="highlight">2D Map:</span> Think of this as your "top-down" blueprint. It shows exactly where the sun rises (<span style="color:#E74C3C;">Red</span>) and sets (<span style="color:#3498DB;">Blue</span>) for your specific location.</li>
-            <li style="margin-bottom: 15px;"><span class="highlight">3D Arc:</span> This shows the sun's "rollercoaster" path. A high arc means long summer days; a low, flat arc means shorter winter days.</li>
-            <li style="margin-bottom: 15px;"><span class="highlight">3D Shadow:</span> Our most powerful tool. It uses real building data to show exactly where shadows fall on your street at any hour.</li>
+            <li style="margin-bottom: 15px; color: {_body_col};"><span class="highlight">2D Map:</span> Think of this as your "top-down" blueprint. It shows exactly where the sun rises (<span style="color:#E74C3C;">Red</span>) and sets (<span style="color:#3498DB;">Blue</span>) for your specific location.</li>
+            <li style="margin-bottom: 15px; color: {_body_col};"><span class="highlight">3D Arc:</span> This shows the sun's "rollercoaster" path. A high arc means long summer days; a low, flat arc means shorter winter days.</li>
+            <li style="margin-bottom: 15px; color: {_body_col};"><span class="highlight">3D Shadow:</span> Our most powerful tool. It uses real building data to show exactly where shadows fall on your street at any hour.</li>
         </ul>
     </div>
 
@@ -273,29 +342,29 @@ with tab_info:
         <div class="info-header">THE DATA DASHBOARD</div>
         <p>What do these technical terms actually mean for you?</p>
         <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;">
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <td style="padding: 10px; color: #F39C12;"><b>Azimuth</b></td>
-                <td style="padding: 10px; color: #9CA3AF;">The compass direction of the sun (e.g., North is 0°, East is 90°).</td>
+            <tr style="border-bottom: 1px solid {_card_border};">
+                <td style="padding: 10px; color: {_header_col};"><b>Azimuth</b></td>
+                <td style="padding: 10px; color: {_sub_col};">The compass direction of the sun (e.g., North is 0°, East is 90°).</td>
             </tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <td style="padding: 10px; color: #F39C12;"><b>Elevation</b></td>
-                <td style="padding: 10px; color: #9CA3AF;">How high the sun is. 0° is the horizon; 90° is directly overhead.</td>
+            <tr style="border-bottom: 1px solid {_card_border};">
+                <td style="padding: 10px; color: {_header_col};"><b>Elevation</b></td>
+                <td style="padding: 10px; color: {_sub_col};">How high the sun is. 0° is the horizon; 90° is directly overhead.</td>
             </tr>
-            <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                <td style="padding: 10px; color: #F39C12;"><b>Solar Noon</b></td>
-                <td style="padding: 10px; color: #9CA3AF;">The peak of the day—when the sun is at its highest point.</td>
+            <tr style="border-bottom: 1px solid {_card_border};">
+                <td style="padding: 10px; color: {_header_col};"><b>Solar Noon</b></td>
+                <td style="padding: 10px; color: {_sub_col};">The peak of the day—when the sun is at its highest point.</td>
             </tr>
             <tr>
-                <td style="padding: 10px; color: #F39C12;"><b>Radiation</b></td>
-                <td style="padding: 10px; color: #9CA3AF;">The "strength" of the sunlight (W/m^2). Higher is better for solar panels.</td>
+                <td style="padding: 10px; color: {_header_col};"><b>Radiation</b></td>
+                <td style="padding: 10px; color: {_sub_col};">The "strength" of the sunlight (W/m²). Higher is better for solar panels.</td>
             </tr>
         </table>
     </div>
 
-    <div class="info-card" style="border-left: 4px solid #F39C12;">
+    <div class="info-card" style="border-left: 4px solid {_header_col};">
         <div class="info-header" style="font-size: 1.2rem;">ACCURACY & DATA</div>
-        <p style="font-size: 0.85rem; color: #9CA3AF;">
-            Sun Scout uses the <span class="code-font">Astral</span> scientific library for solar math and <span class="code-font">OpenStreetMap</span> for building geometry. 
+        <p style="font-size: 0.85rem; color: {_sub_col};">
+            Sun Scout uses the <span style="font-family:'JetBrains Mono',monospace;color:{_hl_col};">Astral</span> scientific library for solar math and <span style="font-family:'JetBrains Mono',monospace;color:{_hl_col};">OpenStreetMap</span> for building geometry.
             While highly precise, please note that local obstacles like small trees or temporary fences might not appear in the 3D view.
         </p>
     </div>
@@ -310,38 +379,11 @@ with tab1:
     display_date = target_date.strftime("%B %d, %Y")
     map_key      = f"map_select_{target_date}_{st.session_state.coords[0]}"
 
-    st.markdown("""
-    <style>
-        .info-card {
-            background: rgba(20, 24, 32, 0.5);
-            border: 1px solid rgba(243, 156, 18, 0.15);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            font-family: 'Inter', sans-serif;
-        }
-        .info-header {
-            font-family: 'Bebas Neue', sans-serif;
-            color: #F39C12;
-            font-size: 2rem;
-            letter-spacing: 2px;
-            margin-bottom: 10px;
-        }
-        .info-sub {
-            font-family: 'JetBrains Mono', monospace;
-            color: #9CA3AF;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 20px;
-        }
-        .highlight { color: #F39C12; font-weight: 600; }
-        .code-font { font-family: 'JetBrains Mono', monospace; color: #E67E22; }
-    </style>
-
+    st.markdown(_INFO_CARD_CSS, unsafe_allow_html=True)
+    st.markdown(f"""
     <div class="info-card">
         <div class="info-sub">What to do here?</div>
-        <p>Select your location on the 2D Map. Also select the date and time. View your location on the 3D map. Then switch the "Step 2" to see the sun path, and the shadows. </p>
+        <p>Select your location on the 2D Map. Also select the date and time. View your location on the 3D map. Then switch the "Step 2" to see the sun path, and the shadows.</p>
     </div>
     """, unsafe_allow_html=True)
 
@@ -486,8 +528,11 @@ with tab2:
 # TAB 3 — YEAR ROUND SUMMARY
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_summary:
-    st.markdown('<div class="theory-section"><h2 class="theory-header">Seasonal Comparison For Selected Location</h2></div>',
-                unsafe_allow_html=True)
+    st.markdown(f'<div style="background:{_card_bg};border:1px solid {_card_border};'
+                f'border-radius:12px;padding:20px 25px;margin-bottom:20px;">'
+                f'<h2 style="font-family:\'Bebas Neue\',sans-serif;color:{_header_col};'
+                f'letter-spacing:2px;margin:0;">Seasonal Comparison For Selected Location</h2>'
+                f'</div>', unsafe_allow_html=True)
 
     milestones = [
         {"id": "Summer", "label": "Summer (June 21)",  "date": date(2026, 6, 21)},
@@ -509,11 +554,14 @@ with tab_summary:
 
     visuals.render_seasonal_map(lat, lon, radius_meters, seasonal_data)
 
-    st.markdown("""
-    <div style="display:flex; justify-content:space-around; background:rgba(255,255,255,0.05); padding:15px; border-radius:10px; margin-top:10px;">
-        <div style="color:#FF4444;">&#9679; Summer</div>
-        <div style="color:#FF8C00;">&#9679; Autumn</div>
-        <div style="color:#F1C40F;">&#9679; Spring</div>
-        <div style="color:#A8D8EA;">&#9679; Winter</div>
+    _legend_bg = "rgba(255,255,255,0.7)" if _is_light else "rgba(255,255,255,0.05)"
+    st.markdown(f"""
+    <div style="display:flex; justify-content:space-around; background:{_legend_bg};
+         padding:15px; border-radius:10px; margin-top:10px;
+         border:1px solid {_card_border};">
+        <div style="color:#FF4444;font-family:'JetBrains Mono',monospace;font-size:13px;">&#9679; Summer</div>
+        <div style="color:#FF8C00;font-family:'JetBrains Mono',monospace;font-size:13px;">&#9679; Autumn</div>
+        <div style="color:#C8A800;font-family:'JetBrains Mono',monospace;font-size:13px;">&#9679; Spring</div>
+        <div style="color:#5BAED8;font-family:'JetBrains Mono',monospace;font-size:13px;">&#9679; Winter</div>
     </div>
     """, unsafe_allow_html=True)
