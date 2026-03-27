@@ -308,66 +308,360 @@ tab_info, tab1, tab2, tab_summary, tab_balcony = st.tabs([
 with tab_info:
     st.markdown(_INFO_CARD_CSS, unsafe_allow_html=True)
     st.markdown(f"""
-    <div class="info-card">
-        <div class="info-header">WELCOME TO SUN SCOUT</div>
-        <div class="info-sub">Your Guide to Visualizing the Light</div>
-        <p>This tool helps you "see" the sun's journey across the sky. Whether you're planning a garden, buying a house, or setting up solar panels, we translate complex celestial mechanics into simple, visual insights.</p>
+    <style>
+    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+    /* ── Hero ── */
+    .hero-wrap {{
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 28px;
+        background: linear-gradient(135deg, #0D0F14 0%, #141820 60%, #1a1408 100%);
+        border: 1px solid rgba(243,156,18,0.15);
+        padding: 52px 48px 48px;
+    }}
+    .hero-wrap::before {{
+        content: '';
+        position: absolute; inset: 0;
+        background:
+            radial-gradient(ellipse 70% 60% at 80% 50%, rgba(243,156,18,0.07) 0%, transparent 70%),
+            radial-gradient(ellipse 40% 40% at 20% 80%, rgba(243,156,18,0.04) 0%, transparent 60%);
+        pointer-events: none;
+    }}
+    .hero-eyebrow {{
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 10px; letter-spacing: .22em; text-transform: uppercase;
+        color: {_header_col}; margin-bottom: 14px; opacity: 0.85;
+    }}
+    .hero-title {{
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: clamp(2.8rem, 5vw, 4.4rem);
+        letter-spacing: 3px; line-height: 1.0;
+        color: #F0F2F5; margin-bottom: 6px;
+    }}
+    .hero-title span {{ color: {_header_col}; }}
+    .hero-sub {{
+        font-family: 'Inter', sans-serif;
+        font-size: 1.05rem; font-weight: 300;
+        color: {'#4B5563' if _is_light else '#6B7280'};
+        margin-bottom: 32px; max-width: 520px; line-height: 1.7;
+    }}
+    .hero-story {{
+        background: rgba(243,156,18,0.06);
+        border: 1px solid rgba(243,156,18,0.18);
+        border-left: 4px solid {_header_col};
+        border-radius: 12px;
+        padding: 18px 22px;
+        max-width: 600px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.92rem;
+        color: {'#374151' if _is_light else '#9CA3AF'};
+        line-height: 1.75;
+        font-style: italic;
+    }}
+    .hero-story b {{ color: {_header_col}; font-style: normal; font-weight: 600; }}
+    .hero-sun-bg {{
+        position: absolute; right: 48px; top: 50%;
+        transform: translateY(-50%);
+        font-size: 130px; line-height: 1;
+        opacity: 0.12; pointer-events: none;
+        filter: blur(2px);
+        user-select: none;
+    }}
+
+    /* ── How-to steps ── */
+    .steps-grid {{
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 14px;
+        margin-bottom: 28px;
+    }}
+    .step-card {{
+        background: {_card_bg};
+        border: 1px solid {_card_border};
+        border-radius: 14px;
+        padding: 22px 18px;
+        position: relative;
+        transition: transform .15s;
+    }}
+    .step-num {{
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 3rem; letter-spacing: 2px;
+        color: {_header_col}; opacity: 0.22;
+        line-height: 1; margin-bottom: 8px;
+    }}
+    .step-icon {{ font-size: 26px; margin-bottom: 10px; display: block; }}
+    .step-title {{
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1.1rem; letter-spacing: 1.5px;
+        color: {_header_col}; margin-bottom: 8px;
+        text-transform: uppercase;
+    }}
+    .step-body {{
+        font-family: 'Inter', sans-serif;
+        font-size: 0.82rem; line-height: 1.6;
+        color: {'#4B5563' if _is_light else '#6B7280'};
+    }}
+    .step-arrow {{
+        position: absolute; top: 50%; right: -10px;
+        transform: translateY(-50%);
+        font-size: 18px; color: {_header_col}; opacity: 0.35;
+        z-index: 2;
+    }}
+
+    /* ── Use case cards ── */
+    .usecase-grid {{
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        margin-bottom: 28px;
+    }}
+    .usecase-card {{
+        background: {_card_bg};
+        border: 1px solid {_card_border};
+        border-radius: 14px;
+        padding: 22px 22px;
+        display: flex; gap: 16px; align-items: flex-start;
+    }}
+    .usecase-icon {{
+        font-size: 32px; flex-shrink: 0;
+        width: 52px; height: 52px;
+        background: rgba(243,156,18,0.08);
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        border: 1px solid rgba(243,156,18,0.15);
+    }}
+    .usecase-title {{
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1.1rem; letter-spacing: 1.5px;
+        color: {_header_col}; margin-bottom: 6px;
+        text-transform: uppercase;
+    }}
+    .usecase-body {{
+        font-family: 'Inter', sans-serif;
+        font-size: 0.83rem; line-height: 1.65;
+        color: {'#4B5563' if _is_light else '#6B7280'};
+    }}
+    .usecase-tag {{
+        display: inline-block;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 9px; letter-spacing: .12em;
+        text-transform: uppercase;
+        background: rgba(243,156,18,0.1);
+        color: {_header_col};
+        border: 1px solid rgba(243,156,18,0.2);
+        border-radius: 20px; padding: 2px 10px;
+        margin-top: 8px; display: inline-block;
+    }}
+
+    /* ── Feature pills ── */
+    .feature-row {{
+        display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 28px;
+    }}
+    .feature-pill {{
+        background: {_card_bg};
+        border: 1px solid {_card_border};
+        border-radius: 30px;
+        padding: 8px 18px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 11px; color: {'#374151' if _is_light else '#9CA3AF'};
+        display: flex; align-items: center; gap: 7px;
+    }}
+    .feature-pill span {{ color: {_header_col}; font-size: 14px; }}
+
+    /* ── Glossary ── */
+    .glossary-grid {{
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        margin-bottom: 0;
+    }}
+    .glossary-item {{
+        background: {_card_bg};
+        border: 1px solid {_card_border};
+        border-radius: 12px; padding: 16px 18px;
+        display: flex; gap: 12px; align-items: flex-start;
+    }}
+    .glossary-key {{
+        font-family: 'Bebas Neue', sans-serif;
+        font-size: 1rem; letter-spacing: 1px;
+        color: {_header_col}; white-space: nowrap;
+        min-width: 90px;
+    }}
+    .glossary-val {{
+        font-family: 'Inter', sans-serif;
+        font-size: 0.82rem; line-height: 1.55;
+        color: {'#4B5563' if _is_light else '#6B7280'};
+    }}
+
+    /* ── Section label ── */
+    .section-label {{
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 9px; letter-spacing: .22em;
+        text-transform: uppercase;
+        color: {_header_col}; opacity: 0.7;
+        margin-bottom: 12px; margin-top: 4px;
+    }}
+
+    @media (max-width: 900px) {{
+        .steps-grid {{ grid-template-columns: repeat(2, 1fr); }}
+        .usecase-grid {{ grid-template-columns: 1fr; }}
+        .glossary-grid {{ grid-template-columns: 1fr; }}
+        .hero-sun-bg {{ display: none; }}
+    }}
+    </style>
+
+    <!-- ── HERO ─────────────────────────────────────────────── -->
+    <div class="hero-wrap">
+        <div class="hero-sun-bg">☀️</div>
+        <div class="hero-eyebrow">Sun Scout · Solar Intelligence</div>
+        <div class="hero-title">Know Your <span>Sunlight</span><br>Before You Buy.</div>
+        <div class="hero-sub">
+            The tool built for one question every house hunter should ask —
+            <em>when does sunlight actually hit that balcony?</em>
+        </div>
     </div>
 
-    <div class="info-card">
-        <div class="info-header">WHY SHOULD ONE CARE?</div>
-        <div class="use-case-item">
-            <span class="highlight">Real Estate:</span> Ever wondered if that "sunny" balcony is actually in the shade by 4 PM? Now you can check for any day of the year.
+    <!-- ── HOW TO USE ────────────────────────────────────────── -->
+    <div class="section-label">How to use</div>
+    <div class="steps-grid">
+        <div class="step-card">
+            <div class="step-num">01</div>
+            <span class="step-icon">📍</span>
+            <div class="step-title">Pin Your Location</div>
+            <div class="step-body">Search an address or click anywhere on the 2D map in Step 1. Drop your pin exactly on the property you're evaluating.</div>
+            <div class="step-arrow">›</div>
         </div>
-        <div class="use-case-item">
-            <span class="highlight">Gardening:</span> "Full Sun" plants need 6+ hours of direct light. Use the <b>Play Path</b> feature to see if your garden bed actually gets them.
+        <div class="step-card">
+            <div class="step-num">02</div>
+            <span class="step-icon">🗓️</span>
+            <div class="step-title">Pick a Date & Time</div>
+            <div class="step-body">Use the sidebar sliders or choose a celestial preset — Summer Solstice, Winter Solstice, or any date in between.</div>
+            <div class="step-arrow">›</div>
         </div>
-        <div class="use-case-item">
-            <span class="highlight">Solar Power:</span> Thinking of solar panels? Check if your neighbor's tall oak tree or a nearby building blocks your roof during peak hours.
+        <div class="step-card">
+            <div class="step-num">03</div>
+            <span class="step-icon">🛰️</span>
+            <div class="step-title">Watch the Shadow</div>
+            <div class="step-body">Switch to Step 2 → 3D Shadow view. Hit Play and watch the sun move across real buildings in real time.</div>
+            <div class="step-arrow">›</div>
         </div>
-        <div class="use-case-item">
-            <span class="highlight">Photography:</span> Find the exact minute of the "Golden Hour" to get that perfect, glowing shot.
+        <div class="step-card">
+            <div class="step-num">04</div>
+            <span class="step-icon">🏠</span>
+            <div class="step-title">Get the Verdict</div>
+            <div class="step-body">Open the Balcony Report tab. Set your floor and which way it faces. Get a season-by-season sunlight breakdown in minutes.</div>
         </div>
     </div>
 
-    <div class="info-card">
-        <div class="info-header">UNDERSTANDING THE VIEWS</div>
-        <ul style="list-style-type: none; padding-left: 0;">
-            <li style="margin-bottom: 15px; color: {_body_col};"><span class="highlight">2D Map:</span> Think of this as your "top-down" blueprint. It shows exactly where the sun rises (<span style="color:#E74C3C;">Red</span>) and sets (<span style="color:#3498DB;">Blue</span>) for your specific location.</li>
-            <li style="margin-bottom: 15px; color: {_body_col};"><span class="highlight">3D Arc:</span> This shows the sun's "rollercoaster" path. A high arc means long summer days; a low, flat arc means shorter winter days.</li>
-            <li style="margin-bottom: 15px; color: {_body_col};"><span class="highlight">3D Shadow:</span> Our most powerful tool. It uses real building data to show exactly where shadows fall on your street at any hour.</li>
-        </ul>
+    <!-- ── USE CASES ─────────────────────────────────────────── -->
+    <div class="section-label">Who is this for</div>
+    <div class="usecase-grid">
+        <div class="usecase-card">
+            <div class="usecase-icon">🏡</div>
+            <div>
+                <div class="usecase-title">House Hunters</div>
+                <div class="usecase-body">
+                    That "sunny south-facing balcony" might be shaded by the 8-storey building next door from October to March.
+                    Check it before you sign. Set your floor, set the surrounding building height, and see exactly what you're buying.
+                </div>
+                <div class="usecase-tag">Core use case</div>
+            </div>
+        </div>
+        <div class="usecase-card">
+            <div class="usecase-icon">🌿</div>
+            <div>
+                <div class="usecase-title">Gardeners</div>
+                <div class="usecase-body">
+                    Full-sun plants need 6+ hours of direct light. Use the Play Path animation to watch sunlight move across your garden plot hour by hour. Know before you plant.
+                </div>
+                <div class="usecase-tag">Planting decisions</div>
+            </div>
+        </div>
+        <div class="usecase-card">
+            <div class="usecase-icon">⚡</div>
+            <div>
+                <div class="usecase-title">Solar Panel Owners</div>
+                <div class="usecase-body">
+                    Is that neighbour's new extension going to shade your roof in winter?
+                    Check peak solar radiation hours by season and see if your roof gets the minimum needed for viable solar generation.
+                </div>
+                <div class="usecase-tag">Energy planning</div>
+            </div>
+        </div>
+        <div class="usecase-card">
+            <div class="usecase-icon">📸</div>
+            <div>
+                <div class="usecase-title">Photographers</div>
+                <div class="usecase-body">
+                    Golden hour is just 20–30 minutes. Use the 3D Arc view to find the exact azimuth and elevation of the sun at your shoot location — down to the minute.
+                </div>
+                <div class="usecase-tag">Shot planning</div>
+            </div>
+        </div>
     </div>
 
-    <div class="info-card">
-        <div class="info-header">THE DATA DASHBOARD</div>
-        <p>What do these technical terms actually mean for you?</p>
-        <table style="width:100%; border-collapse: collapse; font-size: 0.9rem;">
-            <tr style="border-bottom: 1px solid {_card_border};">
-                <td style="padding: 10px; color: {_header_col};"><b>Azimuth</b></td>
-                <td style="padding: 10px; color: {_sub_col};">The compass direction of the sun (e.g., North is 0°, East is 90°).</td>
-            </tr>
-            <tr style="border-bottom: 1px solid {_card_border};">
-                <td style="padding: 10px; color: {_header_col};"><b>Elevation</b></td>
-                <td style="padding: 10px; color: {_sub_col};">How high the sun is. 0° is the horizon; 90° is directly overhead.</td>
-            </tr>
-            <tr style="border-bottom: 1px solid {_card_border};">
-                <td style="padding: 10px; color: {_header_col};"><b>Solar Noon</b></td>
-                <td style="padding: 10px; color: {_sub_col};">The peak of the day—when the sun is at its highest point.</td>
-            </tr>
-            <tr>
-                <td style="padding: 10px; color: {_header_col};"><b>Radiation</b></td>
-                <td style="padding: 10px; color: {_sub_col};">The "strength" of the sunlight (W/m²). Higher is better for solar panels.</td>
-            </tr>
-        </table>
+    <!-- ── FEATURES ──────────────────────────────────────────── -->
+    <div class="section-label">What's inside</div>
+    <div class="feature-row">
+        <div class="feature-pill"><span>🗺️</span> 2D Street & Satellite Map</div>
+        <div class="feature-pill"><span>🌐</span> 3D Sun Arc (Three.js)</div>
+        <div class="feature-pill"><span>🛰️</span> 3D Building Shadows (OSM)</div>
+        <div class="feature-pill"><span>🏠</span> Balcony Report by Season</div>
+        <div class="feature-pill"><span>🧭</span> Facing Direction Filter</div>
+        <div class="feature-pill"><span>🏢</span> Floor-by-Floor Analysis</div>
+        <div class="feature-pill"><span>🔄</span> Year-Round Arc Comparison</div>
+        <div class="feature-pill"><span>⚡</span> Live AQI & Weather</div>
+        <div class="feature-pill"><span>📍</span> GPS Auto-Location</div>
+        <div class="feature-pill"><span>🌙</span> Dark / Light Mode</div>
+        <div class="feature-pill"><span>📅</span> Solstice & Equinox Presets</div>
+        <div class="feature-pill"><span>☀️</span> Solar Radiation (W/m²)</div>
     </div>
 
-    <div class="info-card" style="border-left: 4px solid {_header_col};">
-        <div class="info-header" style="font-size: 1.2rem;">ACCURACY & DATA</div>
-        <p style="font-size: 0.85rem; color: {_sub_col};">
-            Sun Scout uses the <span style="font-family:'JetBrains Mono',monospace;color:{_hl_col};">Astral</span> scientific library for solar math and <span style="font-family:'JetBrains Mono',monospace;color:{_hl_col};">OpenStreetMap</span> for building geometry.
-            While highly precise, please note that local obstacles like small trees or temporary fences might not appear in the 3D view.
-        </p>
+    <!-- ── GLOSSARY ───────────────────────────────────────────── -->
+    <div class="section-label">Understanding the numbers</div>
+    <div class="glossary-grid">
+        <div class="glossary-item">
+            <div class="glossary-key">Azimuth</div>
+            <div class="glossary-val">Compass direction of the sun. North = 0°, East = 90°, South = 180°, West = 270°. Tells you which side of the building the sun is on.</div>
+        </div>
+        <div class="glossary-item">
+            <div class="glossary-key">Elevation</div>
+            <div class="glossary-val">How high the sun is above the horizon. 0° = just risen or setting. 90° = directly overhead. Low elevation = long shadows.</div>
+        </div>
+        <div class="glossary-item">
+            <div class="glossary-key">Solar Noon</div>
+            <div class="glossary-val">The moment the sun peaks for the day — highest elevation, shortest shadows. Not always 12:00; depends on your longitude and timezone offset.</div>
+        </div>
+        <div class="glossary-item">
+            <div class="glossary-key">Obstruction °</div>
+            <div class="glossary-val">The minimum solar elevation needed to clear a nearby building. If the building angle is 32° and the sun is at 28°, you're in shadow.</div>
+        </div>
+        <div class="glossary-item">
+            <div class="glossary-key">Radiation W/m²</div>
+            <div class="glossary-val">Estimated sunlight intensity hitting a flat surface. Above 600 W/m² is strong solar generation territory. Below 200 W/m² is marginal.</div>
+        </div>
+        <div class="glossary-item">
+            <div class="glossary-key">Facing Arc</div>
+            <div class="glossary-val">A south-facing balcony can "see" the sun when it's within ±90° of south (i.e., between east and west). North-facing misses most direct sun.</div>
+        </div>
+    </div>
+
+    <!-- ── FOOTER NOTE ────────────────────────────────────────── -->
+    <div style="margin-top:24px;padding:16px 20px;
+         background:{_card_bg};border:1px solid {_card_border};
+         border-radius:12px;display:flex;gap:14px;align-items:center;">
+        <div style="font-size:22px;flex-shrink:0;">🔬</div>
+        <div style="font-family:'Inter',sans-serif;font-size:0.82rem;
+             color:{'#4B5563' if _is_light else '#6B7280'};line-height:1.6;">
+            Sun Scout uses the <b style="color:{_header_col};">Astral</b> library for
+            precise astronomical calculations, <b style="color:{_header_col};">OpenStreetMap</b>
+            for building geometry, and the <b style="color:{_header_col};">Overpass API</b>
+            for real building heights. Solar positions are accurate to within fractions of a degree.
+            Building obstruction is a geometric model — trees, fences, and unmapped structures
+            won't appear.
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -573,6 +867,7 @@ with tab_summary:
 with tab_balcony:
     st.markdown(_INFO_CARD_CSS, unsafe_allow_html=True)
 
+    # ── Helpers ───────────────────────────────────────────────────────────────
     def fmt_duration(minutes):
         if minutes <= 0:
             return "No direct sun"
@@ -584,8 +879,8 @@ with tab_balcony:
         for pt in hourly:
             fill = color if pt["lit"] else (
                 "rgba(255,255,255,0.06)" if not _is_light else "rgba(0,0,0,0.06)")
-            tip = (f"{pt['hour']:02d}:30 — sun clears buildings" if pt["lit"]
-                   else f"{pt['hour']:02d}:30 — blocked (need >{pt['needed_el']}°)")
+            tip = (f"{pt['hour']:02d}:30 \u2014 sun visible" if pt["lit"]
+                   else f"{pt['hour']:02d}:30 \u2014 blocked (need >{pt['needed_el']}\xb0)")
             cells += (f'<div title="{tip}" style="flex:1;height:28px;'
                       f'background:{fill};border-radius:3px;margin:0 1px;"></div>')
         labels = "".join(
@@ -596,121 +891,89 @@ with tab_balcony:
         return (f'<div style="display:flex;gap:0;margin-bottom:3px;">{cells}</div>'
                 f'<div style="display:flex;gap:0;">{labels}</div>')
 
+    # ── Page header ───────────────────────────────────────────────────────────
     st.markdown(f"""
     <div class="info-card" style="border-left:4px solid {_header_col};">
-        <div class="info-header">🏠 Balcony Sunlight Report</div>
-        <div class="info-sub">Real sunlight — accounting for nearby buildings</div>
-        <p>We fetch actual building heights from OpenStreetMap around your pin,
-        then calculate exactly when the sun clears those buildings from your floor.
-        Change your pin in <b style="color:{_header_col};">Step 1</b> to analyse
-        a different property.</p>
+        <div class="info-header">\U0001f3e0 Balcony Sunlight Report</div>
+        <div class="info-sub">Real sunlight \u2014 floor & buildings aware</div>
+        <p>Set your floor and surrounding building height.
+        We calculate exactly when sunlight hits across all four seasons.</p>
     </div>
     """, unsafe_allow_html=True)
 
-    # ── Floor selector ────────────────────────────────────────────────────────
-    bcol1, bcol2 = st.columns([1, 2])
-    with bcol1:
-        floor_num = st.number_input(
-            "🏢 Your Floor (0 = Ground, max 35)",
+    # ── Controls row ──────────────────────────────────────────────────────────
+    ctrl1, ctrl2 = st.columns(2)
+
+    with ctrl1:
+        floor_num = int(st.number_input(
+            "\U0001f3e2 Your Floor (0=Ground, max 35)",
             min_value=0, max_value=35, value=0, step=1,
-            key="balcony_floor_v2")
-        floor_num = int(floor_num)
-        floor_m   = solarlogic.floor_elevation_m(floor_num)
-        if floor_num == 0:
-            selected_floor_label = "Ground Floor"
-        elif floor_num == 1:
-            selected_floor_label = "1st Floor"
-        elif floor_num == 2:
-            selected_floor_label = "2nd Floor"
-        elif floor_num == 3:
-            selected_floor_label = "3rd Floor"
-        else:
-            selected_floor_label = f"{floor_num}th Floor"
+            key="balcony_floor_v2"))
+        floor_m = solarlogic.floor_elevation_m(floor_num)
+        if floor_num == 0:   selected_floor_label = "Ground Floor"
+        elif floor_num == 1: selected_floor_label = "1st Floor"
+        elif floor_num == 2: selected_floor_label = "2nd Floor"
+        elif floor_num == 3: selected_floor_label = "3rd Floor"
+        else:                selected_floor_label = f"{floor_num}th Floor"
 
-    # ── Fetch buildings ───────────────────────────────────────────────────────
-    with bcol2:
-        with st.spinner("Fetching nearby buildings from OpenStreetMap..."):
-            buildings, osm_ok = solarlogic.fetch_nearby_buildings(lat, lon, radius_m=200)
+    with ctrl2:
+        surround_floors = st.slider(
+            "\U0001f3d9\ufe0f Surrounding buildings (floors)",
+            min_value=0, max_value=35, value=3, step=1,
+            key="surround_height",
+            help="How tall are the buildings immediately around you? "
+                 "0=open field, 3=low-rise, 10=mid-rise, 20+=high-rise.")
+        surround_h = solarlogic.floor_elevation_m(surround_floors)
+        surround_label = ("open field" if surround_floors == 0
+                          else f"{surround_floors}-floor (~{surround_h:.0f}m)")
 
-        if osm_ok and buildings:
-            avg_dist = sum(b["dist_m"] for b in buildings) / len(buildings)
-            max_obs  = max(b["obs_angle_deg"] for b in buildings)
-            bld_status = (f"✅ Found <b style='color:{_header_col};'>"
-                          f"{len(buildings)} buildings</b> within 200 m &nbsp;·&nbsp; "
-                          f"avg distance {avg_dist:.0f} m &nbsp;·&nbsp; "
-                          f"max obstruction angle <b style='color:{_header_col};'>"
-                          f"{max_obs:.1f}°</b>")
-            data_note = "Using real OSM building geometry."
-        elif osm_ok and not buildings:
-            bld_status = ("✅ OSM reachable but <b>no buildings found</b> within 200 m. "
-                          "Open area — using manual surroundings control below.")
-            data_note  = "No nearby buildings in OSM data."
-        else:
-            bld_status = ("⚠️ <b>OpenStreetMap unreachable</b> — using manual "
-                          "surroundings floor count below instead.")
-            data_note  = "OSM offline. Set surrounding floors to match your area."
+    # ── Fetch / build obstruction model ──────────────────────────────────────
+    with st.spinner("Fetching nearby buildings from OpenStreetMap..."):
+        osm_buildings, osm_ok = solarlogic.fetch_nearby_buildings(lat, lon, radius_m=200)
 
-        st.markdown(f"""
-        <div style="background:{_card_bg};border:1px solid {_card_border};
-             border-radius:12px;padding:18px 22px;">
-            <div style="font-size:10px;letter-spacing:.14em;text-transform:uppercase;
-                 color:{_sub_col};font-family:'JetBrains Mono',monospace;margin-bottom:8px;">
-                Building Obstruction Data
-            </div>
-            <div style="font-family:'JetBrains Mono',monospace;font-size:13px;
-                 color:{_header_col};font-weight:600;margin-bottom:6px;">
-                📍 {lat:.5f}, {lon:.5f}
-            </div>
-            <div style="font-size:12px;color:{_sub_col};line-height:1.8;">
-                {bld_status}<br>
-                Your floor: <b style="color:{_header_col};">
-                {selected_floor_label}</b> (~{floor_m:.1f} m eye level)<br>
-                <span style="font-size:10px;">{data_note}</span>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    # ── Surrounding floors slider — always shown ──────────────────────────────
-    st.markdown("<div style='margin-top:12px;'></div>", unsafe_allow_html=True)
-    surround_floors = st.slider(
-        "🏙️ Surrounding buildings — how many floors tall?",
-        min_value=0, max_value=35, value=3, step=1,
-        key="surround_height",
-        help="Set how tall the buildings around your balcony are. "
-             "0 = open field, 3 = typical low-rise, 10 = mid-rise, 20+ = high-rise. "
-             "When OSM data is available this overrides it for a manual scenario.")
-    surround_h     = solarlogic.floor_elevation_m(surround_floors)
-    surround_label = ("open field" if surround_floors == 0
-                      else f"{surround_floors}-floor buildings (~{surround_h:.0f} m)")
-
-    # Always use slider-based synthetic buildings so user has direct control.
-    # OSM data is shown as info only; the slider is the source of truth.
     buildings = solarlogic.make_synthetic_buildings(
         surround_height_m=surround_h, surround_dist_m=20)
 
-    if osm_ok and len(buildings) > 0:
-        st.info(f"Surroundings manually set to {surround_label}. "
-                f"OSM found {len(solarlogic.fetch_nearby_buildings(lat, lon, radius_m=200)[0])} "
-                f"nearby buildings — slider overrides for manual scenario testing.")
+    # Status line
+    if osm_ok and osm_buildings:
+        osm_note = (f"\u2705 OSM: {len(osm_buildings)} buildings found nearby \u2014 "
+                    f"slider overrides for manual scenario testing.")
+    elif osm_ok:
+        osm_note = "\u2705 OSM reachable \u2014 no buildings within 200m (open area)."
     else:
-        st.info(f"Surroundings set to {surround_label}. "
-                f"OSM data unavailable — this slider is your building obstruction model.")
+        osm_note = "\u26a0\ufe0f OSM unreachable \u2014 using slider model only."
 
-    st.markdown("<div style='margin:18px 0 6px;'></div>", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div style="background:{_card_bg};border:1px solid {_card_border};
+         border-radius:12px;padding:14px 20px;margin:10px 0 16px;
+         display:flex;flex-wrap:wrap;gap:20px;align-items:center;">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:12px;
+             color:{_header_col};">
+            \U0001f4cd {lat:.4f}, {lon:.4f}
+        </div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:{_sub_col};">
+            Floor: <b style="color:{_body_col};">{selected_floor_label}</b>
+            &nbsp;\u00b7&nbsp; Surroundings: <b style="color:{_body_col};">{surround_label}</b>
+        </div>
+        <div style="font-size:11px;color:{_sub_col};font-family:'JetBrains Mono',monospace;">
+            {osm_note}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     # ── Seasons ───────────────────────────────────────────────────────────────
     seasons = [
-        {"id": "summer", "label": "Summer",  "emoji": "☀️",
+        {"id": "summer", "label": "Summer",  "emoji": "\u2600\ufe0f",
          "date": date(2026, 6, 21),  "color": "#FF6B35"},
-        {"id": "autumn", "label": "Autumn",  "emoji": "🍂",
+        {"id": "autumn", "label": "Autumn",  "emoji": "\U0001f342",
          "date": date(2026, 10, 31), "color": "#FF8C00"},
-        {"id": "spring", "label": "Spring",  "emoji": "🌸",
+        {"id": "spring", "label": "Spring",  "emoji": "\U0001f338",
          "date": date(2026, 3, 20),  "color": "#F39C12"},
-        {"id": "winter", "label": "Winter",  "emoji": "❄️",
+        {"id": "winter", "label": "Winter",  "emoji": "\u2744\ufe0f",
          "date": date(2026, 12, 21), "color": "#5BAED8"},
     ]
 
-    with st.spinner("Computing sunlight windows with building obstructions..."):
+    with st.spinner("Computing sunlight windows..."):
         results = {}
         for s in seasons:
             results[s["id"]] = solarlogic.compute_sunlight_window(
@@ -720,7 +983,40 @@ with tab_balcony:
                 step_minutes=5,
             )
 
-    # ── 2×2 season cards ──────────────────────────────────────────────────────
+    # ── Prominent sunlight hours summary ─────────────────────────────────────
+    valid    = [s for s in seasons if results[s["id"]]]
+    avg_mins = sum(results[s["id"]]["sun_minutes"] for s in valid) // max(len(valid), 1)
+    summer_m = results["summer"]["sun_minutes"] if results["summer"] else 0
+    winter_m = results["winter"]["sun_minutes"] if results["winter"] else 0
+
+    if   avg_mins >= 300: sum_col, sum_icon = "#27AE60", "\U0001f3c6"
+    elif avg_mins >= 180: sum_col, sum_icon = "#F39C12", "\u2705"
+    elif avg_mins >= 60:  sum_col, sum_icon = "#E67E22", "\u26a0\ufe0f"
+    else:                 sum_col, sum_icon = "#E74C3C", "\U0001f534"
+
+    s_cols = st.columns(3)
+    summary_items = [
+        ("Avg Daily Sun", fmt_duration(avg_mins), sum_col),
+        ("Best (Summer)", fmt_duration(summer_m), "#FF6B35"),
+        ("Worst (Winter)", fmt_duration(winter_m), "#5BAED8"),
+    ]
+    for col, (lbl, val, col_color) in zip(s_cols, summary_items):
+        col.markdown(f"""
+        <div style="background:{_card_bg};border:1px solid {col_color}44;
+             border-radius:14px;padding:18px 16px;text-align:center;
+             border-top:3px solid {col_color};">
+            <div style="font-size:8px;letter-spacing:.16em;text-transform:uppercase;
+                 color:{_sub_col};font-family:'JetBrains Mono',monospace;
+                 margin-bottom:8px;">{lbl}</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;
+                 color:{col_color};letter-spacing:2px;line-height:1;">
+                {val}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("<div style='margin:18px 0 6px;'></div>", unsafe_allow_html=True)
+
+    # ── 2x2 season cards ──────────────────────────────────────────────────────
     row1 = st.columns(2)
     row2 = st.columns(2)
     grid = [row1[0], row1[1], row2[0], row2[1]]
@@ -730,19 +1026,19 @@ with tab_balcony:
         with grid[idx]:
             if not r:
                 st.markdown(
-                    f'<div class="info-card"><b style="color:{s["color"]};">' +
+                    f'<div class="info-card"><b style="color:{s["color"]};">'
                     f'{s["emoji"]} {s["label"]}</b><br>Could not compute.</div>',
                     unsafe_allow_html=True)
                 continue
 
             mins = r["sun_minutes"]
-            if   mins >= 360: quality, qcol = "🟢 Excellent", "#27AE60"
-            elif mins >= 240: quality, qcol = "🟡 Good",      "#F39C12"
-            elif mins >= 120: quality, qcol = "🟠 Moderate",  "#E67E22"
-            elif mins > 0:    quality, qcol = "🔴 Limited",   "#E74C3C"
-            else:             quality, qcol = "⚫ No Sun",    "#555555"
+            if   mins >= 360: quality, qcol = "\U0001f7e2 Excellent", "#27AE60"
+            elif mins >= 240: quality, qcol = "\U0001f7e1 Good",      "#F39C12"
+            elif mins >= 120: quality, qcol = "\U0001f7e0 Moderate",  "#E67E22"
+            elif mins > 0:    quality, qcol = "\U0001f534 Limited",   "#E74C3C"
+            else:             quality, qcol = "\u26ab No Sun",        "#555555"
 
-            window_str = (f"{r['sun_start']} → {r['sun_end']}"
+            window_str = (f"{r['sun_start']} \u2192 {r['sun_end']}"
                           if r["sun_start"] else "No direct sunlight")
             bar = sunlight_bar_html(r["hourly"], s["color"])
 
@@ -754,8 +1050,7 @@ with tab_balcony:
                      align-items:center;margin-bottom:14px;">
                     <div style="font-family:'Bebas Neue',sans-serif;font-size:1.5rem;
                          letter-spacing:2px;color:{s['color']};">
-                        {s['emoji']} {s['label'].upper()}
-                    </div>
+                        {s['emoji']} {s['label'].upper()}</div>
                     <div style="font-size:11px;font-weight:700;color:{qcol};
                          font-family:'JetBrains Mono',monospace;
                          background:{qcol}18;padding:3px 10px;border-radius:20px;
@@ -777,7 +1072,7 @@ with tab_balcony:
                             Peak Elevation</div>
                         <div style="font-size:1.4rem;font-family:'Bebas Neue',sans-serif;
                              color:{s['color']};margin-top:2px;letter-spacing:1px;">
-                            {r['peak_el']}°</div>
+                            {r['peak_el']}\xb0</div>
                     </div>
                 </div>
                 <div style="margin-bottom:8px;">
@@ -790,40 +1085,35 @@ with tab_balcony:
                 <div style="display:flex;gap:14px;margin-bottom:12px;flex-wrap:wrap;">
                     <span style="font-size:10px;color:{_sub_col};
                          font-family:'JetBrains Mono',monospace;">
-                        🌅 <b style="color:{_body_col};">{r['rise']}</b></span>
+                        \U0001f305 <b style="color:{_body_col};">{r['rise']}</b></span>
                     <span style="font-size:10px;color:{_sub_col};
                          font-family:'JetBrains Mono',monospace;">
-                        🌞 Noon <b style="color:{_body_col};">{r['noon']}</b></span>
+                        \U0001f31e Noon <b style="color:{_body_col};">{r['noon']}</b></span>
                     <span style="font-size:10px;color:{_sub_col};
                          font-family:'JetBrains Mono',monospace;">
-                        🌇 <b style="color:{_body_col};">{r['set']}</b></span>
+                        \U0001f307 <b style="color:{_body_col};">{r['set']}</b></span>
                     <span style="font-size:10px;color:{_sub_col};
                          font-family:'JetBrains Mono',monospace;">
-                        ⬆️ Peak <b style="color:{_body_col};">{r['peak_time']}</b></span>
+                        \u2b06\ufe0f Peak <b style="color:{_body_col};">{r['peak_time']}</b></span>
                 </div>
                 <div style="font-size:8px;letter-spacing:.14em;text-transform:uppercase;
                      color:{_sub_col};font-family:'JetBrains Mono',monospace;
-                     margin-bottom:4px;">Hourly · 06:00 — 20:00
-                     &nbsp;|&nbsp; <span style="color:{s['color']};">■</span> sun clears buildings
-                     &nbsp;<span style="color:{_sub_col};">■</span> blocked</div>
+                     margin-bottom:4px;">Hourly 06:00\u201420:00
+                     &nbsp;|\u00a0<span style="color:{s['color']};">\u25a0</span> sunlit
+                     &nbsp;<span style="color:{_sub_col};">\u25a0</span> blocked</div>
                 {bar}
             </div>
             """, unsafe_allow_html=True)
 
-    # ── Comparison table ───────────────────────────────────────────────────────
+    # ── Season comparison table ───────────────────────────────────────────────
     st.markdown("<div style='margin-top:8px;'></div>", unsafe_allow_html=True)
-
     rows_html = ""
     for s in seasons:
         r = results[s["id"]]
         if not r:
             continue
         mins = r["sun_minutes"]
-        if   mins >= 360: dot = "🟢"
-        elif mins >= 240: dot = "🟡"
-        elif mins >= 120: dot = "🟠"
-        elif mins > 0:    dot = "🔴"
-        else:             dot = "⚫"
+        dot = "\U0001f7e2" if mins>=360 else "\U0001f7e1" if mins>=240 else "\U0001f7e0" if mins>=120 else "\U0001f534" if mins>0 else "\u26ab"
         rows_html += f"""
         <tr style="border-bottom:1px solid {_card_border};">
             <td style="padding:11px 8px;font-weight:600;color:{s['color']};
@@ -832,22 +1122,22 @@ with tab_balcony:
                  font-family:'JetBrains Mono',monospace;">{r['rise']}</td>
             <td style="padding:11px 8px;text-align:center;color:{_body_col};
                  font-family:'JetBrains Mono',monospace;font-weight:600;">
-                {r['sun_start'] if r['sun_start'] else '—'}</td>
+                {r['sun_start'] if r['sun_start'] else '\u2014'}</td>
             <td style="padding:11px 8px;text-align:center;color:{_body_col};
                  font-family:'JetBrains Mono',monospace;font-weight:600;">
-                {r['sun_end'] if r['sun_end'] else '—'}</td>
+                {r['sun_end'] if r['sun_end'] else '\u2014'}</td>
             <td style="padding:11px 8px;text-align:center;color:{s['color']};
                  font-family:'Bebas Neue',sans-serif;font-size:1rem;letter-spacing:1px;">
                 {fmt_duration(mins)}</td>
             <td style="padding:11px 8px;text-align:center;color:{_body_col};
                  font-family:'JetBrains Mono',monospace;">
-                {r['peak_el']}° @ {r['peak_time']}</td>
+                {r['peak_el']}\xb0 @ {r['peak_time']}</td>
             <td style="padding:11px 8px;text-align:center;font-size:16px;">{dot}</td>
         </tr>"""
 
     def _th(txt):
-        return (f'<th style="padding:10px 8px;text-align:center;' +
-                f'font-family:\'JetBrains Mono\',monospace;font-size:9px;' +
+        return (f'<th style="padding:10px 8px;text-align:center;'
+                f'font-family:\'JetBrains Mono\',monospace;font-size:9px;'
                 f'letter-spacing:.12em;text-transform:uppercase;color:{_sub_col};">{txt}</th>')
 
     st.markdown(f"""
@@ -855,11 +1145,7 @@ with tab_balcony:
          border-radius:14px;padding:22px 26px;margin-bottom:16px;">
         <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;
              letter-spacing:2px;color:{_header_col};margin-bottom:4px;">
-            📊 Season Comparison — {selected_floor_label}
-        </div>
-        <div style="font-size:10px;color:{_sub_col};font-family:'JetBrains Mono',monospace;
-             margin-bottom:16px;">
-            Accounting for {len(buildings)} nearby buildings from OSM
+            \U0001f4ca Season Comparison \u2014 {selected_floor_label}
         </div>
         <table style="width:100%;border-collapse:collapse;font-size:12px;">
             <thead>
@@ -868,59 +1154,52 @@ with tab_balcony:
                          font-family:'JetBrains Mono',monospace;font-size:9px;
                          letter-spacing:.12em;text-transform:uppercase;
                          color:{_sub_col};">Season</th>
-                    {_th("Sunrise")}
-                    {_th("Sun Hits Balcony")}
-                    {_th("Sun Leaves")}
-                    {_th("Total")}
-                    {_th("Peak Sun")}
-                    {_th("Rating")}
+                    {_th("Sunrise")} {_th("Sun Hits")} {_th("Sun Leaves")}
+                    {_th("Total")} {_th("Peak")} {_th("Rating")}
                 </tr>
             </thead>
             <tbody>{rows_html}</tbody>
         </table>
         <div style="margin-top:14px;font-size:10px;color:{_sub_col};
              font-family:'JetBrains Mono',monospace;line-height:1.8;">
-            🟢 Excellent (6h+) &nbsp;·&nbsp; 🟡 Good (4–6h) &nbsp;·&nbsp;
-            🟠 Moderate (2–4h) &nbsp;·&nbsp; 🔴 Limited (&lt;2h) &nbsp;·&nbsp; ⚫ None
+            \U0001f7e2 Excellent (6h+) &nbsp;\u00b7&nbsp; \U0001f7e1 Good (4\u20136h)
+            &nbsp;\u00b7&nbsp; \U0001f7e0 Moderate (2\u20134h)
+            &nbsp;\u00b7&nbsp; \U0001f534 Limited (&lt;2h) &nbsp;\u00b7&nbsp; \u26ab None
         </div>
     </div>
     """, unsafe_allow_html=True)
 
     # ── Buyer's verdict ───────────────────────────────────────────────────────
-    valid    = [s for s in seasons if results[s["id"]]]
-    avg_mins = sum(results[s["id"]]["sun_minutes"] for s in valid) // max(len(valid), 1)
-    summer_m = results["summer"]["sun_minutes"] if results["summer"] else 0
-    winter_m = results["winter"]["sun_minutes"] if results["winter"] else 0
-
-    if   avg_mins >= 300: vrd, vcol, vic = "Excellent Sun Exposure",     "#27AE60", "🏆"
-    elif avg_mins >= 180: vrd, vcol, vic = "Good Sun Exposure",          "#F39C12", "✅"
-    elif avg_mins >= 60:  vrd, vcol, vic = "Moderate — Check Winter",    "#E67E22", "⚠️"
-    else:                 vrd, vcol, vic = "Limited Sun — Buyer Beware", "#E74C3C", "🔴"
+    if   avg_mins >= 300: vrd, vcol, vic = "Excellent Sun Exposure",     "#27AE60", "\U0001f3c6"
+    elif avg_mins >= 180: vrd, vcol, vic = "Good Sun Exposure",          "#F39C12", "\u2705"
+    elif avg_mins >= 60:  vrd, vcol, vic = "Moderate \u2014 Check Winter","#E67E22", "\u26a0\ufe0f"
+    else:                 vrd, vcol, vic = "Limited Sun \u2014 Buyer Beware","#E74C3C","\U0001f534"
 
     if avg_mins >= 300:
-        vtxt = ("This balcony gets strong sunlight year-round, even accounting for "
-                "nearby buildings. Ideal for plants, solar panels, and morning coffee.")
+        vtxt = ("This balcony gets strong sunlight year-round. Ideal for plants, "
+                "solar panels, and morning coffee in any season.")
     elif avg_mins >= 180:
-        vtxt = ("Solid sunlight for most of the year. Nearby buildings cause some "
-                "obstruction but the balcony remains well-lit overall.")
+        vtxt = ("Solid sunlight for most of the year. Winter months are shorter on light "
+                "but overall this is a well-lit balcony.")
     elif avg_mins >= 60:
         vtxt = (f"Decent in summer ({fmt_duration(summer_m)}) but limited in winter "
-                f"({fmt_duration(winter_m)}). Nearby buildings significantly reduce "
-                f"winter sunlight on lower floors — consider a higher floor.")
+                f"({fmt_duration(winter_m)}). Consider a higher floor or check if "
+                f"a different facing direction gets more sun.")
     else:
-        vtxt = ("Very little direct sunlight reaches this balcony after accounting "
-                "for surrounding buildings. Plants will struggle and it will feel "
-                "dim for much of the year. Higher floors may improve this significantly.")
+        vtxt = ("Very little direct sunlight. Plants will struggle and it will feel "
+                "dim year-round. Try adjusting the floor or facing direction above "
+                "to see if this improves.")
 
     st.markdown(f"""
     <div style="background:{_card_bg};border:1px solid {vcol}44;
-         border-radius:14px;padding:22px 26px;border-left:5px solid {vcol};">
+         border-radius:14px;padding:22px 26px;margin-bottom:20px;
+         border-left:5px solid {vcol};">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
             <div style="font-size:28px;">{vic}</div>
             <div>
                 <div style="font-size:9px;letter-spacing:.18em;text-transform:uppercase;
                      color:{_sub_col};font-family:'JetBrains Mono',monospace;">
-                    Buyer's Verdict · {selected_floor_label}
+                    Buyer's Verdict \u00b7 {selected_floor_label}
                 </div>
                 <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;
                      color:{vcol};letter-spacing:2px;">{vrd}</div>
@@ -930,18 +1209,13 @@ with tab_balcony:
             {vtxt}
         </p>
         <div style="display:flex;gap:24px;flex-wrap:wrap;">
-            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;
-                 color:{_sub_col};">
-                Avg daily sun: <b style="color:{vcol};">{fmt_duration(avg_mins)}</b></span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;
-                 color:{_sub_col};">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:{_sub_col};">
+                Avg: <b style="color:{vcol};">{fmt_duration(avg_mins)}</b></span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:{_sub_col};">
                 Best: <b style="color:{vcol};">Summer ({fmt_duration(summer_m)})</b></span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;
-                 color:{_sub_col};">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:{_sub_col};">
                 Worst: <b style="color:{vcol};">Winter ({fmt_duration(winter_m)})</b></span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:11px;
-                 color:{_sub_col};">
-                Buildings analysed: <b style="color:{vcol};">{len(buildings)}</b></span>
         </div>
     </div>
     """, unsafe_allow_html=True)
+    
