@@ -3,60 +3,155 @@ import streamlit.components.v1 as components
 import math
 
 
-def apply_styles():
-    st.markdown("""
+def apply_styles(theme="dark"):
+    # ── Theme-aware CSS variables ──────────────────────────────────────────
+    if theme == "light":
+        root_vars = """
+        :root {
+            --gold:  #D4860A;
+            --gold2: #B8700E;
+            --dim:   #C47A0C;
+            --glow:  rgba(212,134,10,.12);
+            --bg:    #F7F4EF;
+            --s1:    #FFFFFF;
+            --s2:    #F0ECE6;
+            --s3:    #E8E2D9;
+            --b1:    rgba(0,0,0,.07);
+            --b2:    rgba(0,0,0,.10);
+            --b3:    rgba(212,134,10,.25);
+            --t1:    #111111;
+            --t2:    #3D3D3D;
+            --t3:    #777777;
+            --sidebar-bg: #FFFFFF;
+            --sidebar-border: rgba(212,134,10,.15);
+            --metric-bg: #FFFFFF;
+            --metric-border: rgba(0,0,0,.07);
+            --tab-list-bg: #FFFFFF;
+            --tab-selected-bg: rgba(212,134,10,.10);
+            --input-bg: #FFFFFF;
+            --alert-bg: #FDFAF5;
+            --scrollbar-thumb: rgba(0,0,0,.18);
+            --hr-color: rgba(0,0,0,.08);
+        }"""
+        stapp_extra = """
+        .stApp {
+            background: var(--bg) !important;
+            background-image:
+                radial-gradient(ellipse 100% 40% at 50% 0%, rgba(212,134,10,.06) 0%, transparent 60%) !important;
+        }"""
+        sidebar_extra = """
+        [data-testid="stSidebar"] {
+            background: var(--sidebar-bg) !important;
+            border-right: 1px solid var(--sidebar-border) !important;
+            box-shadow: 2px 0 12px rgba(0,0,0,.06) !important;
+        }"""
+        plot_bg = "rgba(247,244,239,0)"
+        plot_grid = "rgba(0,0,0,0.07)"
+        plot_font = "#111111"
+        alert_extra = """
+        [data-testid="stAlert"] {
+            background: var(--alert-bg) !important;
+            border-radius: 10px !important;
+            border: 1px solid rgba(212,134,10,.2) !important;
+            font-size: 12px !important;
+            color: var(--t2) !important;
+        }"""
+    else:
+        root_vars = """
+        :root {
+            --gold:  #F39C12;
+            --gold2: #E67E22;
+            --dim:   #A06808;
+            --glow:  rgba(243,156,18,.15);
+            --bg:    #0A0C10;
+            --s1:    #0F1218;
+            --s2:    #141820;
+            --s3:    #1C2230;
+            --b1:    rgba(255,255,255,.05);
+            --b2:    rgba(255,255,255,.08);
+            --b3:    rgba(243,156,18,.18);
+            --t1:    #F0F2F5;
+            --t2:    #9CA3AF;
+            --t3:    #4B5563;
+            --sidebar-bg: #070910;
+            --sidebar-border: rgba(243,156,18,.08);
+            --metric-bg: #0F1218;
+            --metric-border: rgba(255,255,255,.05);
+            --tab-list-bg: #0F1218;
+            --tab-selected-bg: rgba(243,156,18,.15);
+            --input-bg: #141820;
+            --alert-bg: #141820;
+            --scrollbar-thumb: rgba(255,255,255,.08);
+            --hr-color: rgba(255,255,255,.08);
+        }"""
+        stapp_extra = """
+        .stApp {
+            background: var(--bg) !important;
+            background-image:
+                radial-gradient(ellipse 100% 40% at 50% 0%, rgba(243,156,18,.055) 0%, transparent 65%) !important;
+        }"""
+        sidebar_extra = """
+        [data-testid="stSidebar"] {
+            background: var(--sidebar-bg) !important;
+            border-right: 1px solid var(--sidebar-border) !important;
+        }"""
+        plot_bg = "rgba(0,0,0,0)"
+        plot_grid = "rgba(0,0,0,0.1)"
+        plot_font = "#F0F2F5"
+        alert_extra = """
+        [data-testid="stAlert"] {
+            background: var(--alert-bg) !important;
+            border-radius: 10px !important;
+            border: 1px solid var(--b1) !important;
+            font-size: 12px !important;
+        }"""
+
+    st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 
-    :root {
-        --gold:  #F39C12;
-        --gold2: #E67E22;
-        --dim:   #A06808;
-        --glow:  rgba(243,156,18,.15);
-        --bg:    #0A0C10;
-        --s1:    #0F1218;
-        --s2:    #141820;
-        --s3:    #1C2230;
-        --b1:    rgba(255,255,255,.05);
-        --b2:    rgba(255,255,255,.08);
-        --b3:    rgba(243,156,18,.18);
-        --t1:    #F0F2F5;
-        --t2:    #9CA3AF;
-        --t3:    #4B5563;
-    }
+    {root_vars}
 
     /* ── Base ── */
-    .stApp {
-        background: var(--bg) !important;
-        background-image:
-            radial-gradient(ellipse 100% 40% at 50% 0%, rgba(243,156,18,.055) 0%, transparent 65%) !important;
-    }
+    {stapp_extra}
 
     /* ── Fonts ── */
-    html, body, [class*="css"] {
+    html, body, [class*="css"] {{
         font-family: 'Inter', sans-serif !important;
-    }
-    h1, h2, h3 {
+        color: var(--t1) !important;
+    }}
+    h1, h2, h3 {{
         font-family: 'Bebas Neue', sans-serif !important;
         letter-spacing: .04em !important;
         color: var(--t1) !important;
-    }
+    }}
+    p, li, span, label, div {{
+        color: var(--t1) !important;
+    }}
 
     /* ── Sidebar ── */
-    [data-testid="stSidebar"] {
-        background: #070910 !important;
-        border-right: 1px solid rgba(243,156,18,.08) !important;
-    }
+    {sidebar_extra}
+    [data-testid="stSidebar"] p,
+    [data-testid="stSidebar"] span,
+    [data-testid="stSidebar"] label,
+    [data-testid="stSidebar"] div {{
+        color: var(--t1) !important;
+    }}
+    [data-testid="stSidebar"] .stMarkdown,
+    [data-testid="stSidebar"] .flowstate-subtitle {{
+        opacity: 1 !important;
+        color: var(--t1) !important;
+    }}
 
     /* ── Tabs ── */
-    [data-testid="stTabs"] [role="tablist"] {
-        background: var(--s1) !important;
+    [data-testid="stTabs"] [role="tablist"] {{
+        background: var(--tab-list-bg) !important;
         border: 1px solid var(--b1) !important;
         border-radius: 14px !important;
         padding: 5px !important;
         gap: 3px !important;
-    }
-    [data-testid="stTabs"] button[role="tab"] {
+    }}
+    [data-testid="stTabs"] button[role="tab"] {{
         border-radius: 10px !important;
         color: var(--t3) !important;
         font-size: 12px !important;
@@ -65,38 +160,39 @@ def apply_styles():
         transition: all .2s !important;
         border: none !important;
         font-family: 'Inter', sans-serif !important;
-    }
-    [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {
-        background: var(--glow) !important;
+    }}
+    [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {{
+        background: var(--tab-selected-bg) !important;
         color: var(--gold) !important;
         border: 1px solid var(--b3) !important;
-    }
-    [data-testid="stTabs"] button[role="tab"] p { color: inherit !important; }
-    button[aria-selected="true"] p { color: var(--gold) !important; }
+    }}
+    [data-testid="stTabs"] button[role="tab"] p {{ color: inherit !important; }}
+    button[aria-selected="true"] p {{ color: var(--gold) !important; }}
 
     /* ── Text inputs ── */
-    div[data-baseweb="input"] {
-        background: var(--s2) !important;
+    div[data-baseweb="input"] {{
+        background: var(--input-bg) !important;
         border: 1px solid var(--b2) !important;
         border-radius: 10px !important;
-    }
-    div[data-baseweb="input"]:focus-within {
+    }}
+    div[data-baseweb="input"]:focus-within {{
         border-color: rgba(243,156,18,.35) !important;
         box-shadow: 0 0 0 3px rgba(243,156,18,.08) !important;
-    }
-    input {
+    }}
+    input {{
         color: var(--gold) !important;
         -webkit-text-fill-color: var(--gold) !important;
         font-family: 'JetBrains Mono', monospace !important;
         font-size: 13px !important;
-    }
-    input::placeholder {
+        background: transparent !important;
+    }}
+    input::placeholder {{
         color: var(--t3) !important;
         -webkit-text-fill-color: var(--t3) !important;
-    }
+    }}
 
     /* ── Buttons ── */
-    button[kind="secondaryFormSubmit"], .stButton > button {
+    button[kind="secondaryFormSubmit"], .stButton > button {{
         background: var(--gold) !important;
         color: #000 !important;
         border: none !important;
@@ -109,112 +205,132 @@ def apply_styles():
         transition: all .2s !important;
         box-shadow: 0 4px 20px rgba(243,156,18,.2) !important;
         font-family: 'Inter', sans-serif !important;
-    }
-    button[kind="secondaryFormSubmit"] p, .stButton > button p {
+    }}
+    button[kind="secondaryFormSubmit"] p, .stButton > button p {{
         color: #000 !important; font-weight: 600 !important;
-    }
-    button[kind="secondaryFormSubmit"]:hover, .stButton > button:hover {
+    }}
+    button[kind="secondaryFormSubmit"]:hover, .stButton > button:hover {{
         background: #FFB020 !important;
         box-shadow: 0 6px 28px rgba(243,156,18,.35) !important;
         transform: translateY(-1px) !important;
-    }
+    }}
 
     /* ── Sliders ── */
-    .stSlider [data-baseweb="slider"] > div > div {
+    .stSlider [data-baseweb="slider"] > div > div {{
         background: linear-gradient(90deg, var(--dim), var(--gold)) !important;
         height: 3px !important;
-    }
-    .stSlider [data-baseweb="slider"] [role="slider"] {
+    }}
+    .stSlider [data-baseweb="slider"] [role="slider"] {{
         background: var(--gold) !important;
-        border: 2px solid #000 !important;
+        border: 2px solid var(--bg) !important;
         box-shadow: 0 0 0 3px rgba(243,156,18,.25) !important;
         width: 15px !important; height: 15px !important;
-    }
-    [data-testid="stSliderTickBar"] { display: none !important; }
-    [data-testid="stWidgetLabel"] p {
+    }}
+    [data-testid="stSliderTickBar"] {{ display: none !important; }}
+    [data-testid="stWidgetLabel"] p {{
         font-size: 10px !important;
         letter-spacing: .1em !important;
         text-transform: uppercase !important;
         color: var(--t3) !important;
         font-family: 'JetBrains Mono', monospace !important;
-    }
+    }}
 
     /* ── Toggle ── */
-    [data-testid="stToggle"] [data-checked="true"] { background: var(--gold) !important; }
+    [data-testid="stToggle"] [data-checked="true"] {{ background: var(--gold) !important; }}
 
     /* ── Selectbox ── */
-    [data-testid="stSelectbox"] > div > div {
+    [data-testid="stSelectbox"] > div > div {{
         background: var(--s2) !important;
         border: 1px solid var(--b2) !important;
         border-radius: 10px !important;
         color: var(--t1) !important;
         font-size: 13px !important;
-    }
+    }}
+    [data-testid="stSelectbox"] span {{
+        color: var(--t1) !important;
+    }}
 
     /* ── Radio ── */
-    [data-testid="stRadio"] label {
+    [data-testid="stRadio"] label {{
         background: var(--s2) !important;
         border: 1px solid var(--b1) !important;
         border-radius: 10px !important;
         padding: 7px 16px !important;
         cursor: pointer !important;
         transition: all .15s !important;
-    }
-    [data-testid="stRadio"] label:has(input:checked) {
+    }}
+    [data-testid="stRadio"] label:has(input:checked) {{
         border-color: rgba(243,156,18,.3) !important;
         background: var(--glow) !important;
-    }
-    [data-testid="stRadio"] label span { color: var(--t1) !important; font-size: 12px !important; }
+    }}
+    [data-testid="stRadio"] label span {{ color: var(--t1) !important; font-size: 12px !important; }}
 
     /* ── Alerts ── */
-    [data-testid="stAlert"] {
-        background: var(--s2) !important;
-        border-radius: 10px !important;
-        border: 1px solid var(--b1) !important;
-        font-size: 12px !important;
-    }
+    {alert_extra}
 
     /* ── Metrics ── */
-    [data-testid="stMetric"] {
-        background: var(--s1) !important;
-        border: 1px solid var(--b1) !important;
+    [data-testid="stMetric"] {{
+        background: var(--metric-bg) !important;
+        border: 1px solid var(--metric-border) !important;
         border-radius: 14px !important;
         padding: 16px !important;
-    }
-    [data-testid="stMetricValue"] {
+    }}
+    [data-testid="stMetricValue"] {{
         color: var(--t1) !important;
         font-family: 'Bebas Neue', sans-serif !important;
         font-size: 28px !important;
         letter-spacing: .04em !important;
-    }
-    [data-testid="stMetricLabel"] p {
+    }}
+    [data-testid="stMetricLabel"] p {{
         font-size: 9px !important; letter-spacing: .14em !important;
         text-transform: uppercase !important; color: var(--t3) !important;
-    }
+    }}
 
     /* ── Layout ── */
-    .main .block-container { padding-top: 1.5rem !important; max-width: 1440px !important; }
-    hr { border: none !important; height: 1px !important;
-         background: linear-gradient(90deg,transparent,var(--b2),transparent) !important; }
-    div[data-testid="stHtml"] { margin-bottom: -30px !important; }
+    .main .block-container {{ padding-top: 1.5rem !important; max-width: 1440px !important; }}
+    hr {{ border: none !important; height: 1px !important;
+         background: linear-gradient(90deg,transparent,var(--hr-color),transparent) !important; }}
+    div[data-testid="stHtml"] {{ margin-bottom: -30px !important; }}
+
+    /* ── Plotly chart background ── */
+    .js-plotly-plot .plotly .bg {{
+        fill: transparent !important;
+    }}
 
     /* ── Scrollbar ── */
-    ::-webkit-scrollbar { width: 3px; }
-    ::-webkit-scrollbar-track { background: var(--bg); }
-    ::-webkit-scrollbar-thumb { background: var(--b2); border-radius: 2px; }
+    ::-webkit-scrollbar {{ width: 3px; }}
+    ::-webkit-scrollbar-track {{ background: var(--bg); }}
+    ::-webkit-scrollbar-thumb {{ background: var(--scrollbar-thumb); border-radius: 2px; }}
 
     /* ── Date input ── */
-    [data-testid="stDateInput"] > div {
+    [data-testid="stDateInput"] > div {{
         background: var(--s2) !important; border: 1px solid var(--b2) !important;
         border-radius: 10px !important;
-    }
+    }}
+    [data-testid="stDateInput"] input {{
+        color: var(--t1) !important;
+        -webkit-text-fill-color: var(--t1) !important;
+    }}
 
-    @media (max-width: 768px) {
-        iframe { height: 450px !important; }
-        .main .block-container { padding-bottom: 1rem !important; }
-    }
+    /* ── Theme toggle button strip ── */
+    .theme-strip {{
+        display: flex;
+        gap: 6px;
+        margin-bottom: 18px;
+    }}
+    .stMarkdown a {{ color: var(--gold) !important; }}
+
+    @media (max-width: 768px) {{
+        iframe {{ height: 450px !important; }}
+        .main .block-container {{ padding-bottom: 1rem !important; }}
+    }}
     </style>
     """, unsafe_allow_html=True)
+
+    # Store for use in info-card inline styles
+    st.session_state["_plot_bg"]   = plot_bg
+    st.session_state["_plot_grid"] = plot_grid
+    st.session_state["_plot_font"] = plot_font
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -445,9 +561,6 @@ def render_3d_shadow_component(lat, lon, radius_meters, path_data, animate_trigg
     } for p in path_data])
     iso_list = json.dumps([p.get("iso", sim_time.isoformat()) for p in path_data])
 
-    # Build the sun-path polyline coords for OSM Buildings GeoJSON
-    # This traces the actual geographic positions the sun marker follows —
-    # rendered as a glowing line ON the map surface (not around the sun).
     sun_path_coords = json.dumps([
         [p["lon"], p["lat"]]
         for p in path_data if p["el"] >= 0
@@ -465,7 +578,6 @@ def render_3d_shadow_component(lat, lon, radius_meters, path_data, animate_trigg
     mel = round(m_el, 2)
     maz = round(m_az, 1)
 
-    # Observer disc GeoJSON
     steps, rd = 20, 0.000035
     ring = []
     for i in range(steps + 1):
@@ -479,7 +591,6 @@ def render_3d_shadow_component(lat, lon, radius_meters, path_data, animate_trigg
                       "geometry": {"type": "Polygon", "coordinates": [ring]}}]
     })
 
-    # Sun path line as GeoJSON — rendered as a flat line ON the 3D map surface
     sun_path_gj = json.dumps({
         "type": "FeatureCollection",
         "features": [{
@@ -489,7 +600,6 @@ def render_3d_shadow_component(lat, lon, radius_meters, path_data, animate_trigg
         }]
     })
 
-    # Clamp saved values to safe ranges
     init_rot  = float(init_rot)  % 360
     init_tilt = max(0.0, min(70.0, float(init_tilt)))
 
@@ -505,6 +615,8 @@ html,body{{background:#0A0C10;overflow:hidden;}}
 #sun{{font-size:36px;line-height:1;pointer-events:none;position:absolute;
       transform:translate(-50%,-50%);display:none;
       filter:drop-shadow(0 0 18px rgba(255,200,0,.95));}}
+#arc-svg{{position:absolute;top:0;left:0;width:100%;height:100%;
+          pointer-events:none;z-index:18;overflow:visible;}}
 #coord{{position:absolute;bottom:46px;left:50%;transform:translateX(-50%);
         z-index:29;background:rgba(7,9,16,.96);
         border:1px solid rgba(243,156,18,.3);border-radius:10px;
@@ -567,6 +679,7 @@ html,body{{background:#0A0C10;overflow:hidden;}}
     </svg>
   </div>
 
+  <svg id="arc-svg"></svg>
   <div id="sun">☀️</div>
   <div id="coord">📍 &nbsp;<span id="ctxt"></span></div>
 </div>
@@ -580,7 +693,6 @@ const TILES = {{
 }};
 let curT = 's', tL = null;
 
-// ── Restore camera from Python-persisted state ────────────────────────────
 let curRot  = {init_rot:.1f};
 let curTilt = {init_tilt:.1f};
 
@@ -597,15 +709,9 @@ map.setDate(new Date('{sim_iso}'));
 tL = map.addMapTiles(TILES.s);
 map.addGeoJSONTiles('https://{{s}}.data.osmbuildings.org/0.2/59fcc2e8/tile/{{z}}/{{x}}/{{y}}.json');
 
-// Observer disc
 map.addGeoJSON({obs_gj}, {{color:'#F39C12'}});
-
-// ── Sun path trail on the map surface ────────────────────────────────────
-// This is the actual geographic arc the sun icon travels — rendered
-// as a glowing gold line lying flat on the 3D scene.
 map.addGeoJSON({sun_path_gj}, {{color:'#F39C12'}});
 
-// Pre-drop orange observer marker (tall pin so it stands out)
 (function(){{
   const rd=0.000022, steps=16, ring=[];
   for(let i=0;i<=steps;i++){{
@@ -641,11 +747,6 @@ const coord = document.getElementById('coord');
 const ctxt  = document.getElementById('ctxt');
 let curEl = {mel}, curAz = {maz}, pinLayer = null;
 
-// ── Broadcast camera state to parent so Python can persist it ─────────────
-// We use localStorage as a reliable cross-frame bridge because
-// postMessage→query_params requires a rerun to be read, losing the value.
-// Instead we write to localStorage and read it back via st.query_params
-// on the NEXT natural rerun triggered by any user interaction.
 function saveCam() {{
   try {{
     const url = new URL(window.parent.location.href);
@@ -659,17 +760,20 @@ function aR(d) {{
   curRot = (curRot + d + 360) % 360;
   map.setRotation(curRot);
   document.getElementById('cmp').style.transform = 'rotate('+curRot+'deg)';
+  drawArc();
   saveCam();
 }}
 function aT(d) {{
   curTilt = Math.max(0, Math.min(70, curTilt + d));
   map.setTilt(curTilt);
+  drawArc();
   saveCam();
 }}
 function rst() {{
   curRot=0; curTilt=45;
   map.setRotation(0); map.setTilt(45);
   document.getElementById('cmp').style.transform = 'rotate(0deg)';
+  drawArc();
   saveCam();
 }}
 
@@ -677,21 +781,123 @@ map.on('rotate', () => {{
   try {{
     curRot = ((map.getRotation()%360)+360)%360;
     document.getElementById('cmp').style.transform = 'rotate('+curRot+'deg)';
+    drawArc();
     saveCam();
   }} catch(e) {{}}
 }});
 
-function moveSun(az, el) {{
-  if(HIDE_SUN || el < -5) {{ sunEl.style.display='none'; return; }}
-  const W = document.getElementById('map').clientWidth  || 600;
+// ── Arc SVG overlay ──────────────────────────────────────────────────────
+const arcSvg = document.getElementById('arc-svg');
+
+// Pre-compute arc points from allPts (az + el, same projection as moveSun)
+function projectToScreen(az, el) {{
+  const W = document.getElementById('map').clientWidth  || 800;
   const H = document.getElementById('map').clientHeight || 600;
   const f  = Math.max(0, el) / 90;
   const rx = W * .40 * (1 - f * .88);
   const ry = H * .36 * (1 - f * .88);
   const ar = (az - curRot) * D2R;
+  return [W/2 + rx*Math.sin(ar), H/2 - ry*Math.cos(ar)*0.55];
+}}
+
+function drawArc() {{
+  const W = document.getElementById('map').clientWidth  || 800;
+  const H = document.getElementById('map').clientHeight || 600;
+  arcSvg.setAttribute('viewBox', '0 0 '+W+' '+H);
+
+  // Clear previous
+  while (arcSvg.firstChild) arcSvg.removeChild(arcSvg.firstChild);
+
+  // Filter to above-horizon points only
+  const abovePts = allPts.filter(p => p.el >= 0);
+  if (abovePts.length < 2) return;
+
+  // Build screen points
+  const screenPts = abovePts.map(p => projectToScreen(p.az, p.el));
+
+  // ── Glow / halo layer (wider, very transparent) ──────────────────────
+  const glow = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+  glow.setAttribute('points', screenPts.map(p => p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '));
+  glow.setAttribute('fill', 'none');
+  glow.setAttribute('stroke', 'rgba(255,180,0,0.18)');
+  glow.setAttribute('stroke-width', '14');
+  glow.setAttribute('stroke-linecap', 'round');
+  glow.setAttribute('stroke-linejoin', 'round');
+  arcSvg.appendChild(glow);
+
+  // ── Soft inner glow ──────────────────────────────────────────────────
+  const glow2 = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+  glow2.setAttribute('points', screenPts.map(p => p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '));
+  glow2.setAttribute('fill', 'none');
+  glow2.setAttribute('stroke', 'rgba(255,200,80,0.28)');
+  glow2.setAttribute('stroke-width', '6');
+  glow2.setAttribute('stroke-linecap', 'round');
+  glow2.setAttribute('stroke-linejoin', 'round');
+  arcSvg.appendChild(glow2);
+
+  // ── Dotted orange arc ────────────────────────────────────────────────
+  const arc = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
+  arc.setAttribute('points', screenPts.map(p => p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '));
+  arc.setAttribute('fill', 'none');
+  arc.setAttribute('stroke', '#F39C12');
+  arc.setAttribute('stroke-width', '2.5');
+  arc.setAttribute('stroke-linecap', 'round');
+  arc.setAttribute('stroke-linejoin', 'round');
+  arc.setAttribute('stroke-dasharray', '6 9');
+  arc.setAttribute('opacity', '0.92');
+  arcSvg.appendChild(arc);
+
+  // ── Dot markers at each point (every 3rd) ────────────────────────────
+  abovePts.forEach((p, i) => {{
+    if (i % 3 !== 0) return;
+    const [sx, sy] = projectToScreen(p.az, p.el);
+    const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    dot.setAttribute('cx', sx.toFixed(1));
+    dot.setAttribute('cy', sy.toFixed(1));
+    dot.setAttribute('r', '2.8');
+    dot.setAttribute('fill', '#FFD06D');
+    dot.setAttribute('opacity', '0.85');
+    arcSvg.appendChild(dot);
+  }});
+
+  // ── Sunrise / Sunset endpoint labels ────────────────────────────────
+  const labels = [
+    {{ pt: screenPts[0],                 txt: '🌅 Rise', anchor: 'end'   }},
+    {{ pt: screenPts[screenPts.length-1], txt: 'Set 🌇',  anchor: 'start' }},
+  ];
+  labels.forEach(lbl => {{
+    const [lx, ly] = lbl.pt;
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', lx.toFixed(1));
+    circle.setAttribute('cy', ly.toFixed(1));
+    circle.setAttribute('r', '4.5');
+    circle.setAttribute('fill', '#F39C12');
+    circle.setAttribute('opacity', '0.95');
+    arcSvg.appendChild(circle);
+
+    const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    t.setAttribute('x', (lx + (lbl.anchor === 'end' ? -10 : 10)).toFixed(1));
+    t.setAttribute('y', (ly - 8).toFixed(1));
+    t.setAttribute('fill', '#FFD06D');
+    t.setAttribute('font-size', '10');
+    t.setAttribute('font-family', 'JetBrains Mono, monospace');
+    t.setAttribute('font-weight', '600');
+    t.setAttribute('text-anchor', lbl.anchor);
+    t.setAttribute('opacity', '0.9');
+    t.textContent = lbl.txt;
+    arcSvg.appendChild(t);
+  }});
+}}
+
+// Initial draw
+drawArc();
+
+function moveSun(az, el) {{
+  if(HIDE_SUN || el < -5) {{ sunEl.style.display='none'; return; }}
+  const [sx, sy] = projectToScreen(az, el);
   sunEl.style.display = 'block';
-  sunEl.style.left = (W/2 + rx*Math.sin(ar)) + 'px';
-  sunEl.style.top  = (H/2 - ry*Math.cos(ar)*0.55) + 'px';
+  sunEl.style.left = sx + 'px';
+  sunEl.style.top  = sy + 'px';
 }}
 
 function updateView(p) {{
@@ -715,9 +921,8 @@ if(anim) {{
   setInterval(() => {{ updateView(allPts[i]); i=(i+1)%allPts.length; }}, 200);
 }}
 
-map.on('change', () => {{ moveSun(curAz, curEl); }});
+map.on('change', () => {{ moveSun(curAz, curEl); drawArc(); }});
 
-// ── Location-select (Tab 1 only) ─────────────────────────────────────────
 function makePinGeoJSON(plat, plon) {{
   const rd=0.000022, steps=16, ring=[];
   for(let i=0;i<=steps;i++){{
@@ -773,9 +978,6 @@ if(SEL) {{
 
     components.html(html, height=660)
 
-    # ── Read cam_rot / cam_tilt written into URL params by the JS above ──────
-    # These are set synchronously via history.replaceState so they are
-    # available in the SAME query_params dict on the very next Streamlit rerun.
     qp = st.query_params
     changed = False
     try:
@@ -791,7 +993,7 @@ if(SEL) {{
                 changed = True
     except (ValueError, TypeError):
         pass
-    # Do NOT rerun here — we just stash the value for the next natural rerun.
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 def render_3d_map_component(lat, lon, radius_meters, path_data, animate_trigger,
@@ -815,7 +1017,6 @@ def render_3d_map_component(lat, lon, radius_meters, path_data, animate_trigger,
     cd  = int(R * 2.2)
     ch  = int(R * 1.3)
 
-    # Restore camera: map OSM rotation (0-360 CW from N) → Three.js theta
     import math as _m
     init_theta = _m.pi / 4 - _m.radians(float(init_rot))
     init_phi   = max(0.15, min(_m.pi / 2.1, _m.radians(90.0 - float(init_tilt))))
@@ -858,7 +1059,6 @@ const dl=new THREE.DirectionalLight(0xffd580,1.8);
 dl.position.set(300,600,300); dl.castShadow=true; scene.add(dl);
 const R={R};
 
-// Ground disc
 scene.add(new THREE.Mesh(
   new THREE.CylinderGeometry(R,R,3,80),
   new THREE.MeshLambertMaterial({{color:0x0D1118}})));
@@ -872,7 +1072,6 @@ const lm=new THREE.LineBasicMaterial({{color:0x1A2535}});
       new THREE.Vector3(a[0],1,a[1]),
       new THREE.Vector3(b[0],1,b[1])]),lm)));
 
-// Observer pillar
 const pil=new THREE.Mesh(
   new THREE.CylinderGeometry(5.5,5.5,18,16),
   new THREE.MeshLambertMaterial({{color:0xF39C12}}));
@@ -880,7 +1079,6 @@ pil.position.y=9; scene.add(pil);
 scene.add(new THREE.Mesh(new THREE.TorusGeometry(11,2,8,32),
   new THREE.MeshBasicMaterial({{color:0xF39C12,transparent:true,opacity:.35}})));
 
-// Compass labels
 function spr(txt,col){{
   const cv2=document.createElement('canvas'); cv2.width=128; cv2.height=64;
   const c2=cv2.getContext('2d');
@@ -896,7 +1094,6 @@ const ld=R+52;
   const s=spr(t,c); s.position.set(x,8,z); scene.add(s);
 }});
 
-// Sun arc tube
 const pd={pts_js};
 const ap=pd.filter(p=>p.el>=0).map(p=>new THREE.Vector3(p.x,p.y,p.z));
 if(ap.length>1){{
@@ -906,7 +1103,6 @@ if(ap.length>1){{
     new THREE.MeshBasicMaterial({{color:0xF39C12,transparent:true,opacity:.82}})));
 }}
 
-// Coloured dots along arc
 pd.filter(p=>p.el>=0).forEach((p,i)=>{{
   if(i%4!==0) return;
   const col=new THREE.Color().setHSL(.09-(i/pd.length)*.04,1,.55);
@@ -915,7 +1111,6 @@ pd.filter(p=>p.el>=0).forEach((p,i)=>{{
   d.position.set(p.x,p.y,p.z); scene.add(d);
 }});
 
-// Vertical drop lines from arc to ground
 pd.filter(p=>p.el>=0).forEach((p,i)=>{{
   if(i%7!==0) return;
   const g=new THREE.BufferGeometry().setFromPoints([
@@ -924,7 +1119,6 @@ pd.filter(p=>p.el>=0).forEach((p,i)=>{{
     new THREE.LineBasicMaterial({{color:0x2D1B00,transparent:true,opacity:.35}})));
 }});
 
-// ── Sun: large emoji sprite (no halo ring) ────────────────────────────────
 const sunCanvas=document.createElement('canvas');
 sunCanvas.width=128; sunCanvas.height=128;
 const sunCtx=sunCanvas.getContext('2d');
@@ -937,7 +1131,6 @@ const sm=new THREE.Sprite(new THREE.SpriteMaterial(
 sm.scale.set(60,60,1);
 scene.add(sm);
 
-// Shadow line from observer to ground-projected sun position
 const sg=[new THREE.Vector3(0,0,0),new THREE.Vector3(0,0,0)];
 const sgeo=new THREE.BufferGeometry().setFromPoints(sg);
 scene.add(new THREE.Line(sgeo,
@@ -965,7 +1158,6 @@ if({'true' if animate_trigger else 'false'}){{
   }},160);
 }}
 
-// ── Camera — restore from persisted state ─────────────────────────────────
 let drag=false, prev={{x:0,y:0}};
 let th={init_theta:.4f};
 let ph={init_phi:.4f};
