@@ -18,8 +18,24 @@ visuals.apply_styles()
 
 # ── GPS / SESSION STATE INIT ──────────────────────────────────────────────────
 if 'coords' not in st.session_state:
-    st.session_state.coords      = [0.0, 0.0]
-    st.session_state.gps_requested = False
+    st.session_state.coords         = [0.0, 0.0]
+    st.session_state.gps_requested  = False
+
+# Camera persistence — read URL query params FIRST, before any widget renders.
+# history.replaceState (called inside the iframe JS) writes these synchronously,
+# so they are available in st.query_params on the very next Streamlit rerun.
+_qp = st.query_params
+if "cam_rot"  in _qp:
+    try:    st.session_state["cam3d_rot"]  = float(_qp["cam_rot"])
+    except: pass
+if "cam_tilt" in _qp:
+    try:    st.session_state["cam3d_tilt"] = float(_qp["cam_tilt"])
+    except: pass
+
+# Initialise camera state defaults only if not yet set
+if "cam3d_rot"  not in st.session_state: st.session_state["cam3d_rot"]  = 0.0
+if "cam3d_tilt" not in st.session_state: st.session_state["cam3d_tilt"] = 45.0
+if "cam3d_zoom" not in st.session_state: st.session_state["cam3d_zoom"] = 1.3
 
 if not st.session_state.gps_requested:
     loc = get_geolocation()
@@ -44,15 +60,12 @@ city_info = LocationInfo(timezone=tz_name, latitude=lat, longitude=lon)
 with st.sidebar:
     st.markdown("""
         <style>
-        /* 1. Force the Sidebar container to stop dimming text */
         [data-testid="stSidebar"] .stMarkdown, 
         [data-testid="stSidebar"] .flowstate-subtitle {
             opacity: 1 !important;
             -webkit-text-fill-color: #FFFFFF !important;
             color: #FFFFFF !important;
         }
-
-        /* 2. Re-apply the logo styles with high priority */
         .flowstate-title {
             font-family:'Akira',sans-serif; font-size:80px; font-weight:900; 
             text-align:center; text-transform:uppercase; letter-spacing:15px; line-height:1.1;
@@ -62,14 +75,12 @@ with st.sidebar:
             -webkit-text-fill-color: transparent;
             filter: drop-shadow(0px 0px 20px rgba(243,156,18,0.4));
         }
-
         .flowstate-subtitle {
             font-family:'Poppins',sans-serif; 
             color: #FFFFFF !important; 
             text-align:center;
             font-size:1.2rem; font-weight:300; letter-spacing:4px; text-transform:uppercase;
             margin-top:-20px; margin-bottom:40px;
-            /* Prevents GitHub/Streamlit Cloud from "greying" the text */
             opacity: 1 !important;
             display: block !important;
         }
@@ -191,11 +202,10 @@ tab_info, tab1, tab2, tab_summary = st.tabs([
     "Step 1: 📍 Location Setup",
     "Step 2: 🚀 Live Visualization",
     "🔄 Year Round Summary",
-    
 ])
 
 # ══════════════════════════════════════════════════════════════════════════════
-# TAB 0 — INFO & HELP (STYLIZED)
+# TAB 0 — INFO & HELP
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_info: 
     st.markdown("""
@@ -300,7 +310,6 @@ with tab1:
     display_date = target_date.strftime("%B %d, %Y")
     map_key      = f"map_select_{target_date}_{st.session_state.coords[0]}"
 
-    # ── Map style toggle ──────────────────────────────────────────────────────
     st.markdown("""
     <style>
         .info-card {
@@ -344,15 +353,10 @@ with tab1:
         _m_slat, _m_slon, _m_shlat, _m_shlon, _m_az, _m_el = solarlogic.get_solar_pos(
             city_info, sim_time, radius_meters, lat, lon)
 
-        # Inject a postMessage receiver into the Streamlit parent page.
-        # When the OSM Buildings iframe fires window.parent.postMessage({type:'osm_pin',...}),
-        # this script writes the coords into a hidden input field which we read via
-        # st.query_params on the next rerun.
         st.components.v1.html("""
         <script>
         window.addEventListener('message', function(e) {
             if (!e.data || e.data.type !== 'osm_pin') return;
-            // Write into Streamlit query params so Python can read it
             const url = new URL(window.parent.location.href);
             url.searchParams.set('pin_lat', e.data.lat.toFixed(6));
             url.searchParams.set('pin_lon', e.data.lon.toFixed(6));
@@ -368,17 +372,18 @@ with tab1:
             _m_slat, _m_slon, _m_shlat, _m_shlon, _m_el, _m_az,
             rise_t.strftime("%H:%M"),
             set_t.strftime("%H:%M"),
-            allow_location_select=True
+            allow_location_select=True,
+            init_rot=st.session_state["cam3d_rot"],
+            init_tilt=st.session_state["cam3d_tilt"],
+            init_zoom=st.session_state["cam3d_zoom"],
         )
 
-        # Read pin from query params (set by JS above on previous click)
         qp = st.query_params
         if "pin_lat" in qp and "pin_lon" in qp:
             try:
                 new_pin = [float(qp["pin_lat"]), float(qp["pin_lon"])]
                 if new_pin != st.session_state.coords:
                     st.session_state.coords = new_pin
-                    # Clear the query params so we don't re-apply on next render
                     st.query_params.clear()
                     st.rerun()
             except (ValueError, TypeError):
@@ -387,7 +392,6 @@ with tab1:
         st.info("View your location on the 3d map.")
 
     else:
-        # ── 2D Folium map ─────────────────────────────────────────────────────
         m = folium.Map(location=st.session_state.coords, zoom_start=17, tiles=None)
         folium.TileLayer(
             'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -451,13 +455,21 @@ with tab2:
         visuals.render_3d_map_component(
             lat, lon, radius_meters, path_data, animate_trigger, sim_time,
             m_slat, m_slon, m_el,
-            rise_t.strftime("%H:%M"), set_t.strftime("%H:%M"))
+            rise_t.strftime("%H:%M"), set_t.strftime("%H:%M"),
+            init_rot=st.session_state["cam3d_rot"],
+            init_tilt=st.session_state["cam3d_tilt"],
+            init_zoom=st.session_state["cam3d_zoom"],
+        )
 
     elif view_mode == "🛰️ 3D Shadow":
         visuals.render_3d_shadow_component(
             lat, lon, radius_meters, path_data, animate_trigger, sim_time,
             m_slat, m_slon, m_shlat, m_shlon, m_el, m_az,
-            rise_t.strftime("%H:%M"), set_t.strftime("%H:%M"))
+            rise_t.strftime("%H:%M"), set_t.strftime("%H:%M"),
+            init_rot=st.session_state["cam3d_rot"],
+            init_tilt=st.session_state["cam3d_tilt"],
+            init_zoom=st.session_state["cam3d_zoom"],
+        )
 
     else:
         visuals.render_map_component(
