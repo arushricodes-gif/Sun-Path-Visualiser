@@ -431,38 +431,67 @@ def render_seasonal_map(lat, lon, radius, seasonal_paths):
 # ─────────────────────────────────────────────────────────────────────────────
 def render_3d_shadow_component(lat, lon, radius_meters, path_data, animate_trigger,
                                sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el,
-                               m_az, rise_time, set_time, allow_location_select=False):
+                               m_az, rise_time, set_time, allow_location_select=False,
+                               init_rot=0, init_tilt=45, init_zoom=1.3):
     import json, math as _m
 
-    all_pts  = json.dumps([{"lon":p["lon"],"lat":p["lat"],"shlat":p["shlat"],
-                             "shlon":p["shlon"],"el":round(p["el"],2),
-                             "az":round(p.get("az",0),2),"time":p["time"],
-                             "iso":p.get("iso","")} for p in path_data])
+    all_pts = json.dumps([{
+        "lon":  p["lon"],  "lat":  p["lat"],
+        "shlat":p["shlat"],"shlon":p["shlon"],
+        "el":   round(p["el"], 2),
+        "az":   round(p.get("az", 0), 2),
+        "time": p["time"],
+        "iso":  p.get("iso", "")
+    } for p in path_data])
     iso_list = json.dumps([p.get("iso", sim_time.isoformat()) for p in path_data])
 
+    # Build the sun-path polyline coords for OSM Buildings GeoJSON
+    # This traces the actual geographic positions the sun marker follows —
+    # rendered as a glowing line ON the map surface (not around the sun).
+    sun_path_coords = json.dumps([
+        [p["lon"], p["lat"]]
+        for p in path_data if p["el"] >= 0
+    ])
+
     cur_time = sim_time.strftime("%H:%M")
+    cur_date = sim_time.strftime("%b %d, %Y")
     sim_iso  = sim_time.isoformat()
+
     sel_js      = "true" if allow_location_select else "false"
     hide_sun_js = "true" if allow_location_select else "false"
-    hint_txt = ("Drag · Scroll zoom · ↔ rotate"
-                if allow_location_select else
-                "🖱 Drag · Scroll zoom · ↔ rotate · ▲▼ tilt")
-    mel  = round(m_el, 2)
-    maz  = round(m_az, 1)
+    hint_txt    = ("Drag · Scroll zoom · ↔ rotate"
+                   if allow_location_select else
+                   "🖱 Drag · Scroll zoom · ↔ rotate · ▲▼ tilt")
+    mel = round(m_el, 2)
+    maz = round(m_az, 1)
 
-    # Observer disc in 3D scene
+    # Observer disc GeoJSON
     steps, rd = 20, 0.000035
     ring = []
-    for i in range(steps+1):
-        a = 2*_m.pi*i/steps
-        ring.append([lon + rd*_m.cos(a)/_m.cos(_m.radians(lat)),
-                     lat + rd*_m.sin(a)])
+    for i in range(steps + 1):
+        a = 2 * _m.pi * i / steps
+        ring.append([lon + rd * _m.cos(a) / _m.cos(_m.radians(lat)),
+                     lat + rd * _m.sin(a)])
     obs_gj = json.dumps({
-        "type":"FeatureCollection",
-        "features":[{"type":"Feature",
-                     "properties":{"color":"#F39C12","height":0.6,"minHeight":0},
-                     "geometry":{"type":"Polygon","coordinates":[ring]}}]
+        "type": "FeatureCollection",
+        "features": [{"type": "Feature",
+                      "properties": {"color": "#F39C12", "height": 0.6, "minHeight": 0},
+                      "geometry": {"type": "Polygon", "coordinates": [ring]}}]
     })
+
+    # Sun path line as GeoJSON — rendered as a flat line ON the 3D map surface
+    sun_path_gj = json.dumps({
+        "type": "FeatureCollection",
+        "features": [{
+            "type": "Feature",
+            "properties": {"color": "#F39C12", "height": 1.5, "minHeight": 0},
+            "geometry": {"type": "LineString", "coordinates": json.loads(sun_path_coords)}
+        }]
+    })
+
+    # Clamp saved values to safe ranges
+    init_rot  = float(init_rot)  % 360
+    init_tilt = max(0.0, min(70.0, float(init_tilt)))
 
     html = f"""<!DOCTYPE html><html><head><meta charset="utf-8"/>
 {_MAP_FONTS}
@@ -473,12 +502,9 @@ def render_3d_shadow_component(lat, lon, radius_meters, path_data, animate_trigg
 html,body{{background:#0A0C10;overflow:hidden;}}
 #map{{width:100%;height:600px;}}
 {_HUD_CSS}
-/* sun emoji */
-#sun{{font-size:24px;line-height:1;pointer-events:none;position:absolute;
+#sun{{font-size:36px;line-height:1;pointer-events:none;position:absolute;
       transform:translate(-50%,-50%);display:none;
-      filter:drop-shadow(0 0 12px rgba(255,200,0,.95));}}
-
-/* coord */
+      filter:drop-shadow(0 0 18px rgba(255,200,0,.95));}}
 #coord{{position:absolute;bottom:46px;left:50%;transform:translateX(-50%);
         z-index:29;background:rgba(7,9,16,.96);
         border:1px solid rgba(243,156,18,.3);border-radius:10px;
@@ -486,7 +512,6 @@ html,body{{background:#0A0C10;overflow:hidden;}}
         display:none;pointer-events:none;white-space:nowrap;
         font-family:'JetBrains Mono',monospace;letter-spacing:.05em;
         box-shadow:0 4px 24px rgba(243,156,18,.18);}}
-/* ctrl buttons */
 .cb{{background:rgba(7,9,16,.92);border:1px solid rgba(255,255,255,.07);
      color:#6B7280;font-size:13px;font-weight:700;padding:7px 12px;
      border-radius:9px;cursor:pointer;transition:all .15s;
@@ -499,15 +524,14 @@ html,body{{background:#0A0C10;overflow:hidden;}}
 <div style="position:relative;width:100%;height:600px;">
   <div id="map"></div>
 
-  <!-- tile toggle -->
   <div class="tile-row">
     <button class="tile-btn on" id="bs" onclick="setT('s')">🗺 Street</button>
     <button class="tile-btn"   id="bsat" onclick="setT('sat')">🛰 Satellite</button>
   </div>
 
-  <!-- HUD -->
   <div class="hud" style="top:14px;right:14px;min-width:185px;">
     <div class="hud-title">Solar Position</div>
+    📅 Date &nbsp;&nbsp;&nbsp;&nbsp;<b>{cur_date}</b><br>
     🌅 Sunrise &nbsp;<b>{rise_time}</b><br>
     🌇 Sunset &nbsp;&nbsp;<b>{set_time}</b><br>
     ☀️ Elevation <b id="hel">{mel}°</b><br>
@@ -515,11 +539,9 @@ html,body{{background:#0A0C10;overflow:hidden;}}
     🕐 Time &nbsp;&nbsp;&nbsp;&nbsp;<b id="htm">{cur_time}</b>
   </div>
 
-  <!-- time badge -->
   <div class="tbadge">☀️ &nbsp;<span id="stm">{cur_time}</span></div>
   <div class="hint">{hint_txt}</div>
 
-  <!-- rotate/tilt -->
   <div style="position:absolute;bottom:46px;right:14px;z-index:25;
     display:flex;flex-direction:column;gap:5px;align-items:center;">
     <button class="cb" onclick="aT(-10)">▲</button>
@@ -531,7 +553,6 @@ html,body{{background:#0A0C10;overflow:hidden;}}
     <button class="cb" onclick="aT(10)">▼</button>
   </div>
 
-  <!-- compass -->
   <div style="position:absolute;top:110px;right:14px;z-index:25;width:42px;height:42px;
     pointer-events:none;background:rgba(7,9,16,.88);border:1px solid rgba(255,255,255,.07);
     border-radius:50%;display:flex;align-items:center;justify-content:center;">
@@ -551,27 +572,42 @@ html,body{{background:#0A0C10;overflow:hidden;}}
 </div>
 
 <script>
-const D2R=Math.PI/180;
-const HIDE_SUN={hide_sun_js};
-const TILES={{s:'https://tile-a.openstreetmap.fr/hot/{{z}}/{{x}}/{{y}}.png',
-              sat:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}'}};
-let curT='s',tL=null;
+const D2R = Math.PI/180;
+const HIDE_SUN = {hide_sun_js};
+const TILES = {{
+  s:   'https://tile-a.openstreetmap.fr/hot/{{z}}/{{x}}/{{y}}.png',
+  sat: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}'
+}};
+let curT = 's', tL = null;
 
-const map=new OSMBuildings({{container:'map',
-  position:{{latitude:{lat},longitude:{lon}}},
-  zoom:17,minZoom:15,maxZoom:20,tilt:45,rotation:0,effects:['shadows'],
-  attribution:'© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> · © <a href="https://osmbuildings.org/copyright">OSM Buildings</a>'
+// ── Restore camera from Python-persisted state ────────────────────────────
+let curRot  = {init_rot:.1f};
+let curTilt = {init_tilt:.1f};
+
+const map = new OSMBuildings({{
+  container: 'map',
+  position:  {{latitude: {lat}, longitude: {lon}}},
+  zoom: 17, minZoom: 15, maxZoom: 20,
+  tilt:     curTilt,
+  rotation: curRot,
+  effects:  ['shadows'],
+  attribution: '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> · © <a href="https://osmbuildings.org/copyright">OSM Buildings</a>'
 }});
 map.setDate(new Date('{sim_iso}'));
-tL=map.addMapTiles(TILES.s);
+tL = map.addMapTiles(TILES.s);
 map.addGeoJSONTiles('https://{{s}}.data.osmbuildings.org/0.2/59fcc2e8/tile/{{z}}/{{x}}/{{y}}.json');
-map.addGeoJSON({obs_gj},{{color:'#F39C12'}});
 
-// Pre-drop a red pin at the currently selected location so it's
-// visible as soon as the map loads — not just after clicking
+// Observer disc
+map.addGeoJSON({obs_gj}, {{color:'#F39C12'}});
+
+// ── Sun path trail on the map surface ────────────────────────────────────
+// This is the actual geographic arc the sun icon travels — rendered
+// as a glowing gold line lying flat on the 3D scene.
+map.addGeoJSON({sun_path_gj}, {{color:'#F39C12'}});
+
+// Pre-drop orange observer marker (tall pin so it stands out)
 (function(){{
-  const rd=0.000022, steps=16;
-  const ring=[];
+  const rd=0.000022, steps=16, ring=[];
   for(let i=0;i<=steps;i++){{
     const a=2*Math.PI*i/steps;
     const cosLat=Math.cos({lat}*Math.PI/180);
@@ -580,38 +616,110 @@ map.addGeoJSON({obs_gj},{{color:'#F39C12'}});
   map.addGeoJSON({{
     type:"FeatureCollection",
     features:[
-      {{type:"Feature",
-        properties:{{color:"#F39C12",height:22,minHeight:0}},
+      {{type:"Feature",properties:{{color:"#F39C12",height:22,minHeight:0}},
         geometry:{{type:"Polygon",coordinates:[ring]}}}},
-      {{type:"Feature",
-        properties:{{color:"#ffffff",height:24,minHeight:20}},
+      {{type:"Feature",properties:{{color:"#ffffff",height:24,minHeight:20}},
         geometry:{{type:"Polygon",coordinates:[ring]}}}}
     ]
   }},{{color:'#F39C12'}});
 }})();
 
-function setT(m){{
+function setT(m) {{
   if(m===curT) return; curT=m;
   if(tL) map.remove(tL);
   tL=map.addMapTiles(TILES[m]);
-  document.getElementById('bs').className='tile-btn'+(m==='s'?' on':'');
-  document.getElementById('bsat').className='tile-btn'+(m==='sat'?' on':'');
+  document.getElementById('bs').className  = 'tile-btn'+(m==='s'  ?' on':'');
+  document.getElementById('bsat').className= 'tile-btn'+(m==='sat'?' on':'');
 }}
 
-const allPts={all_pts}, isoList={iso_list};
-allPts.forEach((p,i)=>p.iso=isoList[i]||'');
+const allPts  = {all_pts};
+const isoList = {iso_list};
+allPts.forEach((p,i) => p.iso = isoList[i] || '');
 
-const sunEl=document.getElementById('sun');
-const coord=document.getElementById('coord');
-const ctxt=document.getElementById('ctxt');
+const sunEl = document.getElementById('sun');
+const coord = document.getElementById('coord');
+const ctxt  = document.getElementById('ctxt');
+let curEl = {mel}, curAz = {maz}, pinLayer = null;
 
-let curRot=0,curTilt=45,curEl={mel},curAz={maz},pinGeo=null;
-let pinLayer=null;  // GeoJSON pin rendered IN the 3D scene
+// ── Broadcast camera state to parent so Python can persist it ─────────────
+// We use localStorage as a reliable cross-frame bridge because
+// postMessage→query_params requires a rerun to be read, losing the value.
+// Instead we write to localStorage and read it back via st.query_params
+// on the NEXT natural rerun triggered by any user interaction.
+function saveCam() {{
+  try {{
+    const url = new URL(window.parent.location.href);
+    url.searchParams.set('cam_rot',  curRot.toFixed(1));
+    url.searchParams.set('cam_tilt', curTilt.toFixed(1));
+    window.parent.history.replaceState({{}}, '', url.toString());
+  }} catch(e) {{}}
+}}
 
-// Build a pin GeoJSON disc — rendered IN the 3D scene, sticks to ground
+function aR(d) {{
+  curRot = (curRot + d + 360) % 360;
+  map.setRotation(curRot);
+  document.getElementById('cmp').style.transform = 'rotate('+curRot+'deg)';
+  saveCam();
+}}
+function aT(d) {{
+  curTilt = Math.max(0, Math.min(70, curTilt + d));
+  map.setTilt(curTilt);
+  saveCam();
+}}
+function rst() {{
+  curRot=0; curTilt=45;
+  map.setRotation(0); map.setTilt(45);
+  document.getElementById('cmp').style.transform = 'rotate(0deg)';
+  saveCam();
+}}
+
+map.on('rotate', () => {{
+  try {{
+    curRot = ((map.getRotation()%360)+360)%360;
+    document.getElementById('cmp').style.transform = 'rotate('+curRot+'deg)';
+    saveCam();
+  }} catch(e) {{}}
+}});
+
+function moveSun(az, el) {{
+  if(HIDE_SUN || el < -5) {{ sunEl.style.display='none'; return; }}
+  const W = document.getElementById('map').clientWidth  || 600;
+  const H = document.getElementById('map').clientHeight || 600;
+  const f  = Math.max(0, el) / 90;
+  const rx = W * .40 * (1 - f * .88);
+  const ry = H * .36 * (1 - f * .88);
+  const ar = (az - curRot) * D2R;
+  sunEl.style.display = 'block';
+  sunEl.style.left = (W/2 + rx*Math.sin(ar)) + 'px';
+  sunEl.style.top  = (H/2 - ry*Math.cos(ar)*0.55) + 'px';
+}}
+
+function updateView(p) {{
+  if(p.iso) map.setDate(new Date(p.iso));
+  curEl = p.el; curAz = p.az;
+  moveSun(p.az, p.el);
+  document.getElementById('hel').textContent = p.el.toFixed(1)+'°';
+  document.getElementById('haz').textContent = p.az.toFixed(1)+'°';
+  document.getElementById('htm').textContent = p.time;
+  document.getElementById('stm').textContent = p.time;
+}}
+
+updateView({{
+  lon:{m_slon}, lat:{m_slat}, shlat:{m_shlat}, shlon:{m_shlon},
+  el:{mel}, az:{maz}, time:'{cur_time}', iso:'{sim_iso}'
+}});
+
+const anim = {'true' if animate_trigger else 'false'};
+if(anim) {{
+  let i=0;
+  setInterval(() => {{ updateView(allPts[i]); i=(i+1)%allPts.length; }}, 200);
+}}
+
+map.on('change', () => {{ moveSun(curAz, curEl); }});
+
+// ── Location-select (Tab 1 only) ─────────────────────────────────────────
 function makePinGeoJSON(plat, plon) {{
-  const rd=0.000022, steps=16;
-  const ring=[];
+  const rd=0.000022, steps=16, ring=[];
   for(let i=0;i<=steps;i++){{
     const a=2*Math.PI*i/steps;
     const cosLat=Math.cos(plat*Math.PI/180);
@@ -620,109 +728,75 @@ function makePinGeoJSON(plat, plon) {{
   return {{
     type:"FeatureCollection",
     features:[
-      // Tall red spike so it's visible
-      {{type:"Feature",
-        properties:{{color:"#F39C12",height:22,minHeight:0}},
+      {{type:"Feature",properties:{{color:"#E74C3C",height:22,minHeight:0}},
         geometry:{{type:"Polygon",coordinates:[ring]}}}},
-      {{type:"Feature",
-        properties:{{color:"#ffffff",height:24,minHeight:20}},
+      {{type:"Feature",properties:{{color:"#ffffff",height:24,minHeight:20}},
         geometry:{{type:"Polygon",coordinates:[ring]}}}}
     ]
   }};
 }}
-const anim={'true' if animate_trigger else 'false'};
 
-function moveSun(az,el){{
-  if(HIDE_SUN||el<-5){{sunEl.style.display='none';return;}}
-  const W=document.getElementById('map').clientWidth||600;
-  const H=document.getElementById('map').clientHeight||600;
-  const f=Math.max(0,el)/90;
-  // rx/ry shrink as sun rises toward zenith (centre of screen)
-  const rx=W*.40*(1-f*.88), ry=H*.36*(1-f*.88);
-  // az is clockwise from North. Subtract map rotation so it stays
-  // geographically correct when user rotates the view.
-  const ar=(az - curRot)*D2R;
-  sunEl.style.display='block';
-  // sin(ar) → east/west,  -cos(ar) → puts North at top (south at bottom)
-  sunEl.style.left=(W/2 + rx*Math.sin(ar))+'px';
-  sunEl.style.top =(H/2 - ry*Math.cos(ar)*0.55)+'px';
-}}
-
-function updateView(p){{
-  if(p.iso) map.setDate(new Date(p.iso));
-  curEl=p.el; curAz=p.az;
-  moveSun(p.az,p.el);
-  document.getElementById('hel').textContent=p.el.toFixed(1)+'°';
-  document.getElementById('haz').textContent=p.az.toFixed(1)+'°';
-  document.getElementById('htm').textContent=p.time;
-  document.getElementById('stm').textContent=p.time;
-}}
-
-updateView({{lon:{m_slon},lat:{m_slat},shlat:{m_shlat},shlon:{m_shlon},
-             el:{mel},az:{maz},time:'{cur_time}',iso:'{sim_iso}'}});
-
-if(anim){{
-  let i=0;
-  setInterval(()=>{{updateView(allPts[i]);i=(i+1)%allPts.length;}},200);
-}}
-
-map.on('change',()=>{{moveSun(curAz,curEl);}});
-
-function aR(d){{
-  curRot=(curRot+d+360)%360;map.setRotation(curRot);
-  document.getElementById('cmp').style.transform='rotate('+curRot+'deg)';
-}}
-function aT(d){{curTilt=Math.max(0,Math.min(70,curTilt+d));map.setTilt(curTilt);}}
-function rst(){{
-  curRot=0;curTilt=45;map.setRotation(0);map.setTilt(45);
-  document.getElementById('cmp').style.transform='rotate(0deg)';
-}}
-map.on('rotate',()=>{{
-  try{{curRot=((map.getRotation()%360)+360)%360;
-    document.getElementById('cmp').style.transform='rotate('+curRot+'deg)';}}catch(e){{}}
-}});
-
-const SEL={sel_js};
-let mdX=0,mdY=0;
-if(SEL){{
-  document.getElementById('map').addEventListener('mousedown',e=>{{mdX=e.clientX;mdY=e.clientY;}});
-  map.on('pointerup',(t,d)=>{{
-    if(Math.abs(d.x-mdX)>8||Math.abs(d.y-mdY)>8) return;
-    const g=map.unproject(d.x,d.y);if(!g) return;
-    pinGeo=g;drop(g.latitude,g.longitude);
-    ctxt.textContent=g.latitude.toFixed(5)+', '+g.longitude.toFixed(5);
-    coord.style.display='block';
-    window.parent.postMessage({{type:'osm_pin',lat:g.latitude,lon:g.longitude}},'*');
-  }});
-  let tx=0,ty=0;
-  document.getElementById('map').addEventListener('touchstart',e=>{{
-    if(e.touches.length===1){{tx=e.touches[0].clientX;ty=e.touches[0].clientY;}}
-  }},{{passive:true}});
-  document.getElementById('map').addEventListener('touchend',e=>{{
-    if(e.changedTouches.length!==1) return;
-    const t=e.changedTouches[0];
-    if(Math.abs(t.clientX-tx)>12||Math.abs(t.clientY-ty)>12) return;
-    const r=document.getElementById('map').getBoundingClientRect();
-    const g=map.unproject(t.clientX-r.left,t.clientY-r.top);if(!g) return;
-    pinGeo=g;drop(g.latitude,g.longitude);
-    ctxt.textContent=g.latitude.toFixed(5)+', '+g.longitude.toFixed(5);
-    coord.style.display='block';
-    window.parent.postMessage({{type:'osm_pin',lat:g.latitude,lon:g.longitude}},'*');
-  }},{{passive:true}});
-}}
-
-// Drop pin as GeoJSON disc inside the 3D scene — sticks to ground like buildings
-function drop(plat, plon){{
+function drop(plat, plon) {{
   if(pinLayer) map.remove(pinLayer);
   pinLayer = map.addGeoJSON(makePinGeoJSON(plat, plon), {{color:'#E74C3C'}});
 }}
+
+const SEL = {sel_js};
+let mdX=0, mdY=0;
+if(SEL) {{
+  document.getElementById('map').addEventListener('mousedown', e => {{ mdX=e.clientX; mdY=e.clientY; }});
+  map.on('pointerup', (t, d) => {{
+    if(Math.abs(d.x-mdX)>8 || Math.abs(d.y-mdY)>8) return;
+    const g = map.unproject(d.x, d.y); if(!g) return;
+    drop(g.latitude, g.longitude);
+    ctxt.textContent = g.latitude.toFixed(5)+', '+g.longitude.toFixed(5);
+    coord.style.display = 'block';
+    window.parent.postMessage({{type:'osm_pin', lat:g.latitude, lon:g.longitude}}, '*');
+  }});
+  let tx=0, ty=0;
+  document.getElementById('map').addEventListener('touchstart', e => {{
+    if(e.touches.length===1){{ tx=e.touches[0].clientX; ty=e.touches[0].clientY; }}
+  }}, {{passive:true}});
+  document.getElementById('map').addEventListener('touchend', e => {{
+    if(e.changedTouches.length!==1) return;
+    const t=e.changedTouches[0];
+    if(Math.abs(t.clientX-tx)>12 || Math.abs(t.clientY-ty)>12) return;
+    const r=document.getElementById('map').getBoundingClientRect();
+    const g=map.unproject(t.clientX-r.left, t.clientY-r.top); if(!g) return;
+    drop(g.latitude, g.longitude);
+    ctxt.textContent = g.latitude.toFixed(5)+', '+g.longitude.toFixed(5);
+    coord.style.display = 'block';
+    window.parent.postMessage({{type:'osm_pin', lat:g.latitude, lon:g.longitude}}, '*');
+  }}, {{passive:true}});
+}}
 </script></body></html>"""
+
     components.html(html, height=660)
 
+    # ── Read cam_rot / cam_tilt written into URL params by the JS above ──────
+    # These are set synchronously via history.replaceState so they are
+    # available in the SAME query_params dict on the very next Streamlit rerun.
+    qp = st.query_params
+    changed = False
+    try:
+        if "cam_rot" in qp:
+            new_rot = float(qp["cam_rot"])
+            if abs(new_rot - st.session_state.get("cam3d_rot", 0)) > 0.5:
+                st.session_state["cam3d_rot"] = new_rot
+                changed = True
+        if "cam_tilt" in qp:
+            new_tilt = float(qp["cam_tilt"])
+            if abs(new_tilt - st.session_state.get("cam3d_tilt", 45)) > 0.5:
+                st.session_state["cam3d_tilt"] = new_tilt
+                changed = True
+    except (ValueError, TypeError):
+        pass
+    # Do NOT rerun here — we just stash the value for the next natural rerun.
 
 # ─────────────────────────────────────────────────────────────────────────────
 def render_3d_map_component(lat, lon, radius_meters, path_data, animate_trigger,
-                             sim_time, m_slat, m_slon, m_el, rise_time, set_time):
+                             sim_time, m_slat, m_slon, m_el, rise_time, set_time,
+                             init_rot=0, init_tilt=45, init_zoom=1.3):
     cos_lat = math.cos(math.radians(lat))
     R = radius_meters
     pts = []
@@ -734,12 +808,18 @@ def render_3d_map_component(lat, lon, radius_meters, path_data, animate_trigger,
                     "el":round(p["el"],2),"time":p["time"]})
     pts_js = str(pts).replace("'",'"').replace("True","true").replace("False","false")
 
-    cx   = round((m_slon - lon) * 111111 * cos_lat, 2)
-    cz   = round(-(m_slat - lat) * 111111, 2)
-    cy   = round(max(0, m_el) * (R / 90.0) * 2.2, 2)
-    ct   = sim_time.strftime('%H:%M')
-    cd   = int(R * 2.2)
-    ch   = int(R * 1.3)
+    cx  = round((m_slon - lon) * 111111 * cos_lat, 2)
+    cz  = round(-(m_slat - lat) * 111111, 2)
+    cy  = round(max(0, m_el) * (R / 90.0) * 2.2, 2)
+    ct  = sim_time.strftime('%H:%M')
+    cd  = int(R * 2.2)
+    ch  = int(R * 1.3)
+
+    # Restore camera: map OSM rotation (0-360 CW from N) → Three.js theta
+    import math as _m
+    init_theta = _m.pi / 4 - _m.radians(float(init_rot))
+    init_phi   = max(0.15, min(_m.pi / 2.1, _m.radians(90.0 - float(init_tilt))))
+    init_cr    = int(R * max(0.6, min(4.0, float(init_zoom))))
 
     html = f"""<!DOCTYPE html><html><head>
 {_MAP_FONTS}
@@ -763,106 +843,164 @@ canvas{{display:block;width:100%!important;height:600px!important;}}
 <script>
 const cv=document.getElementById('c');
 const W=cv.parentElement?cv.parentElement.clientWidth:window.innerWidth, H=600;
-cv.width=W;cv.height=H;
+cv.width=W; cv.height=H;
 const rend=new THREE.WebGLRenderer({{canvas:cv,antialias:true}});
-rend.setPixelRatio(Math.min(devicePixelRatio,2));rend.setSize(W,H);rend.shadowMap.enabled=true;
+rend.setPixelRatio(Math.min(devicePixelRatio,2));
+rend.setSize(W,H);
+rend.shadowMap.enabled=true;
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x0A0C10);
 scene.fog=new THREE.FogExp2(0x0A0C10,0.0007);
 const cam=new THREE.PerspectiveCamera(50,W/H,0.5,8000);
-cam.position.set({cd},{ch},{cd});cam.lookAt(0,0,0);
+cam.position.set({cd},{ch},{cd}); cam.lookAt(0,0,0);
 scene.add(new THREE.AmbientLight(0xffffff,0.35));
 const dl=new THREE.DirectionalLight(0xffd580,1.8);
-dl.position.set(300,600,300);dl.castShadow=true;scene.add(dl);
+dl.position.set(300,600,300); dl.castShadow=true; scene.add(dl);
 const R={R};
-scene.add(new THREE.Mesh(new THREE.CylinderGeometry(R,R,3,80),
+
+// Ground disc
+scene.add(new THREE.Mesh(
+  new THREE.CylinderGeometry(R,R,3,80),
   new THREE.MeshLambertMaterial({{color:0x0D1118}})));
 scene.add(new THREE.GridHelper(R*2,Math.max(10,Math.round(R/13)),0x151C28,0x0F1520));
 scene.add(new THREE.Mesh(new THREE.TorusGeometry(R,2.5,8,80),
   new THREE.MeshBasicMaterial({{color:0x1A2535}})));
 const lm=new THREE.LineBasicMaterial({{color:0x1A2535}});
 [[[-R,0],[R,0]],[[0,-R],[0,R]]].forEach(([a,b])=>
-  scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(
-    [new THREE.Vector3(a[0],1,a[1]),new THREE.Vector3(b[0],1,b[1])]),lm)));
-const pil=new THREE.Mesh(new THREE.CylinderGeometry(5.5,5.5,18,16),
+  scene.add(new THREE.Line(
+    new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(a[0],1,a[1]),
+      new THREE.Vector3(b[0],1,b[1])]),lm)));
+
+// Observer pillar
+const pil=new THREE.Mesh(
+  new THREE.CylinderGeometry(5.5,5.5,18,16),
   new THREE.MeshLambertMaterial({{color:0xF39C12}}));
-pil.position.y=9;scene.add(pil);
+pil.position.y=9; scene.add(pil);
 scene.add(new THREE.Mesh(new THREE.TorusGeometry(11,2,8,32),
   new THREE.MeshBasicMaterial({{color:0xF39C12,transparent:true,opacity:.35}})));
+
+// Compass labels
 function spr(txt,col){{
-  const cv2=document.createElement('canvas');cv2.width=128;cv2.height=64;
+  const cv2=document.createElement('canvas'); cv2.width=128; cv2.height=64;
   const c2=cv2.getContext('2d');
-  c2.fillStyle=col;c2.font='bold 34px JetBrains Mono,monospace';
-  c2.textAlign='center';c2.textBaseline='middle';c2.fillText(txt,64,32);
+  c2.fillStyle=col; c2.font='bold 34px JetBrains Mono,monospace';
+  c2.textAlign='center'; c2.textBaseline='middle'; c2.fillText(txt,64,32);
   const sp=new THREE.Sprite(new THREE.SpriteMaterial(
     {{map:new THREE.CanvasTexture(cv2),transparent:true,depthTest:false}}));
-  sp.scale.set(48,24,1);return sp;
+  sp.scale.set(48,24,1); return sp;
 }}
 const ld=R+52;
-[['N','#E74C3C',0,-ld],['S','#2D3748',0,ld],['E','#2D3748',ld,0],['W','#2D3748',-ld,0]].forEach(([t,c,x,z])=>{{
-  const s=spr(t,c);s.position.set(x,8,z);scene.add(s);
+[['N','#E74C3C',0,-ld],['S','#2D3748',0,ld],
+ ['E','#2D3748',ld,0], ['W','#2D3748',-ld,0]].forEach(([t,c,x,z])=>{{
+  const s=spr(t,c); s.position.set(x,8,z); scene.add(s);
 }});
+
+// Sun arc tube
 const pd={pts_js};
 const ap=pd.filter(p=>p.el>=0).map(p=>new THREE.Vector3(p.x,p.y,p.z));
 if(ap.length>1){{
   const cv3=new THREE.CatmullRomCurve3(ap);
-  scene.add(new THREE.Mesh(new THREE.TubeGeometry(cv3,ap.length*3,3,8,false),
+  scene.add(new THREE.Mesh(
+    new THREE.TubeGeometry(cv3,ap.length*3,3,8,false),
     new THREE.MeshBasicMaterial({{color:0xF39C12,transparent:true,opacity:.82}})));
 }}
+
+// Coloured dots along arc
 pd.filter(p=>p.el>=0).forEach((p,i)=>{{
   if(i%4!==0) return;
   const col=new THREE.Color().setHSL(.09-(i/pd.length)*.04,1,.55);
-  const d=new THREE.Mesh(new THREE.SphereGeometry(3.5,8,8),new THREE.MeshBasicMaterial({{color:col}}));
-  d.position.set(p.x,p.y,p.z);scene.add(d);
+  const d=new THREE.Mesh(new THREE.SphereGeometry(3.5,8,8),
+    new THREE.MeshBasicMaterial({{color:col}}));
+  d.position.set(p.x,p.y,p.z); scene.add(d);
 }});
+
+// Vertical drop lines from arc to ground
 pd.filter(p=>p.el>=0).forEach((p,i)=>{{
   if(i%7!==0) return;
-  const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(p.x,0,p.z),new THREE.Vector3(p.x,p.y,p.z)]);
-  scene.add(new THREE.Line(g,new THREE.LineBasicMaterial({{color:0x2D1B00,transparent:true,opacity:.35}})));
+  const g=new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(p.x,0,p.z),new THREE.Vector3(p.x,p.y,p.z)]);
+  scene.add(new THREE.Line(g,
+    new THREE.LineBasicMaterial({{color:0x2D1B00,transparent:true,opacity:.35}})));
 }});
-const sm=new THREE.Mesh(new THREE.SphereGeometry(14,24,24),new THREE.MeshBasicMaterial({{color:0xFFD700}}));
-const hm=new THREE.Mesh(new THREE.SphereGeometry(22,24,24),new THREE.MeshBasicMaterial({{color:0xFF8800,transparent:true,opacity:.12,side:THREE.BackSide}}));
-scene.add(sm);scene.add(hm);
+
+// ── Sun: large emoji sprite (no halo ring) ────────────────────────────────
+const sunCanvas=document.createElement('canvas');
+sunCanvas.width=128; sunCanvas.height=128;
+const sunCtx=sunCanvas.getContext('2d');
+sunCtx.font='96px serif';
+sunCtx.textAlign='center'; sunCtx.textBaseline='middle';
+sunCtx.fillText('☀️',64,64);
+const sunTex=new THREE.CanvasTexture(sunCanvas);
+const sm=new THREE.Sprite(new THREE.SpriteMaterial(
+  {{map:sunTex,transparent:true,depthTest:false}}));
+sm.scale.set(60,60,1);
+scene.add(sm);
+
+// Shadow line from observer to ground-projected sun position
 const sg=[new THREE.Vector3(0,0,0),new THREE.Vector3(0,0,0)];
 const sgeo=new THREE.BufferGeometry().setFromPoints(sg);
-scene.add(new THREE.Line(sgeo,new THREE.LineBasicMaterial({{color:0x374151,transparent:true,opacity:.5}})));
+scene.add(new THREE.Line(sgeo,
+  new THREE.LineBasicMaterial({{color:0x374151,transparent:true,opacity:.5}})));
+
 function setSun(x,y,z,t,el){{
-  sm.position.set(x,Math.max(0,y),z);hm.position.set(x,Math.max(0,y),z);
+  const yy=Math.max(0,y);
+  sm.position.set(x,yy,z);
   const s=sgeo.attributes.position;
-  s.setXYZ(0,0,.5,0);s.setXYZ(1,x===0?0:-x*2,.5,z===0?0:-z*2);s.needsUpdate=true;
+  s.setXYZ(0,0,.5,0);
+  s.setXYZ(1,x===0?0:-x*2,.5,z===0?0:-z*2);
+  s.needsUpdate=true;
   document.getElementById('hel').textContent=el.toFixed(1)+'°';
   document.getElementById('htm').textContent=t;
   document.getElementById('stm').textContent=t;
-  sm.visible=el>=-2;hm.visible=el>=-2;
+  sm.visible=el>=-2;
 }}
 setSun({cx},{cy},{cz},'{ct}',{m_el});
+
 let ai=0;
 if({'true' if animate_trigger else 'false'}){{
-  setInterval(()=>{{const p=pd[ai];setSun(p.x,p.y,p.z,p.time,p.el);ai=(ai+1)%pd.length;}},160);
+  setInterval(()=>{{
+    const p=pd[ai]; setSun(p.x,p.y,p.z,p.time,p.el);
+    ai=(ai+1)%pd.length;
+  }},160);
 }}
-let drag=false,prev={{x:0,y:0}},th=Math.PI/4,ph=Math.PI/3.5,cr={int(cd*1.3)};
+
+// ── Camera — restore from persisted state ─────────────────────────────────
+let drag=false, prev={{x:0,y:0}};
+let th={init_theta:.4f};
+let ph={init_phi:.4f};
+let cr={init_cr};
+
 function uCam(){{
-  cam.position.set(cr*Math.sin(ph)*Math.sin(th),cr*Math.cos(ph),cr*Math.sin(ph)*Math.cos(th));
+  cam.position.set(
+    cr*Math.sin(ph)*Math.sin(th),
+    cr*Math.cos(ph),
+    cr*Math.sin(ph)*Math.cos(th));
   cam.lookAt(0,0,0);
 }}
 uCam();
-cv.addEventListener('mousedown',e=>{{drag=true;prev={{x:e.clientX,y:e.clientY}};}});
-cv.addEventListener('mouseup',()=>drag=false);
+
+cv.addEventListener('mousedown',e=>{{ drag=true; prev={{x:e.clientX,y:e.clientY}}; }});
+cv.addEventListener('mouseup',  ()=>drag=false);
 cv.addEventListener('mousemove',e=>{{
   if(!drag) return;
-  th-=(e.clientX-prev.x)*.005;
-  ph=Math.max(.15,Math.min(Math.PI/2.1,ph+(e.clientY-prev.y)*.005));
-  prev={{x:e.clientX,y:e.clientY}};uCam();
+  th -= (e.clientX-prev.x)*.005;
+  ph  = Math.max(.15,Math.min(Math.PI/2.1,ph+(e.clientY-prev.y)*.005));
+  prev={{x:e.clientX,y:e.clientY}}; uCam();
 }});
-cv.addEventListener('wheel',e=>{{cr=Math.max(R*.6,Math.min(R*4,cr+e.deltaY*.4));uCam();e.preventDefault();}},{{passive:false}});
+cv.addEventListener('wheel',e=>{{
+  cr=Math.max(R*.6,Math.min(R*4,cr+e.deltaY*.4)); uCam(); e.preventDefault();
+}},{{passive:false}});
 let lt=null;
 cv.addEventListener('touchstart',e=>lt=e.touches[0]);
 cv.addEventListener('touchmove',e=>{{
-  if(!lt) return;const t=e.touches[0];
+  if(!lt) return;
+  const t=e.touches[0];
   th-=(t.clientX-lt.clientX)*.005;
   ph=Math.max(.15,Math.min(Math.PI/2.1,ph+(t.clientY-lt.clientY)*.005));
-  lt=t;uCam();e.preventDefault();
+  lt=t; uCam(); e.preventDefault();
 }},{{passive:false}});
-(function loop(){{requestAnimationFrame(loop);rend.render(scene,cam);}})();
+
+(function loop(){{ requestAnimationFrame(loop); rend.render(scene,cam); }})();
 </script></body></html>"""
     components.html(html, height=620)
