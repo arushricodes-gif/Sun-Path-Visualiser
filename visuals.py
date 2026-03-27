@@ -760,20 +760,20 @@ function aR(d) {{
   curRot = (curRot + d + 360) % 360;
   map.setRotation(curRot);
   document.getElementById('cmp').style.transform = 'rotate('+curRot+'deg)';
-  drawArc();
+  if(!HIDE_SUN) drawArc();
   saveCam();
 }}
 function aT(d) {{
   curTilt = Math.max(0, Math.min(70, curTilt + d));
   map.setTilt(curTilt);
-  drawArc();
+  if(!HIDE_SUN) drawArc();
   saveCam();
 }}
 function rst() {{
   curRot=0; curTilt=45;
   map.setRotation(0); map.setTilt(45);
   document.getElementById('cmp').style.transform = 'rotate(0deg)';
-  drawArc();
+  if(!HIDE_SUN) drawArc();
   saveCam();
 }}
 
@@ -781,7 +781,7 @@ map.on('rotate', () => {{
   try {{
     curRot = ((map.getRotation()%360)+360)%360;
     document.getElementById('cmp').style.transform = 'rotate('+curRot+'deg)';
-    drawArc();
+    if(!HIDE_SUN) drawArc();
     saveCam();
   }} catch(e) {{}}
 }});
@@ -889,8 +889,8 @@ function drawArc() {{
   }});
 }}
 
-// Initial draw
-drawArc();
+// Initial draw — only on visualisation tab, not location-select
+if(!HIDE_SUN) drawArc();
 
 function moveSun(az, el) {{
   if(HIDE_SUN || el < -5) {{ sunEl.style.display='none'; return; }}
@@ -921,7 +921,7 @@ if(anim) {{
   setInterval(() => {{ updateView(allPts[i]); i=(i+1)%allPts.length; }}, 200);
 }}
 
-map.on('change', () => {{ moveSun(curAz, curEl); drawArc(); }});
+map.on('change', () => {{ moveSun(curAz, curEl); if(!HIDE_SUN) drawArc(); }});
 
 function makePinGeoJSON(plat, plon) {{
   const rd=0.000022, steps=16, ring=[];
