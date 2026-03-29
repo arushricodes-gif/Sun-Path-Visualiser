@@ -4,7 +4,6 @@ import math
 
 
 def apply_styles(theme="dark"):
-    # ── Theme-aware CSS variables ──────────────────────────────────────────
     if theme == "light":
         root_vars = """
         :root {
@@ -112,10 +111,8 @@ def apply_styles(theme="dark"):
 
     {root_vars}
 
-    /* ── Base ── */
     {stapp_extra}
 
-    /* ── Fonts ── */
     html, body, [class*="css"] {{
         font-family: 'Inter', sans-serif !important;
         color: var(--t1) !important;
@@ -129,7 +126,6 @@ def apply_styles(theme="dark"):
         color: var(--t1) !important;
     }}
 
-    /* ── Sidebar ── */
     {sidebar_extra}
     [data-testid="stSidebar"] p,
     [data-testid="stSidebar"] span,
@@ -143,7 +139,6 @@ def apply_styles(theme="dark"):
         color: var(--t1) !important;
     }}
 
-    /* ── Tabs ── */
     [data-testid="stTabs"] [role="tablist"] {{
         background: var(--tab-list-bg) !important;
         border: 1px solid var(--b1) !important;
@@ -169,7 +164,6 @@ def apply_styles(theme="dark"):
     [data-testid="stTabs"] button[role="tab"] p {{ color: inherit !important; }}
     button[aria-selected="true"] p {{ color: var(--gold) !important; }}
 
-    /* ── Text inputs ── */
     div[data-baseweb="input"] {{
         background: var(--input-bg) !important;
         border: 1px solid var(--b2) !important;
@@ -191,7 +185,6 @@ def apply_styles(theme="dark"):
         -webkit-text-fill-color: var(--t3) !important;
     }}
 
-    /* ── Buttons ── */
     button[kind="secondaryFormSubmit"], .stButton > button {{
         background: var(--gold) !important;
         color: #000 !important;
@@ -215,7 +208,6 @@ def apply_styles(theme="dark"):
         transform: translateY(-1px) !important;
     }}
 
-    /* ── Sliders ── */
     .stSlider [data-baseweb="slider"] > div > div {{
         background: linear-gradient(90deg, var(--dim), var(--gold)) !important;
         height: 3px !important;
@@ -235,10 +227,8 @@ def apply_styles(theme="dark"):
         font-family: 'JetBrains Mono', monospace !important;
     }}
 
-    /* ── Toggle ── */
     [data-testid="stToggle"] [data-checked="true"] {{ background: var(--gold) !important; }}
 
-    /* ── Selectbox ── */
     [data-testid="stSelectbox"] > div > div {{
         background: var(--s2) !important;
         border: 1px solid var(--b2) !important;
@@ -250,7 +240,6 @@ def apply_styles(theme="dark"):
         color: var(--t1) !important;
     }}
 
-    /* ── Radio ── */
     [data-testid="stRadio"] label {{
         background: var(--s2) !important;
         border: 1px solid var(--b1) !important;
@@ -265,10 +254,8 @@ def apply_styles(theme="dark"):
     }}
     [data-testid="stRadio"] label span {{ color: var(--t1) !important; font-size: 12px !important; }}
 
-    /* ── Alerts ── */
     {alert_extra}
 
-    /* ── Metrics ── */
     [data-testid="stMetric"] {{
         background: var(--metric-bg) !important;
         border: 1px solid var(--metric-border) !important;
@@ -286,23 +273,19 @@ def apply_styles(theme="dark"):
         text-transform: uppercase !important; color: var(--t3) !important;
     }}
 
-    /* ── Layout ── */
     .main .block-container {{ padding-top: 1.5rem !important; max-width: 1440px !important; }}
     hr {{ border: none !important; height: 1px !important;
          background: linear-gradient(90deg,transparent,var(--hr-color),transparent) !important; }}
     div[data-testid="stHtml"] {{ margin-bottom: -30px !important; }}
 
-    /* ── Plotly chart background ── */
     .js-plotly-plot .plotly .bg {{
         fill: transparent !important;
     }}
 
-    /* ── Scrollbar ── */
     ::-webkit-scrollbar {{ width: 3px; }}
     ::-webkit-scrollbar-track {{ background: var(--bg); }}
     ::-webkit-scrollbar-thumb {{ background: var(--scrollbar-thumb); border-radius: 2px; }}
 
-    /* ── Date input ── */
     [data-testid="stDateInput"] > div {{
         background: var(--s2) !important; border: 1px solid var(--b2) !important;
         border-radius: 10px !important;
@@ -312,12 +295,6 @@ def apply_styles(theme="dark"):
         -webkit-text-fill-color: var(--t1) !important;
     }}
 
-    /* ── Theme toggle button strip ── */
-    .theme-strip {{
-        display: flex;
-        gap: 6px;
-        margin-bottom: 18px;
-    }}
     .stMarkdown a {{ color: var(--gold) !important; }}
 
     @media (max-width: 768px) {{
@@ -327,15 +304,11 @@ def apply_styles(theme="dark"):
     </style>
     """, unsafe_allow_html=True)
 
-    # Store for use in info-card inline styles
     st.session_state["_plot_bg"]   = plot_bg
     st.session_state["_plot_grid"] = plot_grid
     st.session_state["_plot_font"] = plot_font
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# MAP STYLES shared across all components
-# ─────────────────────────────────────────────────────────────────────────────
 _MAP_FONTS = '<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Bebas+Neue&display=swap" rel="stylesheet"/>'
 
 _HUD_CSS = """
@@ -372,6 +345,9 @@ _HUD_CSS = """
     background: rgba(7,9,16,.65); padding: 5px 16px; border-radius: 20px;
     border: 1px solid rgba(255,255,255,.04); white-space: nowrap; letter-spacing: .04em;
 }
+.leaflet-control-attribution,
+.leaflet-control-attribution a,
+.osmb-attribution { display: none !important; }
 .tile-row {
     position: absolute; top: 14px; left: 14px; z-index: 20;
     display: flex; gap: 6px;
@@ -390,7 +366,7 @@ _HUD_CSS = """
 
 # ─────────────────────────────────────────────────────────────────────────────
 def render_map_component(lat, lon, radius_meters, path_data, animate_trigger,
-                         sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el,
+                         sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el, m_az,
                          rise_edge, set_edge, rise_time, set_time, aqi_val):
     env    = st.session_state.env_data
     wind_js = ""
@@ -414,7 +390,7 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger,
     {_HUD_CSS}
     body{{margin:0;background:#0A0C10;}}
     #map2{{height:560px;width:100%;border-radius:16px;
-           border:1px solid rgba(243,156,18,.1);}}
+           border:1px solid rgba(243,156,18,.1);cursor:crosshair;}}
     .sun-box{{background:linear-gradient(135deg,#F39C12,#E67E22);color:#000;
               padding:3px 9px;border-radius:7px;font-weight:700;font-size:11px;
               font-family:'JetBrains Mono',monospace;margin-bottom:2px;
@@ -422,33 +398,90 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger,
     .sun-icon{{font-size:30pt;line-height:1;filter:drop-shadow(0 0 14px rgba(255,200,0,.85));}}
     .custom-sun-icon,.wind-arrow-container{{background:none;border:none;}}
     .leg-dot{{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle;}}
+    /* click pin */
+    #click-hint{{
+        position:absolute;bottom:46px;left:50%;transform:translateX(-50%);
+        z-index:25;background:rgba(7,9,16,.88);border:1px solid rgba(243,156,18,.3);
+        border-radius:10px;padding:7px 18px;color:#F39C12;font-size:11px;font-weight:600;
+        font-family:'JetBrains Mono',monospace;pointer-events:none;white-space:nowrap;
+        letter-spacing:.05em;opacity:0;transition:opacity .4s;
+    }}
+    /* Force HUD colors — override Streamlit global resets */
+    #hud2d * {{ color: inherit !important; -webkit-text-fill-color: inherit !important; }}
+    #hud2d .hud-label {{ color: #9CA3AF !important; -webkit-text-fill-color: #9CA3AF !important; }}
+    #hud2d .hud-val-orange {{ color: #F39C12 !important; -webkit-text-fill-color: #F39C12 !important; }}
+    #hud2d .hud-val-white {{ color: #F0F2F5 !important; -webkit-text-fill-color: #F0F2F5 !important; }}
+    #hud2d .leg-red {{ color: #E74C3C !important; -webkit-text-fill-color: #E74C3C !important; }}
+    #hud2d .leg-blue {{ color: #3498DB !important; -webkit-text-fill-color: #3498DB !important; }}
+    #hud2d .leg-grey {{ color: #8B9AB0 !important; -webkit-text-fill-color: #8B9AB0 !important; }}
     </style>
-    <div style="position:relative;">
-      <div id="map2"></div>
+    <div style="position:relative;height:560px;">
+      <div id="map2" style="height:560px;width:100%;"></div>
       <div class="tile-row">
         <button class="tile-btn on" id="bs" onclick="setTile('s')">🗺 Street</button>
         <button class="tile-btn"    id="bsat" onclick="setTile('sat')">🛰 Satellite</button>
       </div>
-      <div class="hud" style="top:14px;right:14px;min-width:190px;">
-        <div class="hud-title">Solar Data</div>
-        🌅 Sunrise &nbsp;<b>{rise_time}</b><br>
-        🌇 Sunset &nbsp;&nbsp;<b>{set_time}</b><br>
-        💨 AQI &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b style="color:{'#F39C12' if aqi_val=='Off' else '#F39C12'};">{aqi_val}</b><br>
-        <div style="margin-top:8px;font-size:9px;color:#4B5563;letter-spacing:.12em;text-transform:uppercase;">Legend</div>
-        <div style="font-size:11px;"><span class="leg-dot" style="background:#E74C3C;"></span>Sunrise</div>
-        <div style="font-size:11px;"><span class="leg-dot" style="background:#3498DB;"></span>Sunset</div>
-        <div style="font-size:11px;"><span class="leg-dot" style="background:#555;"></span>Shadow</div>
+      <div id="hud2d" style="
+        position:absolute;top:14px;right:14px;z-index:9999;
+        background:rgba(7,9,16,0.95);
+        border:1px solid rgba(243,156,18,0.3);
+        border-radius:16px;padding:16px 20px;
+        font-family:'JetBrains Mono',monospace !important;
+        backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+        box-shadow:0 8px 40px rgba(0,0,0,.8);
+        min-width:230px;pointer-events:none;
+        color:#F0F2F5 !important;">
+        <div style="font-size:8px;letter-spacing:.22em;text-transform:uppercase;
+             color:#4B5563 !important;-webkit-text-fill-color:#4B5563 !important;
+             margin-bottom:12px;padding-bottom:8px;
+             border-bottom:1px solid rgba(255,255,255,.08);">SOLAR POSITION</div>
+        <table style="width:100%;border-collapse:collapse;">
+          <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">📅 Date</td>
+              <td style="padding:4px 0;text-align:right;color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:12px;font-weight:700;">{sim_time.strftime('%b %d, %Y')}</td></tr>
+          <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">🌅 Sunrise</td>
+              <td style="padding:4px 0;text-align:right;color:#F0F2F5 !important;-webkit-text-fill-color:#F0F2F5 !important;font-size:12px;font-weight:700;">{rise_time}</td></tr>
+          <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">🌇 Sunset</td>
+              <td style="padding:4px 0;text-align:right;color:#F0F2F5 !important;-webkit-text-fill-color:#F0F2F5 !important;font-size:12px;font-weight:700;">{set_time}</td></tr>
+          <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">☀️ Elevation</td>
+              <td style="padding:4px 0;text-align:right;color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:12px;font-weight:700;" id="hud2d-el">{m_el:.1f}°</td></tr>
+          <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">🧭 Azimuth</td>
+              <td style="padding:4px 0;text-align:right;color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:12px;font-weight:700;" id="hud2d-az">{m_az:.1f}°</td></tr>
+          <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">🕐 Time</td>
+              <td style="padding:4px 0;text-align:right;color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:12px;font-weight:700;" id="hud2d-tm">{sim_time.strftime('%H:%M')}</td></tr>
+        </table>
+        <div style="border-top:1px solid rgba(255,255,255,.08);margin:10px 0 8px;"></div>
+        <div style="font-size:8px;letter-spacing:.18em;text-transform:uppercase;
+             color:#4B5563 !important;-webkit-text-fill-color:#4B5563 !important;margin-bottom:7px;">LEGEND</div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+          <span style="display:inline-block;width:26px;height:3px;background:#E74C3C;border-radius:2px;flex-shrink:0;"></span>
+          <span style="color:#E74C3C !important;-webkit-text-fill-color:#E74C3C !important;font-size:11px;">Sunrise dir</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+          <span style="display:inline-block;width:26px;height:3px;background:#3498DB;border-radius:2px;flex-shrink:0;"></span>
+          <span style="color:#3498DB !important;-webkit-text-fill-color:#3498DB !important;font-size:11px;">Sunset dir</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+          <span style="display:inline-block;width:26px;height:0;border-top:2px dashed #8B9AB0;flex-shrink:0;"></span>
+          <span style="color:#8B9AB0 !important;-webkit-text-fill-color:#8B9AB0 !important;font-size:11px;">Shadow</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span style="display:inline-block;width:26px;height:0;border-top:2px dashed #F39C12;flex-shrink:0;"></span>
+          <span style="color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:11px;">Sun path</span>
+        </div>
       </div>
-      <div class="hint">🖱 Drag · Scroll zoom</div>
+      <div class="hint">🖱 Click to move pin · Drag · Scroll zoom</div>
+      <div id="click-hint">📍 Pin moved!</div>
     </div>
     <script>
+    // Write click coords to parent sessionStorage so streamlit_js_eval can read them
+
     var TILES={{
       s:'https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png',
       sat:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}'
     }};
     var curT='s', tL=null;
     var street=L.tileLayer(TILES.s), sat=L.tileLayer(TILES.sat);
-    var map2=L.map('map2',{{center:[{lat},{lon}],zoom:17,layers:[street],zoomControl:false}});
+    var map2=L.map('map2',{{center:[{lat},{lon}],zoom:17,layers:[street],zoomControl:false,attributionControl:false}});
     L.control.zoom({{position:'bottomright'}}).addTo(map2);
     tL=street;
     function setTile(m){{
@@ -458,6 +491,34 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger,
       document.getElementById('bs').className='tile-btn'+(m==='s'?' on':'');
       document.getElementById('bsat').className='tile-btn'+(m==='sat'?' on':'');
     }}
+
+    // ── Click to relocate ──────────────────────────────────────────────────
+    var pinMarker = L.marker([{lat},{lon}], {{
+        icon: L.divIcon({{
+            html: '<div style="font-size:22px;filter:drop-shadow(0 0 6px rgba(243,156,18,.8));">📍</div>',
+            iconSize:[28,28], iconAnchor:[14,28], className:''
+        }})
+    }}).addTo(map2);
+
+    var clickHint = document.getElementById('click-hint');
+    var hintTimer = null;
+
+    map2.on('click', function(e) {{
+        var newLat = e.latlng.lat;
+        var newLon = e.latlng.lng;
+        // Move the pin marker immediately for visual feedback
+        pinMarker.setLatLng([newLat, newLon]);
+        // Show brief hint
+        clickHint.style.opacity = '1';
+        clearTimeout(hintTimer);
+        hintTimer = setTimeout(function(){{ clickHint.style.opacity='0'; }}, 1500);
+        // Write to parent sessionStorage — streamlit_js_eval reads this and triggers rerun
+        try {{
+            window.parent.sessionStorage.setItem('map2d_click',
+                JSON.stringify({{lat: newLat, lon: newLon}}));
+        }} catch(err) {{}}
+    }});
+
     L.circle([{lat},{lon}],{{radius:{radius_meters},color:'rgba(243,156,18,.25)',
       weight:1.5,fillColor:'rgba(243,156,18,.04)',fillOpacity:1}}).addTo(map2);
     {wind_js}
@@ -471,20 +532,36 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger,
       iconSize:[60,60],iconAnchor:[30,22],className:'custom-sun-icon'
     }});
     var sunM=L.marker([0,0],{{icon:sunIco}}).addTo(map2);
-    var shad=L.polyline([[{lat},{lon}],[{lat},{lon}]],{{color:'rgba(255,255,255,.2)',weight:3}}).addTo(map2);
+    var shad=L.polyline([[{lat},{lon}],[{lat},{lon}]],{{color:'#8B9AB0',weight:2.5,dashArray:'5,8',opacity:.75}}).addTo(map2);
     function upd(p){{
       if(!p) return;
       sunM.setLatLng([p.lat,p.lon]);
       shad.setLatLngs([[{lat},{lon}],[p.shlat,p.shlon]]);
       document.getElementById('stl').innerHTML=p.time;
       sunM.setOpacity(p.el<0?0:1);
-      shad.setStyle({{opacity:p.el<0?0:.6}});
+      shad.setStyle({{opacity:p.el<0?0:.7}});
+      // Update HUD live values
+      var elEl=document.getElementById('hud2d-el');
+      var azEl=document.getElementById('hud2d-az');
+      var tmEl=document.getElementById('hud2d-tm');
+      if(elEl) elEl.textContent=(p.el!=null?p.el.toFixed(1)+'°':'--°');
+      if(azEl) azEl.textContent=(p.az!=null?p.az.toFixed(1)+'°':'--°');
+      if(tmEl) tmEl.textContent=p.time;
     }}
+    // Initial HUD values
+    (function(){{
+      var elEl=document.getElementById('hud2d-el');
+      var azEl=document.getElementById('hud2d-az');
+      var tmEl=document.getElementById('hud2d-tm');
+      if(elEl) elEl.textContent='{m_el:.1f}°';
+      if(azEl) azEl.textContent='{m_az:.1f}°';
+      if(tmEl) tmEl.textContent='{sim_time.strftime('%H:%M')}';
+    }})();
     if({str(animate_trigger).lower()}){{
       var i=0; setInterval(()=>{{upd(pd[i]);i=(i+1)%pd.length;}},150);
     }} else {{
       upd({{lat:{m_slat},lon:{m_slon},shlat:{m_shlat},shlon:{m_shlon},
-            el:{m_el},time:"{sim_time.strftime('%H:%M')}"}});
+            el:{m_el},az:{m_az},time:"{sim_time.strftime('%H:%M')}"}});
     }}
     </script>"""
     components.html(html, height=580)
@@ -532,7 +609,7 @@ def render_seasonal_map(lat, lon, radius, seasonal_paths):
     <script>
     var sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}');
     var str=L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png');
-    var ms=L.map('msmap',{{center:[{lat},{lon}],zoom:17,layers:[sat],zoomControl:false}});
+    var ms=L.map('msmap',{{center:[{lat},{lon}],zoom:17,layers:[sat],zoomControl:false,attributionControl:false}});
     L.control.zoom({{position:'bottomright'}}).addTo(ms);
     L.control.layers({{"🛰 Satellite":sat,"🗺 Street":str}},null,{{position:'topleft',collapsed:false}}).addTo(ms);
     L.circle([{lat},{lon}],{{radius:{radius},color:'rgba(243,156,18,.15)',weight:1,fillOpacity:.02}}).addTo(ms);
@@ -703,7 +780,7 @@ const map = new OSMBuildings({{
   tilt:     curTilt,
   rotation: curRot,
   effects:  ['shadows'],
-  attribution: '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> · © <a href="https://osmbuildings.org/copyright">OSM Buildings</a>'
+  attribution: ''
 }});
 map.setDate(new Date('{sim_iso}'));
 tL = map.addMapTiles(TILES.s);
@@ -786,36 +863,27 @@ map.on('rotate', () => {{
   }} catch(e) {{}}
 }});
 
-// ── Arc SVG overlay ──────────────────────────────────────────────────────
 const arcSvg = document.getElementById('arc-svg');
 
-// Pre-compute arc points from allPts (az + el, same projection as moveSun)
 function projectToScreen(az, el) {{
   const W = document.getElementById('map').clientWidth  || 800;
   const H = document.getElementById('map').clientHeight || 600;
+  // f=0 at horizon → arc endpoints touch map edges; f=1 at zenith → center
   const f  = Math.max(0, el) / 90;
-  const rx = W * .40 * (1 - f * .88);
-  const ry = H * .36 * (1 - f * .88);
+  const rx = W * 0.48 * (1 - f);
+  const ry = H * 0.44 * (1 - f);
   const ar = (az - curRot) * D2R;
-  return [W/2 + rx*Math.sin(ar), H/2 - ry*Math.cos(ar)*0.55];
+  return [W/2 + rx*Math.sin(ar), H/2 - ry*Math.cos(ar)*0.6];
 }}
 
 function drawArc() {{
   const W = document.getElementById('map').clientWidth  || 800;
   const H = document.getElementById('map').clientHeight || 600;
   arcSvg.setAttribute('viewBox', '0 0 '+W+' '+H);
-
-  // Clear previous
   while (arcSvg.firstChild) arcSvg.removeChild(arcSvg.firstChild);
-
-  // Filter to above-horizon points only
   const abovePts = allPts.filter(p => p.el >= 0);
   if (abovePts.length < 2) return;
-
-  // Build screen points
   const screenPts = abovePts.map(p => projectToScreen(p.az, p.el));
-
-  // ── Glow / halo layer (wider, very transparent) ──────────────────────
   const glow = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
   glow.setAttribute('points', screenPts.map(p => p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '));
   glow.setAttribute('fill', 'none');
@@ -824,8 +892,6 @@ function drawArc() {{
   glow.setAttribute('stroke-linecap', 'round');
   glow.setAttribute('stroke-linejoin', 'round');
   arcSvg.appendChild(glow);
-
-  // ── Soft inner glow ──────────────────────────────────────────────────
   const glow2 = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
   glow2.setAttribute('points', screenPts.map(p => p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '));
   glow2.setAttribute('fill', 'none');
@@ -834,8 +900,6 @@ function drawArc() {{
   glow2.setAttribute('stroke-linecap', 'round');
   glow2.setAttribute('stroke-linejoin', 'round');
   arcSvg.appendChild(glow2);
-
-  // ── Dotted orange arc ────────────────────────────────────────────────
   const arc = document.createElementNS('http://www.w3.org/2000/svg', 'polyline');
   arc.setAttribute('points', screenPts.map(p => p[0].toFixed(1)+','+p[1].toFixed(1)).join(' '));
   arc.setAttribute('fill', 'none');
@@ -846,8 +910,6 @@ function drawArc() {{
   arc.setAttribute('stroke-dasharray', '6 9');
   arc.setAttribute('opacity', '0.92');
   arcSvg.appendChild(arc);
-
-  // ── Dot markers at each point (every 3rd) ────────────────────────────
   abovePts.forEach((p, i) => {{
     if (i % 3 !== 0) return;
     const [sx, sy] = projectToScreen(p.az, p.el);
@@ -859,8 +921,6 @@ function drawArc() {{
     dot.setAttribute('opacity', '0.85');
     arcSvg.appendChild(dot);
   }});
-
-  // ── Sunrise / Sunset endpoint labels ────────────────────────────────
   const labels = [
     {{ pt: screenPts[0],                 txt: '🌅 Rise', anchor: 'end'   }},
     {{ pt: screenPts[screenPts.length-1], txt: 'Set 🌇',  anchor: 'start' }},
@@ -874,7 +934,6 @@ function drawArc() {{
     circle.setAttribute('fill', '#F39C12');
     circle.setAttribute('opacity', '0.95');
     arcSvg.appendChild(circle);
-
     const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     t.setAttribute('x', (lx + (lbl.anchor === 'end' ? -10 : 10)).toFixed(1));
     t.setAttribute('y', (ly - 8).toFixed(1));
@@ -889,7 +948,6 @@ function drawArc() {{
   }});
 }}
 
-// Initial draw — only on visualisation tab, not location-select
 if(!HIDE_SUN) drawArc();
 
 function moveSun(az, el) {{
@@ -979,18 +1037,15 @@ if(SEL) {{
     components.html(html, height=660)
 
     qp = st.query_params
-    changed = False
     try:
         if "cam_rot" in qp:
             new_rot = float(qp["cam_rot"])
             if abs(new_rot - st.session_state.get("cam3d_rot", 0)) > 0.5:
                 st.session_state["cam3d_rot"] = new_rot
-                changed = True
         if "cam_tilt" in qp:
             new_tilt = float(qp["cam_tilt"])
             if abs(new_tilt - st.session_state.get("cam3d_tilt", 45)) > 0.5:
                 st.session_state["cam3d_tilt"] = new_tilt
-                changed = True
     except (ValueError, TypeError):
         pass
 
@@ -1196,4 +1251,559 @@ cv.addEventListener('touchmove',e=>{{
 (function loop(){{ requestAnimationFrame(loop); rend.render(scene,cam); }})();
 </script></body></html>"""
     components.html(html, height=620)
-    
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+def render_live_component(lat, lon, radius_meters, path_data, animate_trigger,
+                          sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el, m_az,
+                          rise_edge, set_edge, rise_time, set_time, aqi_val,
+                          date_sweep=None, sweep_start_idx=0,
+                          init_rot=0, init_tilt=45, init_zoom=1.3):
+    """Single component with on-map buttons: 2D Street · 3D Street · 3D Satellite"""
+    import json, math as _m
+
+    env = st.session_state.env_data
+    mel  = round(m_el, 2)
+    maz  = round(m_az, 1)
+    ct   = sim_time.strftime('%H:%M')
+    cdate = sim_time.strftime('%b %d, %Y')
+    sim_iso = sim_time.isoformat()
+
+    all_pts = json.dumps([{
+        "lon": p["lon"], "lat": p["lat"],
+        "shlat": p["shlat"], "shlon": p["shlon"],
+        "el": round(p["el"], 2), "az": round(p.get("az", 0), 2),
+        "time": p["time"], "iso": p.get("iso", "")
+    } for p in path_data])
+
+    cos_lat = _m.cos(_m.radians(lat))
+    R = radius_meters
+
+    # 3D arc points (Three.js coords)
+    pts3 = []
+    for p in path_data:
+        dx = (p["lon"] - lon) * 111111 * cos_lat
+        dz = -(p["lat"] - lat) * 111111
+        dy = max(0, p["el"]) * (R / 90.0) * 2.2
+        pts3.append({"x": round(dx,2), "y": round(dy,2), "z": round(dz,2),
+                     "el": round(p["el"],2), "az": round(p.get("az",0),2), "time": p["time"]})
+    pts3_js = json.dumps(pts3)
+
+    cx  = round((m_slon - lon) * 111111 * cos_lat, 2)
+    cz  = round(-(m_slat - lat) * 111111, 2)
+    cy  = round(max(0, m_el) * (R / 90.0) * 2.2, 2)
+
+    init_rot  = float(init_rot) % 360
+    init_tilt = max(0.0, min(70.0, float(init_tilt)))
+    init_cr   = int(R * max(0.6, min(4.0, float(init_zoom))))
+
+    # OSM building ring for 3D shadow
+    steps, rd = 20, 0.000035
+    ring = []
+    for i in range(steps + 1):
+        a = 2 * _m.pi * i / steps
+        ring.append([lon + rd * _m.cos(a) / _m.cos(_m.radians(lat)),
+                     lat + rd * _m.sin(a)])
+    obs_gj = json.dumps({
+        "type": "FeatureCollection",
+        "features": [{"type": "Feature",
+                      "properties": {"color": "#F39C12", "height": 0.6, "minHeight": 0},
+                      "geometry": {"type": "Polygon", "coordinates": [ring]}}]
+    })
+    sun_path_coords = [[p["lon"], p["lat"]] for p in path_data if p["el"] >= 0]
+    sun_path_gj = json.dumps({
+        "type": "FeatureCollection",
+        "features": [{"type": "Feature",
+                      "properties": {"color": "#F39C12", "height": 1.5, "minHeight": 0},
+                      "geometry": {"type": "LineString", "coordinates": sun_path_coords}}]
+    })
+
+    animate_js = "true" if animate_trigger else "false"
+
+    # 365-day sweep data
+    sweep_js     = json.dumps(date_sweep or [])
+    sweep_idx_js = int(sweep_start_idx)
+
+    html = f"""<!DOCTYPE html><html><head><meta charset="utf-8"/>
+{_MAP_FONTS}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link href="https://cdn.osmbuildings.org/4.1.1/OSMBuildings.css" rel="stylesheet"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.osmbuildings.org/4.1.1/OSMBuildings.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*{{margin:0;padding:0;box-sizing:border-box;}}
+html,body{{background:#0A0C10;overflow:hidden;}}
+{_HUD_CSS}
+#wrap{{position:relative;width:100%;height:600px;}}
+#map2d{{width:100%;height:600px;border-radius:16px;border:1px solid rgba(243,156,18,.1);cursor:crosshair;display:block;}}
+#map3d{{width:100%;height:600px;border-radius:16px;border:1px solid rgba(243,156,18,.1);display:none;}}
+#cv3{{display:none;width:100%;height:600px;border-radius:16px;}}
+.sun-box{{background:linear-gradient(135deg,#F39C12,#E67E22);color:#000;
+          padding:3px 9px;border-radius:7px;font-weight:700;font-size:11px;
+          font-family:'JetBrains Mono',monospace;margin-bottom:2px;}}
+.sun-icon{{font-size:28pt;line-height:1;filter:drop-shadow(0 0 14px rgba(255,200,0,.85));}}
+.custom-sun-icon{{background:none;border:none;}}
+/* view switcher buttons */
+#view-btns{{position:absolute;top:14px;left:14px;z-index:9999;display:flex;gap:6px;}}
+.vbtn{{
+  background:rgba(7,9,16,.92);border:1px solid rgba(255,255,255,.07);
+  color:#6B7280;font-size:11px;font-weight:600;
+  font-family:'JetBrains Mono',monospace;
+  padding:6px 13px;border-radius:9px;cursor:pointer;
+  transition:all .2s;backdrop-filter:blur(8px);letter-spacing:.04em;
+}}
+.vbtn:hover{{border-color:rgba(243,156,18,.3);color:#E8EAF0;}}
+.vbtn.on{{border-color:rgba(243,156,18,.45);color:#F39C12;background:rgba(243,156,18,.1);}}
+
+/* 3D nav */
+.cb{{background:rgba(7,9,16,.92);border:1px solid rgba(255,255,255,.07);
+     color:#6B7280;font-size:13px;font-weight:700;padding:7px 12px;
+     border-radius:9px;cursor:pointer;transition:all .15s;backdrop-filter:blur(8px);line-height:1;}}
+.cb:hover{{border-color:rgba(243,156,18,.3);color:#E8EAF0;}}
+.cb.N{{border-color:rgba(243,156,18,.25);color:#F39C12;font-size:10px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;}}
+#nav3d{{position:absolute;bottom:46px;right:14px;z-index:9999;
+        display:none;flex-direction:column;gap:5px;align-items:center;}}
+#cmp-wrap{{position:absolute;top:110px;right:14px;z-index:9999;
+           display:none;width:42px;height:42px;pointer-events:none;
+           background:rgba(7,9,16,.88);border:1px solid rgba(255,255,255,.07);
+           border-radius:50%;align-items:center;justify-content:center;}}
+/* HUD */
+#hud{{position:absolute;top:14px;right:14px;z-index:9999;
+      background:rgba(7,9,16,0.95);border:1px solid rgba(243,156,18,0.3);
+      border-radius:16px;padding:16px 20px;font-family:'JetBrains Mono',monospace;
+      backdrop-filter:blur(20px);box-shadow:0 8px 40px rgba(0,0,0,.8);
+      min-width:230px;pointer-events:none;}}
+.hint{{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
+       z-index:9999;color:rgba(255,255,255,.25);font-size:10px;pointer-events:none;
+       font-family:'JetBrains Mono',monospace;background:rgba(7,9,16,.65);
+       padding:5px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.04);
+       white-space:nowrap;letter-spacing:.04em;}}
+</style>
+</head><body>
+<div id="wrap">
+  <!-- containers -->
+  <div id="map2d"></div>
+  <div id="map3d"></div>
+  <canvas id="cv3"></canvas>
+
+  <!-- view switcher -->
+  <div id="view-btns">
+    <button class="vbtn on" id="vb-2ds" onclick="switchView('2ds')">🗺 2D Street</button>
+    <button class="vbtn"    id="vb-3ds" onclick="switchView('3ds')">🏙 3D Street</button>
+    <button class="vbtn"    id="vb-3dt" onclick="switchView('3dt')">🛰 3D Satellite</button>
+  </div>
+
+  <!-- HUD (shared) -->
+  <div id="hud">
+    <div style="font-size:8px;letter-spacing:.22em;text-transform:uppercase;
+         color:#4B5563 !important;-webkit-text-fill-color:#4B5563 !important;
+         margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.08);">SOLAR POSITION</div>
+    <table style="width:100%;border-collapse:collapse;">
+      <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">📅 Date</td>
+          <td style="padding:4px 0;text-align:right;color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:12px;font-weight:700;">{cdate}</td></tr>
+      <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">🌅 Sunrise</td>
+          <td style="padding:4px 0;text-align:right;color:#F0F2F5 !important;-webkit-text-fill-color:#F0F2F5 !important;font-size:12px;font-weight:700;">{rise_time}</td></tr>
+      <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">🌇 Sunset</td>
+          <td style="padding:4px 0;text-align:right;color:#F0F2F5 !important;-webkit-text-fill-color:#F0F2F5 !important;font-size:12px;font-weight:700;">{set_time}</td></tr>
+      <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">☀️ Elevation</td>
+          <td style="padding:4px 0;text-align:right;color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:12px;font-weight:700;" id="hud-el">{mel}°</td></tr>
+      <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">🧭 Azimuth</td>
+          <td style="padding:4px 0;text-align:right;color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:12px;font-weight:700;" id="hud-az">{maz}°</td></tr>
+      <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">🕐 Time</td>
+          <td style="padding:4px 0;text-align:right;color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:12px;font-weight:700;" id="hud-tm">{ct}</td></tr>
+    </table>
+    <div id="hud-legend" style="border-top:1px solid rgba(255,255,255,.08);margin:10px 0 8px;"></div>
+    <div id="hud-legend-items">
+    <div style="font-size:8px;letter-spacing:.18em;text-transform:uppercase;
+         color:#4B5563 !important;-webkit-text-fill-color:#4B5563 !important;margin-bottom:7px;">LEGEND</div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+      <span style="display:inline-block;width:26px;height:3px;background:#E74C3C;border-radius:2px;flex-shrink:0;"></span>
+      <span style="color:#E74C3C !important;-webkit-text-fill-color:#E74C3C !important;font-size:11px;">Sunrise dir</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+      <span style="display:inline-block;width:26px;height:3px;background:#3498DB;border-radius:2px;flex-shrink:0;"></span>
+      <span style="color:#3498DB !important;-webkit-text-fill-color:#3498DB !important;font-size:11px;">Sunset dir</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
+      <span style="display:inline-block;width:26px;height:0;border-top:2px dashed #8B9AB0;flex-shrink:0;"></span>
+      <span style="color:#8B9AB0 !important;-webkit-text-fill-color:#8B9AB0 !important;font-size:11px;">Shadow</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span style="display:inline-block;width:26px;height:0;border-top:2px dashed #F39C12;flex-shrink:0;"></span>
+      <span style="color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:11px;">Sun path</span>
+    </div>
+    </div>
+  </div>
+
+  <!-- 3D nav controls -->
+  <div id="nav3d">
+    <button class="cb" onclick="aT(-10)">▲</button>
+    <div style="display:flex;gap:5px;">
+      <button class="cb" onclick="aR(-15)">◀</button>
+      <button class="cb N" onclick="rst()">N</button>
+      <button class="cb" onclick="aR(15)">▶</button>
+    </div>
+    <button class="cb" onclick="aT(10)">▼</button>
+  </div>
+  <div id="cmp-wrap">
+    <svg id="cmp" width="34" height="34" viewBox="-20 -20 40 40" style="transition:transform .2s;">
+      <polygon points="0,-12 3,0 0,3 -3,0" fill="#E74C3C"/>
+      <polygon points="0,12 3,0 0,-3 -3,0" fill="#374151"/>
+      <text x="0" y="-14" text-anchor="middle" fill="#E74C3C" font-size="5.5" font-weight="bold" font-family="JetBrains Mono">N</text>
+      <text x="0" y="19"  text-anchor="middle" fill="#374151" font-size="5.5" font-family="JetBrains Mono">S</text>
+      <text x="15" y="3"  text-anchor="middle" fill="#374151" font-size="5.5" font-family="JetBrains Mono">E</text>
+      <text x="-15" y="3" text-anchor="middle" fill="#374151" font-size="5.5" font-family="JetBrains Mono">W</text>
+    </svg>
+  </div>
+
+  <!-- arc overlay + floating sun for 3D -->
+  <svg id="arc-svg3d" style="position:absolute;top:0;left:0;width:100%;height:100%;
+    pointer-events:none;z-index:18;overflow:visible;display:none;"></svg>
+  <div id="sun3d" style="font-size:36px;line-height:1;pointer-events:none;position:absolute;
+    transform:translate(-50%,-50%);display:none;
+    filter:drop-shadow(0 0 18px rgba(255,200,0,.95));">☀️</div>
+  <div class="hint" id="hint-bar">🖱 Click to move pin · Drag · Scroll zoom</div>
+</div>
+
+<script>
+const D2R = Math.PI/180;
+const allPts = {all_pts};
+const pts3   = {pts3_js};
+let curView  = '2ds';
+let curRot   = {init_rot:.1f};
+let curTilt  = {init_tilt:.1f};
+let curCr    = {init_cr};
+let osmMap   = null, lMap = null, threeRend = null, threeScene = null, threeCam = null;
+let sunM2d=null, shad2d=null, animTimer=null, threeAnimTimer=null;
+let osmSunLayer=null;
+
+// ── HUD updater ───────────────────────────────────────────────────────────
+function updHUD(el, az, tm) {{
+  document.getElementById('hud-el').textContent = el.toFixed(1)+'°';
+  document.getElementById('hud-az').textContent = az.toFixed(1)+'°';
+  document.getElementById('hud-tm').textContent = tm;
+}}
+
+// ── VIEW SWITCHER ─────────────────────────────────────────────────────────
+function switchView(v) {{
+  curView = v;
+  ['2ds','3ds','3dt'].forEach(id => {{
+    document.getElementById('vb-'+id).className = 'vbtn'+(id===v?' on':'');
+  }});
+  document.getElementById('map2d').style.display = v==='2ds' ? 'block' : 'none';
+  document.getElementById('map3d').style.display = (v==='3ds'||v==='3dt') ? 'block' : 'none';
+  document.getElementById('cv3').style.display   = 'none';
+  document.getElementById('nav3d').style.display      = (v==='3ds'||v==='3dt') ? 'flex' : 'none';
+  document.getElementById('cmp-wrap').style.display   = (v==='3ds'||v==='3dt') ? 'flex' : 'none';
+  document.getElementById('arc-svg3d').style.display  = (v==='3ds'||v==='3dt') ? 'block' : 'none';
+  document.getElementById('sun3d').style.display      = (v==='3ds'||v==='3dt') ? 'block' : 'none';
+  // Legend only on 2D
+  var leg = document.getElementById('hud-legend');
+  var legI = document.getElementById('hud-legend-items');
+  if(leg)  leg.style.display  = v==='2ds' ? 'block' : 'none';
+  if(legI) legI.style.display = v==='2ds' ? 'block' : 'none';
+  document.getElementById('hint-bar').textContent = v==='2ds'
+    ? '🖱 Click to move pin · Drag · Scroll zoom'
+    : '🖱 Drag · Scroll zoom · ↔ rotate · ▲▼ tilt';
+
+  if ((v==='3ds'||v==='3dt') && !osmMap) initOSM();
+  if (v==='3dt' && osmMap) osmMap.addMapTiles('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}');
+  if (v==='3ds' && osmMap) osmMap.addMapTiles('https://tile-a.openstreetmap.fr/hot/{{z}}/{{x}}/{{y}}.png');
+  if (v==='2ds' && !lMap) initLeaflet();
+  // Re-apply current sweep day arc on view switch
+  if(sweepData && sweepData.length) {{
+    var day = sweepData[sweepIdx];
+    if(v==='2ds') {{ setTimeout(function(){{ updateDayArc2d(day); }}, 300); }}
+    else          {{ setTimeout(function(){{ updateDayArc3d(day); }}, 300); }}
+  }}
+}}
+
+// ── LEAFLET 2D ────────────────────────────────────────────────────────────
+function initLeaflet() {{
+  var streetT = L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png');
+  lMap = L.map('map2d', {{center:[{lat},{lon}], zoom:17, layers:[streetT], zoomControl:false,attributionControl:false}});
+  L.control.zoom({{position:'bottomright'}}).addTo(lMap);
+
+  L.circle([{lat},{lon}],{{radius:{radius_meters},color:'rgba(243,156,18,.25)',
+    weight:1.5,fillColor:'rgba(243,156,18,.04)',fillOpacity:1}}).addTo(lMap);
+  L.polyline(allPts.map(p=>[p.lat,p.lon]),{{color:'#F39C12',weight:4,dashArray:'6,10',opacity:.75}}).addTo(lMap);
+  L.polyline([[{lat},{lon}],{rise_edge}],{{color:'#E74C3C',weight:2.5,opacity:.8}}).addTo(lMap);
+  L.polyline([[{lat},{lon}],{set_edge}], {{color:'#3498DB',weight:2.5,opacity:.8}}).addTo(lMap);
+
+  var sunIco = L.divIcon({{
+    html:'<div style="text-align:center;line-height:1;"><div class="sun-icon">☀️</div><div class="sun-box" id="stl" style="margin-top:2px;">{ct}</div></div>',
+    iconSize:[60,60], iconAnchor:[30,22], className:'custom-sun-icon'
+  }});
+  sunM2d = L.marker([{m_slat},{m_slon}], {{icon:sunIco}}).addTo(lMap);
+  shad2d = L.polyline([[{lat},{lon}],[{m_shlat},{m_shlon}]],
+    {{color:'#8B9AB0',weight:2.5,dashArray:'5,8',opacity:.75}}).addTo(lMap);
+
+  // click to relocate
+  var pinM = L.marker([{lat},{lon}],{{icon:L.divIcon({{
+    html:'<div style="font-size:22px;filter:drop-shadow(0 0 6px rgba(243,156,18,.8));">📍</div>',
+    iconSize:[28,28],iconAnchor:[14,28],className:''}})}}).addTo(lMap);
+  lMap.on('click', function(e){{
+    pinM.setLatLng([e.latlng.lat, e.latlng.lng]);
+    try {{ window.parent.sessionStorage.setItem('map2d_click',
+      JSON.stringify({{lat:e.latlng.lat,lon:e.latlng.lng}})); }} catch(err){{}}
+  }});
+
+  start2DAnim();
+}}
+
+function upd2d(p) {{
+  if(!p||!sunM2d) return;
+  sunM2d.setLatLng([p.lat,p.lon]);
+  shad2d.setLatLngs([[{lat},{lon}],[p.shlat,p.shlon]]);
+  var stl=document.getElementById('stl'); if(stl) stl.innerHTML=p.time;
+  sunM2d.setOpacity(p.el<0?0:1);
+  shad2d.setStyle({{opacity:p.el<0?0:.75}});
+  updHUD(p.el,p.az,p.time);
+}}
+
+function start2DAnim() {{
+  if(animTimer) clearInterval(animTimer);
+  var i=0, anim={animate_js};
+  if(anim) {{ animTimer=setInterval(()=>{{upd2d(allPts[i]);i=(i+1)%allPts.length;}},150); }}
+  else {{ upd2d(allPts.find(p=>p.time==='{ct}')||allPts[0]); }}
+}}
+
+// ── OSM BUILDINGS 3D ──────────────────────────────────────────────────────
+function initOSM() {{
+  var tileUrl = curView==='3dt'
+    ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}'
+    : 'https://tile-a.openstreetmap.fr/hot/{{z}}/{{x}}/{{y}}.png';
+
+  osmMap = new OSMBuildings({{
+    container:'map3d',
+    position:{{latitude:{lat},longitude:{lon}}},
+    zoom:17,minZoom:15,maxZoom:20,
+    tilt:curTilt,rotation:curRot,
+    effects:['shadows'],
+    attribution:''
+  }});
+  osmMap.setDate(new Date('{sim_iso}'));
+  osmMap.addMapTiles(tileUrl);
+  osmMap.addGeoJSONTiles('https://{{s}}.data.osmbuildings.org/0.2/59fcc2e8/tile/{{z}}/{{x}}/{{y}}.json');
+  osmMap.addGeoJSON({obs_gj});
+  osmMap.addGeoJSON({sun_path_gj});
+
+  osmMap.on('rotate', ()=>{{
+    try {{ curRot=((osmMap.getRotation()%360)+360)%360;
+      document.getElementById('cmp').style.transform='rotate('+curRot+'deg)';
+    }}catch(e){{}}
+  }});
+
+  start3DAnim();
+}}
+
+// ── Arc overlay for 3D ───────────────────────────────────────────────────
+var curEl3d = {mel}, curAz3d = {maz};
+var arcSvg3d = document.getElementById('arc-svg3d');
+var sunEl3d  = document.getElementById('sun3d');
+
+function projectToScreen3d(az, el) {{
+  var mapDiv = document.getElementById('map3d');
+  var W = (mapDiv && mapDiv.clientWidth)  || 800;
+  var H = (mapDiv && mapDiv.clientHeight) || 600;
+  var f  = Math.max(0, el) / 90;
+  var rx = W * 0.48 * (1 - f);
+  var ry = H * 0.44 * (1 - f);
+  var ar = (az - curRot) * D2R;
+  return [W/2 + rx*Math.sin(ar), H/2 - ry*Math.cos(ar)*0.6];
+}}
+
+function drawArc3d() {{
+  var mapDiv = document.getElementById('map3d');
+  var W = (mapDiv && mapDiv.clientWidth)  || 800;
+  var H = (mapDiv && mapDiv.clientHeight) || 600;
+  arcSvg3d.setAttribute('viewBox','0 0 '+W+' '+H);
+  while(arcSvg3d.firstChild) arcSvg3d.removeChild(arcSvg3d.firstChild);
+  var above = allPts.filter(p=>p.el>=0);
+  if(above.length<2) return;
+  var spts = above.map(p=>projectToScreen3d(p.az,p.el));
+  var pts_str = spts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
+  function mkPoly(stroke,sw,dash,op){{
+    var pl=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+    pl.setAttribute('points',pts_str); pl.setAttribute('fill','none');
+    pl.setAttribute('stroke',stroke); pl.setAttribute('stroke-width',sw);
+    pl.setAttribute('stroke-linecap','round'); pl.setAttribute('stroke-linejoin','round');
+    if(dash) pl.setAttribute('stroke-dasharray',dash);
+    if(op)   pl.setAttribute('opacity',op);
+    arcSvg3d.appendChild(pl);
+  }}
+  mkPoly('rgba(255,180,0,0.18)','14',null,null);
+  mkPoly('rgba(255,200,80,0.28)','6',null,null);
+  mkPoly('#F39C12','2.5','6 9','0.92');
+  above.forEach(function(p,i){{
+    if(i%3!==0) return;
+    var sp=projectToScreen3d(p.az,p.el);
+    var dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    dot.setAttribute('cx',sp[0].toFixed(1)); dot.setAttribute('cy',sp[1].toFixed(1));
+    dot.setAttribute('r','2.8'); dot.setAttribute('fill','#FFD06D'); dot.setAttribute('opacity','0.85');
+    arcSvg3d.appendChild(dot);
+  }});
+  // Rise/set labels
+  [{{'pt':spts[0],'txt':'🌅 Rise','anchor':'end'}},{{'pt':spts[spts.length-1],'txt':'Set 🌇','anchor':'start'}}].forEach(function(lbl){{
+    var lx=lbl.pt[0], ly=lbl.pt[1];
+    var c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',lx.toFixed(1)); c.setAttribute('cy',ly.toFixed(1));
+    c.setAttribute('r','4.5'); c.setAttribute('fill','#F39C12'); c.setAttribute('opacity','0.95');
+    arcSvg3d.appendChild(c);
+    var t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',(lx+(lbl.anchor==='end'?-10:10)).toFixed(1));
+    t.setAttribute('y',(ly-8).toFixed(1));
+    t.setAttribute('fill','#FFD06D'); t.setAttribute('font-size','10');
+    t.setAttribute('font-family','JetBrains Mono,monospace'); t.setAttribute('font-weight','600');
+    t.setAttribute('text-anchor',lbl.anchor); t.setAttribute('opacity','0.9');
+    t.textContent=lbl.txt; arcSvg3d.appendChild(t);
+  }});
+}}
+
+function moveSun3d(az, el) {{
+  if(el < -5) {{ sunEl3d.style.display='none'; return; }}
+  var sp = projectToScreen3d(az, el);
+  sunEl3d.style.display='block';
+  sunEl3d.style.left=sp[0]+'px';
+  sunEl3d.style.top=sp[1]+'px';
+}}
+
+function start3DAnim() {{
+  if(threeAnimTimer) clearInterval(threeAnimTimer);
+  // Show arc overlay
+  arcSvg3d.style.display='block';
+  sunEl3d.style.display='block';
+  drawArc3d();
+  moveSun3d(curAz3d, curEl3d);
+  var i=0, anim={animate_js};
+  if(anim) {{
+    threeAnimTimer=setInterval(function(){{
+      var p=allPts[i]; i=(i+1)%allPts.length;
+      if(osmMap && p.iso) osmMap.setDate(new Date(p.iso));
+      curEl3d=p.el; curAz3d=p.az;
+      moveSun3d(p.az,p.el);
+      updHUD(p.el,p.az,p.time);
+    }},200);
+  }} else {{
+    moveSun3d({maz},{mel});
+    updHUD({mel},{maz},'{ct}');
+  }}
+}}
+
+function aR(d){{
+  curRot=(curRot+d+360)%360; if(osmMap)osmMap.setRotation(curRot);
+  document.getElementById('cmp').style.transform='rotate('+curRot+'deg)';
+  drawArc3d(); moveSun3d(curAz3d,curEl3d);
+}}
+function aT(d){{
+  curTilt=Math.max(0,Math.min(70,curTilt+d)); if(osmMap)osmMap.setTilt(curTilt);
+  drawArc3d(); moveSun3d(curAz3d,curEl3d);
+}}
+function rst(){{
+  curRot=0;curTilt=45; if(osmMap){{osmMap.setRotation(0);osmMap.setTilt(45);}}
+  document.getElementById('cmp').style.transform='rotate(0deg)';
+  drawArc3d(); moveSun3d(curAz3d,curEl3d);
+}}
+
+// ── DATE SWEEP DATA ───────────────────────────────────────────────────────
+const sweepData   = {sweep_js};
+let   sweepIdx    = {sweep_idx_js};
+let   sweepPaused = false;
+let   sweepTimer  = null;
+let   dayArcPoly2d  = null;  // Leaflet polyline for day arc
+let   shadRiseEdge2d = null;
+let   shadSetEdge2d  = null;
+
+const pauseBtn  = document.getElementById('date-pause');
+const dateBadge = document.getElementById('date-badge');
+
+pauseBtn.addEventListener('click', function() {{
+  sweepPaused = !sweepPaused;
+  pauseBtn.textContent = sweepPaused ? '▶' : '⏸';
+  pauseBtn.style.borderColor = sweepPaused ? '#E74C3C' : 'rgba(243,156,18,0.5)';
+}});
+
+// Convert az+el to Leaflet lat/lon on the ground plane (same formula as get_solar_pos)
+function azElToLatLon(az, el) {{
+  var sc  = Math.cos(el * Math.PI / 180);
+  var R   = {radius_meters};
+  var lat0 = {lat} * Math.PI / 180;
+  var slat = {lat} + (R * sc / 111111) * Math.cos(az * Math.PI / 180);
+  var slon = {lon} + (R * sc / (111111 * Math.cos(lat0))) * Math.sin(az * Math.PI / 180);
+  return [slat, slon];
+}}
+
+function updateDayArc2d(dayData) {{
+  if(!lMap) return;
+  // Remove old arc + edges
+  if(dayArcPoly2d)   {{ lMap.removeLayer(dayArcPoly2d);   dayArcPoly2d   = null; }}
+  if(shadRiseEdge2d) {{ lMap.removeLayer(shadRiseEdge2d); shadRiseEdge2d = null; }}
+  if(shadSetEdge2d)  {{ lMap.removeLayer(shadSetEdge2d);  shadSetEdge2d  = null; }}
+
+  var abovePts = dayData.pts.filter(function(p) {{ return p.el >= 0; }});
+  if(abovePts.length < 2) return;
+
+  // Draw arc path
+  var latlngs = abovePts.map(function(p) {{ return azElToLatLon(p.az, p.el); }});
+  dayArcPoly2d = L.polyline(latlngs, {{color:'#F39C12', weight:3, dashArray:'6,10', opacity:.8}}).addTo(lMap);
+
+  // Draw rise/set direction lines
+  var rPt = azElToLatLon(abovePts[0].az, 0.1);
+  var sPt = azElToLatLon(abovePts[abovePts.length-1].az, 0.1);
+  shadRiseEdge2d = L.polyline([[{lat},{lon}], rPt], {{color:'#E74C3C', weight:2, opacity:.7}}).addTo(lMap);
+  shadSetEdge2d  = L.polyline([[{lat},{lon}], sPt], {{color:'#3498DB', weight:2, opacity:.7}}).addTo(lMap);
+}}
+
+function updateDayArc3d(dayData) {{
+  if(!osmMap) return;
+  var abovePts = dayData.pts.filter(function(p) {{ return p.el >= 0; }});
+  curEl3d = abovePts.length ? abovePts[Math.floor(abovePts.length/2)].el : 0;
+  curAz3d = abovePts.length ? abovePts[Math.floor(abovePts.length/2)].az : 180;
+  drawArc3d();
+  moveSun3d(curAz3d, curEl3d);
+}}
+
+function tickSweep() {{
+  if(sweepPaused || !sweepData.length) return;
+  sweepIdx = (sweepIdx + 1) % sweepData.length;
+  var day  = sweepData[sweepIdx];
+  dateBadge.textContent = day.date + '  🌅 ' + day.rise + '  🌇 ' + day.set;
+
+  // Update HUD date
+  document.getElementById('hud-el').textContent = '--°';
+  document.getElementById('hud-az').textContent = '--°';
+  document.getElementById('hud-tm').textContent = day.noon;
+
+  // Update 3D OSM shadow date
+  if(osmMap) {{
+    try {{ osmMap.setDate(new Date(day.iso + 'T' + day.noon.replace(':','') + '00')); }} catch(e) {{}}
+  }}
+
+  // Update arc on current view
+  if(curView === '2ds') updateDayArc2d(day);
+  else                  updateDayArc3d(day);
+}}
+
+function initSweep() {{
+  if(!sweepData.length) return;
+  // Show initial day
+  var day = sweepData[sweepIdx];
+  if(day) {{
+    dateBadge.textContent = day.date + '  🌅 ' + day.rise + '  🌇 ' + day.set;
+    if(curView === '2ds') updateDayArc2d(day);
+    else                  updateDayArc3d(day);
+  }}
+  // Tick every 800ms — smooth but readable
+  sweepTimer = setInterval(tickSweep, 800);
+}}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────
+initLeaflet();
+updHUD({mel},{maz},'{ct}');
+// Start sweep after a short delay to let maps init
+setTimeout(initSweep, 600);
+</script>
+</body></html>"""
+
+    components.html(html, height=640)
