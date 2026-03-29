@@ -235,4 +235,3 @@ def compute_sunlight_window(city_info, obs_date, local_tz, buildings, floor_m,
         "peak_time":   peak_time,
         "hourly":      hourly,
     }
-                                
