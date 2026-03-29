@@ -1257,7 +1257,6 @@ cv.addEventListener('touchmove',e=>{{
 def render_live_component(lat, lon, radius_meters, path_data, animate_trigger,
                           sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el, m_az,
                           rise_edge, set_edge, rise_time, set_time, aqi_val,
-                          date_sweep=None, sweep_start_idx=0,
                           init_rot=0, init_tilt=45, init_zoom=1.3):
     """Single component with on-map buttons: 2D Street · 3D Street · 3D Satellite"""
     import json, math as _m
@@ -1319,10 +1318,6 @@ def render_live_component(lat, lon, radius_meters, path_data, animate_trigger,
     })
 
     animate_js = "true" if animate_trigger else "false"
-
-    # 365-day sweep data
-    sweep_js     = json.dumps(date_sweep or [])
-    sweep_idx_js = int(sweep_start_idx)
 
     html = f"""<!DOCTYPE html><html><head><meta charset="utf-8"/>
 {_MAP_FONTS}
@@ -1706,103 +1701,9 @@ function rst(){{
   drawArc3d(); moveSun3d(curAz3d,curEl3d);
 }}
 
-// ── DATE SWEEP DATA ───────────────────────────────────────────────────────
-const sweepData   = {sweep_js};
-let   sweepIdx    = {sweep_idx_js};
-let   sweepPaused = false;
-let   sweepTimer  = null;
-let   dayArcPoly2d  = null;  // Leaflet polyline for day arc
-let   shadRiseEdge2d = null;
-let   shadSetEdge2d  = null;
-
-const pauseBtn  = document.getElementById('date-pause');
-const dateBadge = document.getElementById('date-badge');
-
-pauseBtn.addEventListener('click', function() {{
-  sweepPaused = !sweepPaused;
-  pauseBtn.textContent = sweepPaused ? '▶' : '⏸';
-  pauseBtn.style.borderColor = sweepPaused ? '#E74C3C' : 'rgba(243,156,18,0.5)';
-}});
-
-// Convert az+el to Leaflet lat/lon on the ground plane (same formula as get_solar_pos)
-function azElToLatLon(az, el) {{
-  var sc  = Math.cos(el * Math.PI / 180);
-  var R   = {radius_meters};
-  var lat0 = {lat} * Math.PI / 180;
-  var slat = {lat} + (R * sc / 111111) * Math.cos(az * Math.PI / 180);
-  var slon = {lon} + (R * sc / (111111 * Math.cos(lat0))) * Math.sin(az * Math.PI / 180);
-  return [slat, slon];
-}}
-
-function updateDayArc2d(dayData) {{
-  if(!lMap) return;
-  // Remove old arc + edges
-  if(dayArcPoly2d)   {{ lMap.removeLayer(dayArcPoly2d);   dayArcPoly2d   = null; }}
-  if(shadRiseEdge2d) {{ lMap.removeLayer(shadRiseEdge2d); shadRiseEdge2d = null; }}
-  if(shadSetEdge2d)  {{ lMap.removeLayer(shadSetEdge2d);  shadSetEdge2d  = null; }}
-
-  var abovePts = dayData.pts.filter(function(p) {{ return p.el >= 0; }});
-  if(abovePts.length < 2) return;
-
-  // Draw arc path
-  var latlngs = abovePts.map(function(p) {{ return azElToLatLon(p.az, p.el); }});
-  dayArcPoly2d = L.polyline(latlngs, {{color:'#F39C12', weight:3, dashArray:'6,10', opacity:.8}}).addTo(lMap);
-
-  // Draw rise/set direction lines
-  var rPt = azElToLatLon(abovePts[0].az, 0.1);
-  var sPt = azElToLatLon(abovePts[abovePts.length-1].az, 0.1);
-  shadRiseEdge2d = L.polyline([[{lat},{lon}], rPt], {{color:'#E74C3C', weight:2, opacity:.7}}).addTo(lMap);
-  shadSetEdge2d  = L.polyline([[{lat},{lon}], sPt], {{color:'#3498DB', weight:2, opacity:.7}}).addTo(lMap);
-}}
-
-function updateDayArc3d(dayData) {{
-  if(!osmMap) return;
-  var abovePts = dayData.pts.filter(function(p) {{ return p.el >= 0; }});
-  curEl3d = abovePts.length ? abovePts[Math.floor(abovePts.length/2)].el : 0;
-  curAz3d = abovePts.length ? abovePts[Math.floor(abovePts.length/2)].az : 180;
-  drawArc3d();
-  moveSun3d(curAz3d, curEl3d);
-}}
-
-function tickSweep() {{
-  if(sweepPaused || !sweepData.length) return;
-  sweepIdx = (sweepIdx + 1) % sweepData.length;
-  var day  = sweepData[sweepIdx];
-  dateBadge.textContent = day.date + '  🌅 ' + day.rise + '  🌇 ' + day.set;
-
-  // Update HUD date
-  document.getElementById('hud-el').textContent = '--°';
-  document.getElementById('hud-az').textContent = '--°';
-  document.getElementById('hud-tm').textContent = day.noon;
-
-  // Update 3D OSM shadow date
-  if(osmMap) {{
-    try {{ osmMap.setDate(new Date(day.iso + 'T' + day.noon.replace(':','') + '00')); }} catch(e) {{}}
-  }}
-
-  // Update arc on current view
-  if(curView === '2ds') updateDayArc2d(day);
-  else                  updateDayArc3d(day);
-}}
-
-function initSweep() {{
-  if(!sweepData.length) return;
-  // Show initial day
-  var day = sweepData[sweepIdx];
-  if(day) {{
-    dateBadge.textContent = day.date + '  🌅 ' + day.rise + '  🌇 ' + day.set;
-    if(curView === '2ds') updateDayArc2d(day);
-    else                  updateDayArc3d(day);
-  }}
-  // Tick every 800ms — smooth but readable
-  sweepTimer = setInterval(tickSweep, 800);
-}}
-
 // ── BOOT ──────────────────────────────────────────────────────────────────
 initLeaflet();
 updHUD({mel},{maz},'{ct}');
-// Start sweep after a short delay to let maps init
-setTimeout(initSweep, 600);
 </script>
 </body></html>"""
 
