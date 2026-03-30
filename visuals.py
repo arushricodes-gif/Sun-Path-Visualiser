@@ -1455,9 +1455,14 @@ html,body{{background:#0A0C10;overflow:hidden;}}
   <!-- arc overlay + floating sun for 3D -->
   <svg id="arc-svg3d" style="position:absolute;top:0;left:0;width:100%;height:100%;
     pointer-events:none;z-index:18;overflow:visible;display:none;"></svg>
-  <div id="sun3d" style="font-size:36px;line-height:1;pointer-events:none;position:absolute;
-    transform:translate(-50%,-50%);display:none;
-    filter:drop-shadow(0 0 18px rgba(255,200,0,.95));">☀️</div>
+  <div id="sun3d" style="pointer-events:none;position:absolute;
+    transform:translate(-50%,-50%);display:none;text-align:center;line-height:1;">
+    <div style="font-size:36px;filter:drop-shadow(0 0 18px rgba(255,200,0,.95));">☀️</div>
+    <div id="sun3d-time" style="background:linear-gradient(135deg,#F39C12,#E67E22);color:#000;
+      padding:3px 9px;border-radius:7px;font-weight:700;font-size:11px;
+      font-family:'JetBrains Mono',monospace;margin-top:3px;
+      box-shadow:0 3px 10px rgba(243,156,18,.35);white-space:nowrap;">--:--</div>
+  </div>
   <div class="hint" id="hint-bar">🖱 Click to move pin · Drag · Scroll zoom</div>
 </div>
 
@@ -1656,12 +1661,13 @@ function drawArc3d() {{
   }});
 }}
 
-function moveSun3d(az, el) {{
+function moveSun3d(az, el, tm) {{
   if(el < -5) {{ sunEl3d.style.display='none'; return; }}
   var sp = projectToScreen3d(az, el);
   sunEl3d.style.display='block';
   sunEl3d.style.left=sp[0]+'px';
   sunEl3d.style.top=sp[1]+'px';
+  if(tm) {{ var tl=document.getElementById('sun3d-time'); if(tl) tl.textContent=tm; }}
 }}
 
 function start3DAnim() {{
@@ -1677,11 +1683,11 @@ function start3DAnim() {{
       var p=allPts[i]; i=(i+1)%allPts.length;
       if(osmMap && p.iso) osmMap.setDate(new Date(p.iso));
       curEl3d=p.el; curAz3d=p.az;
-      moveSun3d(p.az,p.el);
+      moveSun3d(p.az,p.el,p.time);
       updHUD(p.el,p.az,p.time);
     }},200);
   }} else {{
-    moveSun3d({maz},{mel});
+    moveSun3d({maz},{mel},'{ct}');
     updHUD({mel},{maz},'{ct}');
   }}
 }}
