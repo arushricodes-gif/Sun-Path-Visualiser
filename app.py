@@ -931,4 +931,3 @@ with tab_explorer:
             </div>
         </div>
         """, unsafe_allow_html=True)
-        
