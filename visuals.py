@@ -4,312 +4,184 @@ import math
 
 
 def apply_styles(theme="dark"):
-    if theme == "light":
-        root_vars = """
-        :root {
-            --gold:  #D4860A;
-            --gold2: #B8700E;
-            --dim:   #C47A0C;
-            --glow:  rgba(212,134,10,.12);
-            --bg:    #F7F4EF;
-            --s1:    #FFFFFF;
-            --s2:    #F0ECE6;
-            --s3:    #E8E2D9;
-            --b1:    rgba(0,0,0,.07);
-            --b2:    rgba(0,0,0,.10);
-            --b3:    rgba(212,134,10,.25);
-            --t1:    #111111;
-            --t2:    #3D3D3D;
-            --t3:    #777777;
-            --sidebar-bg: #FFFFFF;
-            --sidebar-border: rgba(212,134,10,.15);
-            --metric-bg: #FFFFFF;
-            --metric-border: rgba(0,0,0,.07);
-            --tab-list-bg: #FFFFFF;
-            --tab-selected-bg: rgba(212,134,10,.10);
-            --input-bg: #FFFFFF;
-            --alert-bg: #FDFAF5;
-            --scrollbar-thumb: rgba(0,0,0,.18);
-            --hr-color: rgba(0,0,0,.08);
-        }"""
-        stapp_extra = """
-        .stApp {
-            background: var(--bg) !important;
-            background-image:
-                radial-gradient(ellipse 100% 40% at 50% 0%, rgba(212,134,10,.06) 0%, transparent 60%) !important;
-        }"""
-        sidebar_extra = """
-        [data-testid="stSidebar"] {
-            background: var(--sidebar-bg) !important;
-            border-right: 1px solid var(--sidebar-border) !important;
-            box-shadow: 2px 0 12px rgba(0,0,0,.06) !important;
-        }"""
-        plot_bg = "rgba(247,244,239,0)"
-        plot_grid = "rgba(0,0,0,0.07)"
-        plot_font = "#111111"
-        alert_extra = """
-        [data-testid="stAlert"] {
-            background: var(--alert-bg) !important;
-            border-radius: 10px !important;
-            border: 1px solid rgba(212,134,10,.2) !important;
-            font-size: 12px !important;
-            color: var(--t2) !important;
-        }"""
-    else:
-        root_vars = """
-        :root {
-            --gold:  #F39C12;
-            --gold2: #E67E22;
-            --dim:   #A06808;
-            --glow:  rgba(243,156,18,.15);
-            --bg:    #0A0C10;
-            --s1:    #0F1218;
-            --s2:    #141820;
-            --s3:    #1C2230;
-            --b1:    rgba(255,255,255,.05);
-            --b2:    rgba(255,255,255,.08);
-            --b3:    rgba(243,156,18,.18);
-            --t1:    #F0F2F5;
-            --t2:    #9CA3AF;
-            --t3:    #4B5563;
-            --sidebar-bg: #070910;
-            --sidebar-border: rgba(243,156,18,.08);
-            --metric-bg: #0F1218;
-            --metric-border: rgba(255,255,255,.05);
-            --tab-list-bg: #0F1218;
-            --tab-selected-bg: rgba(243,156,18,.15);
-            --input-bg: #141820;
-            --alert-bg: #141820;
-            --scrollbar-thumb: rgba(255,255,255,.08);
-            --hr-color: rgba(255,255,255,.08);
-        }"""
-        stapp_extra = """
-        .stApp {
-            background: var(--bg) !important;
-            background-image:
-                radial-gradient(ellipse 100% 40% at 50% 0%, rgba(243,156,18,.055) 0%, transparent 65%) !important;
-        }"""
-        sidebar_extra = """
-        [data-testid="stSidebar"] {
-            background: var(--sidebar-bg) !important;
-            border-right: 1px solid var(--sidebar-border) !important;
-        }"""
-        plot_bg = "rgba(0,0,0,0)"
-        plot_grid = "rgba(0,0,0,0.1)"
-        plot_font = "#F0F2F5"
-        alert_extra = """
-        [data-testid="stAlert"] {
-            background: var(--alert-bg) !important;
-            border-radius: 10px !important;
-            border: 1px solid var(--b1) !important;
-            font-size: 12px !important;
-        }"""
+    """Minimal — just stores plot colors. All CSS is in app.py."""
+    # Always light now
+    st.session_state["_plot_bg"]   = "rgba(0,0,0,0)"
+    st.session_state["_plot_grid"] = "rgba(0,0,0,0.06)"
+    st.session_state["_plot_font"] = "#1A1A1A"
+    # Inject ONLY what Streamlit's built-in widgets need that app.py can't reach:
+    # fix selectbox dropdown background (it renders in a portal outside the main DOM)
+    # Inject via a JS-based style tag so it applies at body level and wins over portal styles
+    st.components.v1.html("""
+<script>
+(function() {
+  var css = `
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
 
-    st.markdown(f"""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+    /* All inputs white */
+    input, textarea,
+    [data-baseweb="input"], [data-baseweb="base-input"],
+    [data-baseweb="select"], [data-baseweb="select"] > div,
+    [data-testid="stTextInput"] > div,
+    [data-testid="stSelectbox"] > div > div,
+    [data-testid="stDateInput"] > div > div {
+      background-color: #ffffff !important;
+      background: #ffffff !important;
+      color: #1A1A1A !important;
+      -webkit-text-fill-color: #1A1A1A !important;
+    }
+    input::placeholder { color: #999 !important; -webkit-text-fill-color: #999 !important; }
+    [data-testid="stSelectbox"] span,
+    [data-testid="stSelectbox"] div,
+    [data-testid="stSelectbox"] p { color: #1A1A1A !important; -webkit-text-fill-color: #1A1A1A !important; }
 
-    {root_vars}
+    /* Dropdown portal — must be on body/document, not scoped */
+    body [data-baseweb="popover"],
+    body [data-baseweb="popover"] > div,
+    body [data-baseweb="popover"] > div > div,
+    body [data-baseweb="menu"],
+    body [data-baseweb="menu"] > ul,
+    body [data-baseweb="menu"] li,
+    body [data-baseweb="list"],
+    body li[role="option"],
+    body div[role="option"],
+    body [data-baseweb="option"],
+    body [class*="menuList"],
+    body [class*="option"],
+    body [class*="menu"] > div {
+      background-color: #ffffff !important;
+      background: #ffffff !important;
+      color: #1A1A1A !important;
+      -webkit-text-fill-color: #1A1A1A !important;
+    }
+    body [data-baseweb="option"]:hover,
+    body li[role="option"]:hover,
+    body [data-baseweb="option"][aria-selected="true"],
+    body li[role="option"][aria-selected="true"] {
+      background-color: #FFF3E0 !important;
+      color: #E07B00 !important;
+      -webkit-text-fill-color: #E07B00 !important;
+    }
+    body [data-baseweb="option"] *,
+    body [data-baseweb="menu"] span,
+    body [data-baseweb="menu"] div,
+    body li[role="option"] span,
+    body li[role="option"] div { color: #1A1A1A !important; -webkit-text-fill-color: #1A1A1A !important; }
 
-    {stapp_extra}
+    /* Form */
+    [data-testid="stForm"] { background:#fff !important; border:2px solid #FFF3E0 !important; border-radius:16px !important; padding:16px !important; }
 
-    html, body, [class*="css"] {{
-        font-family: 'Inter', sans-serif !important;
-        color: var(--t1) !important;
-    }}
-    h1, h2, h3 {{
-        font-family: 'Bebas Neue', sans-serif !important;
-        letter-spacing: .04em !important;
-        color: var(--t1) !important;
-    }}
-    p, li, span, label, div {{
-        color: var(--t1) !important;
-    }}
+    /* Slider, toggle, alert */
+    [data-testid="stSlider"] p, [data-testid="stSlider"] span { color:#1A1A1A !important; -webkit-text-fill-color:#1A1A1A !important; }
+    [data-testid="stThumbValue"] { color:#E07B00 !important; -webkit-text-fill-color:#E07B00 !important; font-weight:700 !important; }
+    [data-testid="stToggle"] p, [data-testid="stToggle"] span { color:#1A1A1A !important; -webkit-text-fill-color:#1A1A1A !important; }
+    [data-testid="stAlert"] p, [data-testid="stAlert"] span { color:#1A1A1A !important; -webkit-text-fill-color:#1A1A1A !important; }
 
-    {sidebar_extra}
-    [data-testid="stSidebar"] p,
-    [data-testid="stSidebar"] span,
-    [data-testid="stSidebar"] label,
-    [data-testid="stSidebar"] div {{
-        color: var(--t1) !important;
-    }}
-    [data-testid="stSidebar"] .stMarkdown,
-    [data-testid="stSidebar"] .flowstate-subtitle {{
-        opacity: 1 !important;
-        color: var(--t1) !important;
-    }}
+    /* Plotly, maps */
+    .js-plotly-plot .plotly .bg { fill:transparent !important; }
+    .leaflet-control-attribution, .osmb-attribution { display:none !important; }
 
-    [data-testid="stTabs"] [role="tablist"] {{
-        background: var(--tab-list-bg) !important;
-        border: 1px solid var(--b1) !important;
-        border-radius: 14px !important;
-        padding: 5px !important;
-        gap: 3px !important;
-    }}
-    [data-testid="stTabs"] button[role="tab"] {{
-        border-radius: 10px !important;
-        color: var(--t3) !important;
-        font-size: 12px !important;
-        font-weight: 500 !important;
-        padding: 9px 20px !important;
-        transition: all .2s !important;
-        border: none !important;
-        font-family: 'Inter', sans-serif !important;
-    }}
-    [data-testid="stTabs"] button[role="tab"][aria-selected="true"] {{
-        background: var(--tab-selected-bg) !important;
-        color: var(--gold) !important;
-        border: 1px solid var(--b3) !important;
-    }}
-    [data-testid="stTabs"] button[role="tab"] p {{ color: inherit !important; }}
-    button[aria-selected="true"] p {{ color: var(--gold) !important; }}
+    /* Calendar / date picker portal */
+    body [data-baseweb="calendar"],
+    body [data-baseweb="datepicker"],
+    body [class*="react-datepicker"],
+    body div[role="dialog"],
+    body table[role="grid"],
+    body table[role="grid"] td,
+    body table[role="grid"] th,
+    body table[role="grid"] tr,
+    body [aria-label*="calendar"],
+    body [class*="CalendarMonth"],
+    body [class*="DayPicker"],
+    body [class*="datepicker"],
+    body [data-testid="stDateInput"] + div,
+    body [data-baseweb="calendar"] *:not([aria-selected="true"]):not([data-selected="true"]) {
+      background-color: #ffffff !important;
+      background: #ffffff !important;
+      color: #1A1A1A !important;
+      -webkit-text-fill-color: #1A1A1A !important;
+    }
+    /* Calendar header nav arrows */
+    body [data-baseweb="calendar"] button,
+    body [data-baseweb="datepicker"] button {
+      background: transparent !important;
+      color: #E07B00 !important;
+      -webkit-text-fill-color: #E07B00 !important;
+    }
+    /* Month/year dropdowns inside calendar */
+    body [data-baseweb="calendar"] select,
+    body [data-baseweb="calendar"] [data-baseweb="select"] > div {
+      background: #fff !important;
+      color: #1A1A1A !important;
+    }
+  `;
+  // Inject into parent document (Streamlit host)
+  function inject(doc) {
+    var s = doc.createElement('style');
+    s.id = 'sunscout-global';
+    s.textContent = css;
+    (doc.head || doc.documentElement).appendChild(s);
+  }
+  // Only inject into parent Streamlit document, NOT this component iframe
+  try { inject(window.parent.document); } catch(e) { inject(document); }
 
-    div[data-baseweb="input"] {{
-        background: var(--input-bg) !important;
-        border: 1px solid var(--b2) !important;
-        border-radius: 10px !important;
-    }}
-    div[data-baseweb="input"]:focus-within {{
-        border-color: rgba(243,156,18,.35) !important;
-        box-shadow: 0 0 0 3px rgba(243,156,18,.08) !important;
-    }}
-    input {{
-        color: var(--gold) !important;
-        -webkit-text-fill-color: var(--gold) !important;
-        font-family: 'JetBrains Mono', monospace !important;
-        font-size: 13px !important;
-        background: transparent !important;
-    }}
-    input::placeholder {{
-        color: var(--t3) !important;
-        -webkit-text-fill-color: var(--t3) !important;
-    }}
+  // MutationObserver to re-apply when portals open (dropdowns, calendars, etc)
+  function forceWhite(n) {
+    if (!n || n.nodeType !== 1) return;
+    n.style.setProperty('background-color','#ffffff','important');
+    n.style.setProperty('color','#1A1A1A','important');
+    n.style.setProperty('-webkit-text-fill-color','#1A1A1A','important');
+    var all = n.querySelectorAll ? n.querySelectorAll('*') : [];
+    for (var i=0; i<all.length; i++) {
+      var el = all[i];
+      var tag = el.tagName ? el.tagName.toLowerCase() : '';
+      // Skip the selected-date circle (keep its red/orange color)
+      if (el.getAttribute && el.getAttribute('aria-selected') === 'true') continue;
+      el.style.setProperty('background-color','#ffffff','important');
+      el.style.setProperty('color','#1A1A1A','important');
+      el.style.setProperty('-webkit-text-fill-color','#1A1A1A','important');
+    }
+  }
 
-    button[kind="secondaryFormSubmit"], .stButton > button {{
-        background: var(--gold) !important;
-        color: #000 !important;
-        border: none !important;
-        font-weight: 600 !important;
-        font-size: 12px !important;
-        letter-spacing: .04em !important;
-        border-radius: 10px !important;
-        padding: 10px 16px !important;
-        width: 100% !important;
-        transition: all .2s !important;
-        box-shadow: 0 4px 20px rgba(243,156,18,.2) !important;
-        font-family: 'Inter', sans-serif !important;
-    }}
-    button[kind="secondaryFormSubmit"] p, .stButton > button p {{
-        color: #000 !important; font-weight: 600 !important;
-    }}
-    button[kind="secondaryFormSubmit"]:hover, .stButton > button:hover {{
-        background: #FFB020 !important;
-        box-shadow: 0 6px 28px rgba(243,156,18,.35) !important;
-        transform: translateY(-1px) !important;
-    }}
+  function isPortal(n) {
+    if (!n || !n.getAttribute) return false;
+    var bw = n.getAttribute('data-baseweb');
+    if (bw === 'popover' || bw === 'menu' || bw === 'datepicker') return true;
+    // Streamlit date picker renders as a div with class containing "CalendarDay" parent
+    if (n.querySelector && (
+      n.querySelector('[data-baseweb="menu"]') ||
+      n.querySelector('[data-baseweb="calendar"]') ||
+      n.querySelector('table[role="grid"]') ||
+      n.querySelector('[aria-label*="calendar"]') ||
+      n.querySelector('[class*="CalendarDay"]') ||
+      n.querySelector('[class*="calendar"]')
+    )) return true;
+    return false;
+  }
 
-    .stSlider [data-baseweb="slider"] > div > div {{
-        background: linear-gradient(90deg, var(--dim), var(--gold)) !important;
-        height: 3px !important;
-    }}
-    .stSlider [data-baseweb="slider"] [role="slider"] {{
-        background: var(--gold) !important;
-        border: 2px solid var(--bg) !important;
-        box-shadow: 0 0 0 3px rgba(243,156,18,.25) !important;
-        width: 15px !important; height: 15px !important;
-    }}
-    [data-testid="stSliderTickBar"] {{ display: none !important; }}
-    [data-testid="stWidgetLabel"] p {{
-        font-size: 10px !important;
-        letter-spacing: .1em !important;
-        text-transform: uppercase !important;
-        color: var(--t3) !important;
-        font-family: 'JetBrains Mono', monospace !important;
-    }}
-
-    [data-testid="stToggle"] [data-checked="true"] {{ background: var(--gold) !important; }}
-
-    [data-testid="stSelectbox"] > div > div {{
-        background: var(--s2) !important;
-        border: 1px solid var(--b2) !important;
-        border-radius: 10px !important;
-        color: var(--t1) !important;
-        font-size: 13px !important;
-    }}
-    [data-testid="stSelectbox"] span {{
-        color: var(--t1) !important;
-    }}
-
-    [data-testid="stRadio"] label {{
-        background: var(--s2) !important;
-        border: 1px solid var(--b1) !important;
-        border-radius: 10px !important;
-        padding: 7px 16px !important;
-        cursor: pointer !important;
-        transition: all .15s !important;
-    }}
-    [data-testid="stRadio"] label:has(input:checked) {{
-        border-color: rgba(243,156,18,.3) !important;
-        background: var(--glow) !important;
-    }}
-    [data-testid="stRadio"] label span {{ color: var(--t1) !important; font-size: 12px !important; }}
-
-    {alert_extra}
-
-    [data-testid="stMetric"] {{
-        background: var(--metric-bg) !important;
-        border: 1px solid var(--metric-border) !important;
-        border-radius: 14px !important;
-        padding: 16px !important;
-    }}
-    [data-testid="stMetricValue"] {{
-        color: var(--t1) !important;
-        font-family: 'Bebas Neue', sans-serif !important;
-        font-size: 28px !important;
-        letter-spacing: .04em !important;
-    }}
-    [data-testid="stMetricLabel"] p {{
-        font-size: 9px !important; letter-spacing: .14em !important;
-        text-transform: uppercase !important; color: var(--t3) !important;
-    }}
-
-    .main .block-container {{ padding-top: 1.5rem !important; max-width: 1440px !important; }}
-    hr {{ border: none !important; height: 1px !important;
-         background: linear-gradient(90deg,transparent,var(--hr-color),transparent) !important; }}
-    div[data-testid="stHtml"] {{ margin-bottom: -30px !important; }}
-
-    .js-plotly-plot .plotly .bg {{
-        fill: transparent !important;
-    }}
-
-    ::-webkit-scrollbar {{ width: 3px; }}
-    ::-webkit-scrollbar-track {{ background: var(--bg); }}
-    ::-webkit-scrollbar-thumb {{ background: var(--scrollbar-thumb); border-radius: 2px; }}
-
-    [data-testid="stDateInput"] > div {{
-        background: var(--s2) !important; border: 1px solid var(--b2) !important;
-        border-radius: 10px !important;
-    }}
-    [data-testid="stDateInput"] input {{
-        color: var(--t1) !important;
-        -webkit-text-fill-color: var(--t1) !important;
-    }}
-
-    .stMarkdown a {{ color: var(--gold) !important; }}
-
-    @media (max-width: 768px) {{
-        iframe {{ height: 450px !important; }}
-        .main .block-container {{ padding-bottom: 1rem !important; }}
-    }}
-    </style>
-    """, unsafe_allow_html=True)
-
-    st.session_state["_plot_bg"]   = plot_bg
-    st.session_state["_plot_grid"] = plot_grid
-    st.session_state["_plot_font"] = plot_font
+  function watchPortals(doc) {
+    var obs = new MutationObserver(function(mutations) {
+      mutations.forEach(function(m) {
+        m.addedNodes.forEach(function(n) {
+          if (n.nodeType === 1 && isPortal(n)) {
+            forceWhite(n);
+            // Also watch children added inside this portal
+            var inner = new MutationObserver(function() { forceWhite(n); });
+            inner.observe(n, { childList: true, subtree: true, attributes: true });
+          }
+        });
+      });
+    });
+    obs.observe(doc.body, { childList: true, subtree: false });
+  }
+  try { watchPortals(window.parent.document); } catch(e) {}
+  // Never watch the component iframe itself — that would break maps
+})();
+</script>
+""", height=0)
 
 
-_MAP_FONTS = '<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Bebas+Neue&display=swap" rel="stylesheet"/>'
+_MAP_FONTS = '<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet"/>'
 
 _HUD_CSS = """
 .hud {
@@ -421,52 +293,27 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger,
         <button class="tile-btn on" id="bs" onclick="setTile('s')">🗺 Street</button>
         <button class="tile-btn"    id="bsat" onclick="setTile('sat')">🛰 Satellite</button>
       </div>
-      <div id="hud2d" style="
-        position:absolute;top:14px;right:14px;z-index:9999;
-        background:rgba(7,9,16,0.95);
-        border:1px solid rgba(243,156,18,0.3);
-        border-radius:16px;padding:16px 20px;
-        font-family:'JetBrains Mono',monospace !important;
-        backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
-        box-shadow:0 8px 40px rgba(0,0,0,.8);
-        min-width:230px;pointer-events:none;
-        color:#F0F2F5 !important;">
-        <div style="font-size:8px;letter-spacing:.22em;text-transform:uppercase;
-             color:#4B5563 !important;-webkit-text-fill-color:#4B5563 !important;
-             margin-bottom:12px;padding-bottom:8px;
-             border-bottom:1px solid rgba(255,255,255,.08);">SOLAR POSITION</div>
-        <table style="width:100%;border-collapse:collapse;">
-          <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">📅 Date</td>
-              <td style="padding:4px 0;text-align:right;color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:12px;font-weight:700;">{sim_time.strftime('%b %d, %Y')}</td></tr>
-          <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">🌅 Sunrise</td>
-              <td style="padding:4px 0;text-align:right;color:#F0F2F5 !important;-webkit-text-fill-color:#F0F2F5 !important;font-size:12px;font-weight:700;">{rise_time}</td></tr>
-          <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">🌇 Sunset</td>
-              <td style="padding:4px 0;text-align:right;color:#F0F2F5 !important;-webkit-text-fill-color:#F0F2F5 !important;font-size:12px;font-weight:700;">{set_time}</td></tr>
-          <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">☀️ Elevation</td>
-              <td style="padding:4px 0;text-align:right;color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:12px;font-weight:700;" id="hud2d-el">{m_el:.1f}°</td></tr>
-          <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">🧭 Azimuth</td>
-              <td style="padding:4px 0;text-align:right;color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:12px;font-weight:700;" id="hud2d-az">{m_az:.1f}°</td></tr>
-          <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">🕐 Time</td>
-              <td style="padding:4px 0;text-align:right;color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:12px;font-weight:700;" id="hud2d-tm">{sim_time.strftime('%H:%M')}</td></tr>
-        </table>
-        <div style="border-top:1px solid rgba(255,255,255,.08);margin:10px 0 8px;"></div>
-        <div style="font-size:8px;letter-spacing:.18em;text-transform:uppercase;
-             color:#4B5563 !important;-webkit-text-fill-color:#4B5563 !important;margin-bottom:7px;">LEGEND</div>
+      <div style="position:absolute;bottom:48px;left:14px;z-index:9999;
+        background:rgba(255,255,255,0.97);border:2px solid rgba(224,123,0,0.2);
+        border-radius:14px;padding:12px 16px;pointer-events:none;
+        box-shadow:0 4px 16px rgba(0,0,0,0.1);font-family:sans-serif;">
+        <div style="font-size:10px;font-weight:800;color:#888;text-transform:uppercase;
+             letter-spacing:.1em;margin-bottom:8px;">Legend</div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
-          <span style="display:inline-block;width:26px;height:3px;background:#E74C3C;border-radius:2px;flex-shrink:0;"></span>
-          <span style="color:#E74C3C !important;-webkit-text-fill-color:#E74C3C !important;font-size:11px;">Sunrise dir</span>
+          <span style="display:inline-block;width:28px;height:4px;background:#E74C3C;border-radius:2px;flex-shrink:0;"></span>
+          <span style="font-size:12px;font-weight:700;color:#E74C3C;">Sunrise dir</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
-          <span style="display:inline-block;width:26px;height:3px;background:#3498DB;border-radius:2px;flex-shrink:0;"></span>
-          <span style="color:#3498DB !important;-webkit-text-fill-color:#3498DB !important;font-size:11px;">Sunset dir</span>
+          <span style="display:inline-block;width:28px;height:4px;background:#3498DB;border-radius:2px;flex-shrink:0;"></span>
+          <span style="font-size:12px;font-weight:700;color:#3498DB;">Sunset dir</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
-          <span style="display:inline-block;width:26px;height:0;border-top:2px dashed #8B9AB0;flex-shrink:0;"></span>
-          <span style="color:#8B9AB0 !important;-webkit-text-fill-color:#8B9AB0 !important;font-size:11px;">Shadow</span>
+          <span style="display:inline-block;width:28px;height:0;border-top:3px dashed #8B9AB0;flex-shrink:0;"></span>
+          <span style="font-size:12px;font-weight:700;color:#8B9AB0;">Shadow</span>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
-          <span style="display:inline-block;width:26px;height:0;border-top:2px dashed #F39C12;flex-shrink:0;"></span>
-          <span style="color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:11px;">Sun path</span>
+          <span style="display:inline-block;width:28px;height:0;border-top:3px dashed #E07B00;flex-shrink:0;"></span>
+          <span style="font-size:12px;font-weight:700;color:#E07B00;">Sun path</span>
         </div>
       </div>
       <div class="hint">🖱 Click to move pin · Drag · Scroll zoom</div>
@@ -523,16 +370,16 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger,
       weight:1.5,fillColor:'rgba(243,156,18,.04)',fillOpacity:1}}).addTo(map2);
     {wind_js}
     var pd={path_data};
-    L.polyline(pd.map(p=>[p.lat,p.lon]),{{color:'#F39C12',weight:4,
-      dashArray:'6,10',opacity:.75}}).addTo(map2);
-    L.polyline([[{lat},{lon}],{rise_edge}],{{color:'#E74C3C',weight:2.5,opacity:.8}}).addTo(map2);
-    L.polyline([[{lat},{lon}],{set_edge}], {{color:'#3498DB',weight:2.5,opacity:.8}}).addTo(map2);
+    L.polyline(pd.map(p=>[p.lat,p.lon]),{{color:'#F39C12',weight:7,
+      dashArray:'8,12',opacity:.85}}).addTo(map2);
+    L.polyline([[{lat},{lon}],{rise_edge}],{{color:'#E74C3C',weight:5,opacity:.85}}).addTo(map2);
+    L.polyline([[{lat},{lon}],{set_edge}], {{color:'#3498DB',weight:5,opacity:.85}}).addTo(map2);
     var sunIco=L.divIcon({{
       html:'<div style="text-align:center;line-height:1;"><div class="sun-icon" style="font-size:28pt;filter:drop-shadow(0 0 10px rgba(255,200,0,.9));">☀️</div><div class="sun-box" id="stl" style="margin-top:2px;">--:--</div></div>',
       iconSize:[60,60],iconAnchor:[30,22],className:'custom-sun-icon'
     }});
     var sunM=L.marker([0,0],{{icon:sunIco}}).addTo(map2);
-    var shad=L.polyline([[{lat},{lon}],[{lat},{lon}]],{{color:'#8B9AB0',weight:2.5,dashArray:'5,8',opacity:.75}}).addTo(map2);
+    var shad=L.polyline([[{lat},{lon}],[{lat},{lon}]],{{color:'#8B9AB0',weight:5,dashArray:'6,10',opacity:.80}}).addTo(map2);
     function upd(p){{
       if(!p) return;
       sunM.setLatLng([p.lat,p.lon]);
@@ -701,13 +548,12 @@ html,body{{background:#0A0C10;overflow:hidden;}}
         display:none;pointer-events:none;white-space:nowrap;
         font-family:'JetBrains Mono',monospace;letter-spacing:.05em;
         box-shadow:0 4px 24px rgba(243,156,18,.18);}}
-.cb{{background:rgba(7,9,16,.92);border:1px solid rgba(255,255,255,.07);
-     color:#6B7280;font-size:13px;font-weight:700;padding:7px 12px;
-     border-radius:9px;cursor:pointer;transition:all .15s;
-     backdrop-filter:blur(8px);line-height:1;}}
-.cb:hover{{border-color:rgba(243,156,18,.3);color:#E8EAF0;}}
-.cb.N{{border-color:rgba(243,156,18,.25);color:#F39C12;font-size:10px;
-       font-family:'JetBrains Mono',monospace;letter-spacing:.1em;}}
+.cb{{background:#fff;border:2px solid #E5E7EB;
+     color:#555;font-size:14px;font-weight:700;padding:8px 12px;
+     border-radius:10px;cursor:pointer;transition:all .15s;line-height:1;}}
+.cb:hover{{border-color:#E07B00;color:#E07B00;background:#FFF3E0;}}
+.cb.N{{border-color:rgba(224,123,0,.4);color:#E07B00;font-size:11px;
+       font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;letter-spacing:.06em;}}
 </style>
 </head><body>
 <div style="position:relative;width:100%;height:600px;">
@@ -718,21 +564,14 @@ html,body{{background:#0A0C10;overflow:hidden;}}
     <button class="tile-btn"   id="bsat" onclick="setT('sat')">🛰 Satellite</button>
   </div>
 
-  <div class="hud" style="top:14px;right:14px;min-width:185px;">
-    <div class="hud-title">Solar Position</div>
-    📅 Date &nbsp;&nbsp;&nbsp;&nbsp;<b>{cur_date}</b><br>
-    🌅 Sunrise &nbsp;<b>{rise_time}</b><br>
-    🌇 Sunset &nbsp;&nbsp;<b>{set_time}</b><br>
-    ☀️ Elevation <b id="hel">{mel}°</b><br>
-    🧭 Azimuth &nbsp;<b id="haz">{maz}°</b><br>
-    🕐 Time &nbsp;&nbsp;&nbsp;&nbsp;<b id="htm">{cur_time}</b>
-  </div>
-
   <div class="tbadge">☀️ &nbsp;<span id="stm">{cur_time}</span></div>
   <div class="hint">{hint_txt}</div>
 
-  <div style="position:absolute;bottom:46px;right:14px;z-index:25;
-    display:flex;flex-direction:column;gap:5px;align-items:center;">
+  <div style="position:absolute;top:50%;right:14px;transform:translateY(-50%);z-index:25;
+    display:flex;flex-direction:column;gap:6px;align-items:center;
+    background:rgba(255,255,255,0.92);border:2px solid rgba(224,123,0,0.25);
+    border-radius:16px;padding:12px 10px;
+    box-shadow:0 4px 20px rgba(0,0,0,0.12);">
     <button class="cb" onclick="aT(-10)">▲</button>
     <div style="display:flex;gap:5px;">
       <button class="cb" onclick="aR(-15)">◀</button>
@@ -962,10 +801,7 @@ function updateView(p) {{
   if(p.iso) map.setDate(new Date(p.iso));
   curEl = p.el; curAz = p.az;
   moveSun(p.az, p.el);
-  document.getElementById('hel').textContent = p.el.toFixed(1)+'°';
-  document.getElementById('haz').textContent = p.az.toFixed(1)+'°';
-  document.getElementById('htm').textContent = p.time;
-  document.getElementById('stm').textContent = p.time;
+  var stm=document.getElementById('stm'); if(stm) stm.textContent=p.time;
 }}
 
 updateView({{
@@ -1253,464 +1089,25 @@ cv.addEventListener('touchmove',e=>{{
     components.html(html, height=620)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 def render_live_component(lat, lon, radius_meters, path_data, animate_trigger,
                           sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el, m_az,
-                          rise_edge, set_edge, rise_time, set_time, aqi_val,
-                          init_rot=0, init_tilt=45, init_zoom=1.3):
-    """Single component with on-map buttons: 2D Street · 3D Street · 3D Satellite"""
-    import json, math as _m
-
-    env = st.session_state.env_data
-    mel  = round(m_el, 2)
-    maz  = round(m_az, 1)
-    ct   = sim_time.strftime('%H:%M')
-    cdate = sim_time.strftime('%b %d, %Y')
-    sim_iso = sim_time.isoformat()
-
-    all_pts = json.dumps([{
-        "lon": p["lon"], "lat": p["lat"],
-        "shlat": p["shlat"], "shlon": p["shlon"],
-        "el": round(p["el"], 2), "az": round(p.get("az", 0), 2),
-        "time": p["time"], "iso": p.get("iso", "")
-    } for p in path_data])
-
-    cos_lat = _m.cos(_m.radians(lat))
-    R = radius_meters
-
-    # 3D arc points (Three.js coords)
-    pts3 = []
-    for p in path_data:
-        dx = (p["lon"] - lon) * 111111 * cos_lat
-        dz = -(p["lat"] - lat) * 111111
-        dy = max(0, p["el"]) * (R / 90.0) * 2.2
-        pts3.append({"x": round(dx,2), "y": round(dy,2), "z": round(dz,2),
-                     "el": round(p["el"],2), "az": round(p.get("az",0),2), "time": p["time"]})
-    pts3_js = json.dumps(pts3)
-
-    cx  = round((m_slon - lon) * 111111 * cos_lat, 2)
-    cz  = round(-(m_slat - lat) * 111111, 2)
-    cy  = round(max(0, m_el) * (R / 90.0) * 2.2, 2)
-
-    init_rot  = float(init_rot) % 360
-    init_tilt = max(0.0, min(70.0, float(init_tilt)))
-    init_cr   = int(R * max(0.6, min(4.0, float(init_zoom))))
-
-    # OSM building ring for 3D shadow
-    steps, rd = 20, 0.000035
-    ring = []
-    for i in range(steps + 1):
-        a = 2 * _m.pi * i / steps
-        ring.append([lon + rd * _m.cos(a) / _m.cos(_m.radians(lat)),
-                     lat + rd * _m.sin(a)])
-    obs_gj = json.dumps({
-        "type": "FeatureCollection",
-        "features": [{"type": "Feature",
-                      "properties": {"color": "#F39C12", "height": 0.6, "minHeight": 0},
-                      "geometry": {"type": "Polygon", "coordinates": [ring]}}]
-    })
-    sun_path_coords = [[p["lon"], p["lat"]] for p in path_data if p["el"] >= 0]
-    sun_path_gj = json.dumps({
-        "type": "FeatureCollection",
-        "features": [{"type": "Feature",
-                      "properties": {"color": "#F39C12", "height": 1.5, "minHeight": 0},
-                      "geometry": {"type": "LineString", "coordinates": sun_path_coords}}]
-    })
-
-    animate_js = "true" if animate_trigger else "false"
-
-    html = f"""<!DOCTYPE html><html><head><meta charset="utf-8"/>
-{_MAP_FONTS}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<link href="https://cdn.osmbuildings.org/4.1.1/OSMBuildings.css" rel="stylesheet"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.osmbuildings.org/4.1.1/OSMBuildings.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<style>
-*{{margin:0;padding:0;box-sizing:border-box;}}
-html,body{{background:#0A0C10;overflow:hidden;}}
-{_HUD_CSS}
-#wrap{{position:relative;width:100%;height:600px;}}
-#map2d{{width:100%;height:600px;border-radius:16px;border:1px solid rgba(243,156,18,.1);cursor:crosshair;display:block;}}
-#map3d{{width:100%;height:600px;border-radius:16px;border:1px solid rgba(243,156,18,.1);display:none;}}
-#cv3{{display:none;width:100%;height:600px;border-radius:16px;}}
-.sun-box{{background:linear-gradient(135deg,#F39C12,#E67E22);color:#000;
-          padding:3px 9px;border-radius:7px;font-weight:700;font-size:11px;
-          font-family:'JetBrains Mono',monospace;margin-bottom:2px;}}
-.sun-icon{{font-size:28pt;line-height:1;filter:drop-shadow(0 0 14px rgba(255,200,0,.85));}}
-.custom-sun-icon{{background:none;border:none;}}
-/* view switcher buttons */
-#view-btns{{position:absolute;top:14px;left:14px;z-index:9999;display:flex;gap:6px;}}
-.vbtn{{
-  background:rgba(7,9,16,.92);border:1px solid rgba(255,255,255,.07);
-  color:#6B7280;font-size:11px;font-weight:600;
-  font-family:'JetBrains Mono',monospace;
-  padding:6px 13px;border-radius:9px;cursor:pointer;
-  transition:all .2s;backdrop-filter:blur(8px);letter-spacing:.04em;
-}}
-.vbtn:hover{{border-color:rgba(243,156,18,.3);color:#E8EAF0;}}
-.vbtn.on{{border-color:rgba(243,156,18,.45);color:#F39C12;background:rgba(243,156,18,.1);}}
-
-/* 3D nav */
-.cb{{background:rgba(7,9,16,.92);border:1px solid rgba(255,255,255,.07);
-     color:#6B7280;font-size:13px;font-weight:700;padding:7px 12px;
-     border-radius:9px;cursor:pointer;transition:all .15s;backdrop-filter:blur(8px);line-height:1;}}
-.cb:hover{{border-color:rgba(243,156,18,.3);color:#E8EAF0;}}
-.cb.N{{border-color:rgba(243,156,18,.25);color:#F39C12;font-size:10px;font-family:'JetBrains Mono',monospace;letter-spacing:.1em;}}
-#nav3d{{position:absolute;bottom:46px;right:14px;z-index:9999;
-        display:none;flex-direction:column;gap:5px;align-items:center;}}
-#cmp-wrap{{position:absolute;top:110px;right:14px;z-index:9999;
-           display:none;width:42px;height:42px;pointer-events:none;
-           background:rgba(7,9,16,.88);border:1px solid rgba(255,255,255,.07);
-           border-radius:50%;align-items:center;justify-content:center;}}
-/* HUD */
-#hud{{position:absolute;top:14px;right:14px;z-index:9999;
-      background:rgba(7,9,16,0.95);border:1px solid rgba(243,156,18,0.3);
-      border-radius:16px;padding:16px 20px;font-family:'JetBrains Mono',monospace;
-      backdrop-filter:blur(20px);box-shadow:0 8px 40px rgba(0,0,0,.8);
-      min-width:230px;pointer-events:none;}}
-.hint{{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);
-       z-index:9999;color:rgba(255,255,255,.25);font-size:10px;pointer-events:none;
-       font-family:'JetBrains Mono',monospace;background:rgba(7,9,16,.65);
-       padding:5px 16px;border-radius:20px;border:1px solid rgba(255,255,255,.04);
-       white-space:nowrap;letter-spacing:.04em;}}
-</style>
-</head><body>
-<div id="wrap">
-  <!-- containers -->
-  <div id="map2d"></div>
-  <div id="map3d"></div>
-  <canvas id="cv3"></canvas>
-
-  <!-- view switcher -->
-  <div id="view-btns">
-    <button class="vbtn on" id="vb-2ds" onclick="switchView('2ds')">🗺 2D Street</button>
-    <button class="vbtn"    id="vb-3ds" onclick="switchView('3ds')">🏙 3D Street</button>
-    <button class="vbtn"    id="vb-3dt" onclick="switchView('3dt')">🛰 3D Satellite</button>
-  </div>
-
-  <!-- HUD (shared) -->
-  <div id="hud">
-    <div style="font-size:8px;letter-spacing:.22em;text-transform:uppercase;
-         color:#4B5563 !important;-webkit-text-fill-color:#4B5563 !important;
-         margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(255,255,255,.08);">SOLAR POSITION</div>
-    <table style="width:100%;border-collapse:collapse;">
-      <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">📅 Date</td>
-          <td style="padding:4px 0;text-align:right;color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:12px;font-weight:700;">{cdate}</td></tr>
-      <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">🌅 Sunrise</td>
-          <td style="padding:4px 0;text-align:right;color:#F0F2F5 !important;-webkit-text-fill-color:#F0F2F5 !important;font-size:12px;font-weight:700;">{rise_time}</td></tr>
-      <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">🌇 Sunset</td>
-          <td style="padding:4px 0;text-align:right;color:#F0F2F5 !important;-webkit-text-fill-color:#F0F2F5 !important;font-size:12px;font-weight:700;">{set_time}</td></tr>
-      <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">☀️ Elevation</td>
-          <td style="padding:4px 0;text-align:right;color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:12px;font-weight:700;" id="hud-el">{mel}°</td></tr>
-      <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">🧭 Azimuth</td>
-          <td style="padding:4px 0;text-align:right;color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:12px;font-weight:700;" id="hud-az">{maz}°</td></tr>
-      <tr><td style="padding:4px 0;color:#9CA3AF !important;-webkit-text-fill-color:#9CA3AF !important;font-size:12px;">🕐 Time</td>
-          <td style="padding:4px 0;text-align:right;color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:12px;font-weight:700;" id="hud-tm">{ct}</td></tr>
-    </table>
-    <div id="hud-legend" style="border-top:1px solid rgba(255,255,255,.08);margin:10px 0 8px;"></div>
-    <div id="hud-legend-items">
-    <div style="font-size:8px;letter-spacing:.18em;text-transform:uppercase;
-         color:#4B5563 !important;-webkit-text-fill-color:#4B5563 !important;margin-bottom:7px;">LEGEND</div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
-      <span style="display:inline-block;width:26px;height:3px;background:#E74C3C;border-radius:2px;flex-shrink:0;"></span>
-      <span style="color:#E74C3C !important;-webkit-text-fill-color:#E74C3C !important;font-size:11px;">Sunrise dir</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
-      <span style="display:inline-block;width:26px;height:3px;background:#3498DB;border-radius:2px;flex-shrink:0;"></span>
-      <span style="color:#3498DB !important;-webkit-text-fill-color:#3498DB !important;font-size:11px;">Sunset dir</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:5px;">
-      <span style="display:inline-block;width:26px;height:0;border-top:2px dashed #8B9AB0;flex-shrink:0;"></span>
-      <span style="color:#8B9AB0 !important;-webkit-text-fill-color:#8B9AB0 !important;font-size:11px;">Shadow</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px;">
-      <span style="display:inline-block;width:26px;height:0;border-top:2px dashed #F39C12;flex-shrink:0;"></span>
-      <span style="color:#F39C12 !important;-webkit-text-fill-color:#F39C12 !important;font-size:11px;">Sun path</span>
-    </div>
-    </div>
-  </div>
-
-  <!-- 3D nav controls -->
-  <div id="nav3d">
-    <button class="cb" onclick="aT(-10)">▲</button>
-    <div style="display:flex;gap:5px;">
-      <button class="cb" onclick="aR(-15)">◀</button>
-      <button class="cb N" onclick="rst()">N</button>
-      <button class="cb" onclick="aR(15)">▶</button>
-    </div>
-    <button class="cb" onclick="aT(10)">▼</button>
-  </div>
-  <div id="cmp-wrap">
-    <svg id="cmp" width="34" height="34" viewBox="-20 -20 40 40" style="transition:transform .2s;">
-      <polygon points="0,-12 3,0 0,3 -3,0" fill="#E74C3C"/>
-      <polygon points="0,12 3,0 0,-3 -3,0" fill="#374151"/>
-      <text x="0" y="-14" text-anchor="middle" fill="#E74C3C" font-size="5.5" font-weight="bold" font-family="JetBrains Mono">N</text>
-      <text x="0" y="19"  text-anchor="middle" fill="#374151" font-size="5.5" font-family="JetBrains Mono">S</text>
-      <text x="15" y="3"  text-anchor="middle" fill="#374151" font-size="5.5" font-family="JetBrains Mono">E</text>
-      <text x="-15" y="3" text-anchor="middle" fill="#374151" font-size="5.5" font-family="JetBrains Mono">W</text>
-    </svg>
-  </div>
-
-  <!-- arc overlay + floating sun for 3D -->
-  <svg id="arc-svg3d" style="position:absolute;top:0;left:0;width:100%;height:100%;
-    pointer-events:none;z-index:18;overflow:visible;display:none;"></svg>
-  <div id="sun3d" style="pointer-events:none;position:absolute;
-    transform:translate(-50%,-50%);display:none;text-align:center;line-height:1;">
-    <div style="font-size:36px;filter:drop-shadow(0 0 18px rgba(255,200,0,.95));">☀️</div>
-    <div id="sun3d-time" style="background:linear-gradient(135deg,#F39C12,#E67E22);color:#000;
-      padding:3px 9px;border-radius:7px;font-weight:700;font-size:11px;
-      font-family:'JetBrains Mono',monospace;margin-top:3px;
-      box-shadow:0 3px 10px rgba(243,156,18,.35);white-space:nowrap;">--:--</div>
-  </div>
-  <div class="hint" id="hint-bar">🖱 Click to move pin · Drag · Scroll zoom</div>
-</div>
-
-<script>
-const D2R = Math.PI/180;
-const allPts = {all_pts};
-const pts3   = {pts3_js};
-let curView  = '2ds';
-let curRot   = {init_rot:.1f};
-let curTilt  = {init_tilt:.1f};
-let curCr    = {init_cr};
-let osmMap   = null, lMap = null, threeRend = null, threeScene = null, threeCam = null;
-let sunM2d=null, shad2d=null, animTimer=null, threeAnimTimer=null;
-let osmSunLayer=null;
-
-// ── HUD updater ───────────────────────────────────────────────────────────
-function updHUD(el, az, tm) {{
-  document.getElementById('hud-el').textContent = el.toFixed(1)+'°';
-  document.getElementById('hud-az').textContent = az.toFixed(1)+'°';
-  document.getElementById('hud-tm').textContent = tm;
-}}
-
-// ── VIEW SWITCHER ─────────────────────────────────────────────────────────
-function switchView(v) {{
-  curView = v;
-  ['2ds','3ds','3dt'].forEach(id => {{
-    document.getElementById('vb-'+id).className = 'vbtn'+(id===v?' on':'');
-  }});
-  document.getElementById('map2d').style.display = v==='2ds' ? 'block' : 'none';
-  document.getElementById('map3d').style.display = (v==='3ds'||v==='3dt') ? 'block' : 'none';
-  document.getElementById('cv3').style.display   = 'none';
-  document.getElementById('nav3d').style.display      = (v==='3ds'||v==='3dt') ? 'flex' : 'none';
-  document.getElementById('cmp-wrap').style.display   = (v==='3ds'||v==='3dt') ? 'flex' : 'none';
-  document.getElementById('arc-svg3d').style.display  = (v==='3ds'||v==='3dt') ? 'block' : 'none';
-  document.getElementById('sun3d').style.display      = (v==='3ds'||v==='3dt') ? 'block' : 'none';
-  // Legend only on 2D
-  var leg = document.getElementById('hud-legend');
-  var legI = document.getElementById('hud-legend-items');
-  if(leg)  leg.style.display  = v==='2ds' ? 'block' : 'none';
-  if(legI) legI.style.display = v==='2ds' ? 'block' : 'none';
-  document.getElementById('hint-bar').textContent = v==='2ds'
-    ? '🖱 Click to move pin · Drag · Scroll zoom'
-    : '🖱 Drag · Scroll zoom · ↔ rotate · ▲▼ tilt';
-
-  if ((v==='3ds'||v==='3dt') && !osmMap) initOSM();
-  if (v==='3dt' && osmMap) osmMap.addMapTiles('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}');
-  if (v==='3ds' && osmMap) osmMap.addMapTiles('https://tile-a.openstreetmap.fr/hot/{{z}}/{{x}}/{{y}}.png');
-  if (v==='2ds' && !lMap) initLeaflet();
-  // Re-apply current sweep day arc on view switch
-  if(sweepData && sweepData.length) {{
-    var day = sweepData[sweepIdx];
-    if(v==='2ds') {{ setTimeout(function(){{ updateDayArc2d(day); }}, 300); }}
-    else          {{ setTimeout(function(){{ updateDayArc3d(day); }}, 300); }}
-  }}
-}}
-
-// ── LEAFLET 2D ────────────────────────────────────────────────────────────
-function initLeaflet() {{
-  var streetT = L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png');
-  lMap = L.map('map2d', {{center:[{lat},{lon}], zoom:17, layers:[streetT], zoomControl:false,attributionControl:false}});
-  L.control.zoom({{position:'bottomright'}}).addTo(lMap);
-
-  L.circle([{lat},{lon}],{{radius:{radius_meters},color:'rgba(243,156,18,.25)',
-    weight:1.5,fillColor:'rgba(243,156,18,.04)',fillOpacity:1}}).addTo(lMap);
-  L.polyline(allPts.map(p=>[p.lat,p.lon]),{{color:'#F39C12',weight:4,dashArray:'6,10',opacity:.75}}).addTo(lMap);
-  L.polyline([[{lat},{lon}],{rise_edge}],{{color:'#E74C3C',weight:2.5,opacity:.8}}).addTo(lMap);
-  L.polyline([[{lat},{lon}],{set_edge}], {{color:'#3498DB',weight:2.5,opacity:.8}}).addTo(lMap);
-
-  var sunIco = L.divIcon({{
-    html:'<div style="text-align:center;line-height:1;"><div class="sun-icon">☀️</div><div class="sun-box" id="stl" style="margin-top:2px;">{ct}</div></div>',
-    iconSize:[60,60], iconAnchor:[30,22], className:'custom-sun-icon'
-  }});
-  sunM2d = L.marker([{m_slat},{m_slon}], {{icon:sunIco}}).addTo(lMap);
-  shad2d = L.polyline([[{lat},{lon}],[{m_shlat},{m_shlon}]],
-    {{color:'#8B9AB0',weight:2.5,dashArray:'5,8',opacity:.75}}).addTo(lMap);
-
-  // click to relocate
-  var pinM = L.marker([{lat},{lon}],{{icon:L.divIcon({{
-    html:'<div style="font-size:22px;filter:drop-shadow(0 0 6px rgba(243,156,18,.8));">📍</div>',
-    iconSize:[28,28],iconAnchor:[14,28],className:''}})}}).addTo(lMap);
-  lMap.on('click', function(e){{
-    pinM.setLatLng([e.latlng.lat, e.latlng.lng]);
-    try {{ window.parent.sessionStorage.setItem('map2d_click',
-      JSON.stringify({{lat:e.latlng.lat,lon:e.latlng.lng}})); }} catch(err){{}}
-  }});
-
-  start2DAnim();
-}}
-
-function upd2d(p) {{
-  if(!p||!sunM2d) return;
-  sunM2d.setLatLng([p.lat,p.lon]);
-  shad2d.setLatLngs([[{lat},{lon}],[p.shlat,p.shlon]]);
-  var stl=document.getElementById('stl'); if(stl) stl.innerHTML=p.time;
-  sunM2d.setOpacity(p.el<0?0:1);
-  shad2d.setStyle({{opacity:p.el<0?0:.75}});
-  updHUD(p.el,p.az,p.time);
-}}
-
-function start2DAnim() {{
-  if(animTimer) clearInterval(animTimer);
-  var i=0, anim={animate_js};
-  if(anim) {{ animTimer=setInterval(()=>{{upd2d(allPts[i]);i=(i+1)%allPts.length;}},150); }}
-  else {{ upd2d(allPts.find(p=>p.time==='{ct}')||allPts[0]); }}
-}}
-
-// ── OSM BUILDINGS 3D ──────────────────────────────────────────────────────
-function initOSM() {{
-  var tileUrl = curView==='3dt'
-    ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}'
-    : 'https://tile-a.openstreetmap.fr/hot/{{z}}/{{x}}/{{y}}.png';
-
-  osmMap = new OSMBuildings({{
-    container:'map3d',
-    position:{{latitude:{lat},longitude:{lon}}},
-    zoom:17,minZoom:15,maxZoom:20,
-    tilt:curTilt,rotation:curRot,
-    effects:['shadows'],
-    attribution:''
-  }});
-  osmMap.setDate(new Date('{sim_iso}'));
-  osmMap.addMapTiles(tileUrl);
-  osmMap.addGeoJSONTiles('https://{{s}}.data.osmbuildings.org/0.2/59fcc2e8/tile/{{z}}/{{x}}/{{y}}.json');
-  osmMap.addGeoJSON({obs_gj});
-  osmMap.addGeoJSON({sun_path_gj});
-
-  osmMap.on('rotate', ()=>{{
-    try {{ curRot=((osmMap.getRotation()%360)+360)%360;
-      document.getElementById('cmp').style.transform='rotate('+curRot+'deg)';
-    }}catch(e){{}}
-  }});
-
-  start3DAnim();
-}}
-
-// ── Arc overlay for 3D ───────────────────────────────────────────────────
-var curEl3d = {mel}, curAz3d = {maz};
-var arcSvg3d = document.getElementById('arc-svg3d');
-var sunEl3d  = document.getElementById('sun3d');
-
-function projectToScreen3d(az, el) {{
-  var mapDiv = document.getElementById('map3d');
-  var W = (mapDiv && mapDiv.clientWidth)  || 800;
-  var H = (mapDiv && mapDiv.clientHeight) || 600;
-  var f  = Math.max(0, el) / 90;
-  var rx = W * 0.48 * (1 - f);
-  var ry = H * 0.44 * (1 - f);
-  var ar = (az - curRot) * D2R;
-  return [W/2 + rx*Math.sin(ar), H/2 - ry*Math.cos(ar)*0.6];
-}}
-
-function drawArc3d() {{
-  var mapDiv = document.getElementById('map3d');
-  var W = (mapDiv && mapDiv.clientWidth)  || 800;
-  var H = (mapDiv && mapDiv.clientHeight) || 600;
-  arcSvg3d.setAttribute('viewBox','0 0 '+W+' '+H);
-  while(arcSvg3d.firstChild) arcSvg3d.removeChild(arcSvg3d.firstChild);
-  var above = allPts.filter(p=>p.el>=0);
-  if(above.length<2) return;
-  var spts = above.map(p=>projectToScreen3d(p.az,p.el));
-  var pts_str = spts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ');
-  function mkPoly(stroke,sw,dash,op){{
-    var pl=document.createElementNS('http://www.w3.org/2000/svg','polyline');
-    pl.setAttribute('points',pts_str); pl.setAttribute('fill','none');
-    pl.setAttribute('stroke',stroke); pl.setAttribute('stroke-width',sw);
-    pl.setAttribute('stroke-linecap','round'); pl.setAttribute('stroke-linejoin','round');
-    if(dash) pl.setAttribute('stroke-dasharray',dash);
-    if(op)   pl.setAttribute('opacity',op);
-    arcSvg3d.appendChild(pl);
-  }}
-  mkPoly('rgba(255,180,0,0.18)','14',null,null);
-  mkPoly('rgba(255,200,80,0.28)','6',null,null);
-  mkPoly('#F39C12','2.5','6 9','0.92');
-  above.forEach(function(p,i){{
-    if(i%3!==0) return;
-    var sp=projectToScreen3d(p.az,p.el);
-    var dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    dot.setAttribute('cx',sp[0].toFixed(1)); dot.setAttribute('cy',sp[1].toFixed(1));
-    dot.setAttribute('r','2.8'); dot.setAttribute('fill','#FFD06D'); dot.setAttribute('opacity','0.85');
-    arcSvg3d.appendChild(dot);
-  }});
-  // Rise/set labels
-  [{{'pt':spts[0],'txt':'🌅 Rise','anchor':'end'}},{{'pt':spts[spts.length-1],'txt':'Set 🌇','anchor':'start'}}].forEach(function(lbl){{
-    var lx=lbl.pt[0], ly=lbl.pt[1];
-    var c=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    c.setAttribute('cx',lx.toFixed(1)); c.setAttribute('cy',ly.toFixed(1));
-    c.setAttribute('r','4.5'); c.setAttribute('fill','#F39C12'); c.setAttribute('opacity','0.95');
-    arcSvg3d.appendChild(c);
-    var t=document.createElementNS('http://www.w3.org/2000/svg','text');
-    t.setAttribute('x',(lx+(lbl.anchor==='end'?-10:10)).toFixed(1));
-    t.setAttribute('y',(ly-8).toFixed(1));
-    t.setAttribute('fill','#FFD06D'); t.setAttribute('font-size','10');
-    t.setAttribute('font-family','JetBrains Mono,monospace'); t.setAttribute('font-weight','600');
-    t.setAttribute('text-anchor',lbl.anchor); t.setAttribute('opacity','0.9');
-    t.textContent=lbl.txt; arcSvg3d.appendChild(t);
-  }});
-}}
-
-function moveSun3d(az, el, tm) {{
-  if(el < -5) {{ sunEl3d.style.display='none'; return; }}
-  var sp = projectToScreen3d(az, el);
-  sunEl3d.style.display='block';
-  sunEl3d.style.left=sp[0]+'px';
-  sunEl3d.style.top=sp[1]+'px';
-  if(tm) {{ var tl=document.getElementById('sun3d-time'); if(tl) tl.textContent=tm; }}
-}}
-
-function start3DAnim() {{
-  if(threeAnimTimer) clearInterval(threeAnimTimer);
-  // Show arc overlay
-  arcSvg3d.style.display='block';
-  sunEl3d.style.display='block';
-  drawArc3d();
-  moveSun3d(curAz3d, curEl3d);
-  var i=0, anim={animate_js};
-  if(anim) {{
-    threeAnimTimer=setInterval(function(){{
-      var p=allPts[i]; i=(i+1)%allPts.length;
-      if(osmMap && p.iso) osmMap.setDate(new Date(p.iso));
-      curEl3d=p.el; curAz3d=p.az;
-      moveSun3d(p.az,p.el,p.time);
-      updHUD(p.el,p.az,p.time);
-    }},200);
-  }} else {{
-    moveSun3d({maz},{mel},'{ct}');
-    updHUD({mel},{maz},'{ct}');
-  }}
-}}
-
-function aR(d){{
-  curRot=(curRot+d+360)%360; if(osmMap)osmMap.setRotation(curRot);
-  document.getElementById('cmp').style.transform='rotate('+curRot+'deg)';
-  drawArc3d(); moveSun3d(curAz3d,curEl3d);
-}}
-function aT(d){{
-  curTilt=Math.max(0,Math.min(70,curTilt+d)); if(osmMap)osmMap.setTilt(curTilt);
-  drawArc3d(); moveSun3d(curAz3d,curEl3d);
-}}
-function rst(){{
-  curRot=0;curTilt=45; if(osmMap){{osmMap.setRotation(0);osmMap.setTilt(45);}}
-  document.getElementById('cmp').style.transform='rotate(0deg)';
-  drawArc3d(); moveSun3d(curAz3d,curEl3d);
-}}
-
-// ── BOOT ──────────────────────────────────────────────────────────────────
-initLeaflet();
-updHUD({mel},{maz},'{ct}');
-</script>
-</body></html>"""
-
-    components.html(html, height=640)
+                          rise_edge, set_edge, rise_time, set_time,
+                          init_view='3d', init_rot=0, init_tilt=45, init_zoom=1.3):
+    """
+    init_view='3d'  -> render_3d_shadow_component (OSMBuildings, Street/Satellite toggle on map)
+    init_view='2d'  -> render_map_component (Leaflet, Street/Satellite toggle on map)
+    """
+    if init_view == '3d':
+        render_3d_shadow_component(
+            lat, lon, radius_meters, path_data, animate_trigger,
+            sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el, m_az,
+            rise_time, set_time,
+            allow_location_select=False,
+            init_rot=init_rot, init_tilt=init_tilt, init_zoom=init_zoom
+        )
+    else:
+        render_map_component(
+            lat, lon, radius_meters, path_data, animate_trigger,
+            sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el, m_az,
+            rise_edge, set_edge, rise_time, set_time, "Off"
+        )
