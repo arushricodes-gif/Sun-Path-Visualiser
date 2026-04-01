@@ -36,7 +36,7 @@ if "cam_tilt" in _qp:
     except: pass
 
 if "cam3d_rot"  not in st.session_state: st.session_state["cam3d_rot"]  = 0.0
-if "cam3d_tilt" not in st.session_state: st.session_state["cam3d_tilt"] = 45.0
+if "cam3d_tilt" not in st.session_state: st.session_state["cam3d_tilt"] = 0.0
 if "cam3d_zoom" not in st.session_state: st.session_state["cam3d_zoom"] = 1.3
 
 if not st.session_state.gps_requested:
