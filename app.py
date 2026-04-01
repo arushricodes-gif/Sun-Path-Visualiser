@@ -712,7 +712,7 @@ with tab_info:
         </div>
         <div class="hero-right">
             <div class="hero-sun">☀️</div>
-            <button class="btn" onclick="goTab()">☀️ &nbsp;Go to Sun Scout &nbsp;→</button>
+            <button class="btn" onclick="goTab()">☀️ &nbsp;Enter &nbsp;→</button>
         </div>
     </div>
 
