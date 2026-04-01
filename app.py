@@ -23,6 +23,10 @@ if 'coords' not in st.session_state:
     st.session_state.coords        = [0.0, 0.0]
     st.session_state.gps_requested = False
 
+# ── Tab navigation state ──────────────────────────────────────────────────────
+if 'active_tab' not in st.session_state:
+    st.session_state.active_tab = 0
+
 _qp = st.query_params
 if "cam_rot"  in _qp:
     try:    st.session_state["cam3d_rot"]  = float(_qp["cam_rot"])
@@ -342,20 +346,22 @@ with st.sidebar:
         "🍂 Autumn Equinox (Sep 22)":  date(2026, 9, 22),
         "❄️ Winter Solstice (Dec 21)": date(2026, 12, 21),
     }
-    date_preset = st.selectbox("Key Dates", list(celestial_dates.keys()))
+    date_preset = st.selectbox("Season Selection", list(celestial_dates.keys()))
     target_date = st.date_input("Custom Date", date.today()) \
                   if date_preset == "Manual Selection" else celestial_dates[date_preset]
 
-    shour = st.slider("Hour",   0, 23, datetime.now(local_tz).hour)
-    smin  = st.slider("Minute", 0, 59, 0, step=5)
-    sim_time = local_tz.localize(
-        datetime.combine(target_date, datetime.min.time())
-    ) + timedelta(hours=shour, minutes=smin)
-
-
-
     radius_meters = 250
     enable_aqi    = False  # removed
+
+# ── SIM TIME defaults (overridden inline when paused) ────────────────────────
+if "shour" not in st.session_state:
+    st.session_state.shour = datetime.now(local_tz).hour
+if "smin" not in st.session_state:
+    st.session_state.smin = 0
+
+sim_time = local_tz.localize(
+    datetime.combine(target_date, datetime.min.time())
+) + timedelta(hours=st.session_state.shour, minutes=st.session_state.smin)
 
 # ── SUN TIMES ─────────────────────────────────────────────────────────────────
 try:
@@ -538,6 +544,37 @@ with tab_info:
         -webkit-text-fill-color: {TEXT_MID} !important;
         max-width: 520px;
         line-height: 1.8;
+        margin-bottom: 28px;
+    }}
+    .hero-cta {{
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: {ORG};
+        color: #fff !important;
+        -webkit-text-fill-color: #fff !important;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.05rem;
+        font-weight: 700;
+        padding: 14px 32px;
+        border-radius: 14px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(224,123,0,0.35);
+        transition: all .2s;
+        text-decoration: none;
+        letter-spacing: .02em;
+    }}
+    .hero-cta:hover {{
+        background: #C96E00;
+        box-shadow: 0 6px 28px rgba(224,123,0,0.45);
+        transform: translateY(-2px);
+        color: #fff !important;
+        -webkit-text-fill-color: #fff !important;
+    }}
+    .hero-cta * {{
+        color: #fff !important;
+        -webkit-text-fill-color: #fff !important;
     }}
     .steps-row {{
         display: grid;
@@ -668,7 +705,41 @@ with tab_info:
             <em>when does sunlight actually hit that balcony?</em>
         </div>
     </div>
+    """, unsafe_allow_html=True)
 
+    # ── CTA button via components.html so JS actually runs ────────────────────
+    import streamlit.components.v1 as _cmp
+    _cmp.html(f"""
+    <style>
+    .cta-wrap {{ margin: -8px 0 24px 0; }}
+    .hero-cta {{
+        display: inline-flex; align-items: center; gap: 10px;
+        background: {ORG}; color: #fff; font-family: 'Space Grotesk', sans-serif;
+        font-size: 1.05rem; font-weight: 700; padding: 14px 32px;
+        border-radius: 14px; border: none; cursor: pointer;
+        box-shadow: 0 4px 20px rgba(224,123,0,0.35); transition: all .2s;
+        letter-spacing: .02em;
+    }}
+    .hero-cta:hover {{ background: #C96E00; box-shadow: 0 6px 28px rgba(224,123,0,0.45); transform: translateY(-2px); }}
+    </style>
+    <div class="cta-wrap">
+        <button class="hero-cta" onclick="clickSunScoutTab()">☀️ &nbsp; Go to Sun Scout &nbsp; →</button>
+    </div>
+    <script>
+    function clickSunScoutTab() {{
+        // st.markdown is in the main Streamlit document; components.html is in an iframe.
+        // window.parent IS the Streamlit document.
+        var doc = window.parent.document;
+        var tabs = doc.querySelectorAll('[data-testid="stTabs"] button[role="tab"]');
+        if (tabs && tabs.length > 1) {{
+            tabs[1].click();
+            window.parent.scrollTo({{top: 0, behavior: 'smooth'}});
+        }}
+    }}
+    </script>
+    """, height=80)
+
+    st.markdown(f"""
     <div class="sc-section">How to Use</div>
     <div class="steps-row">
         <div class="step-card">
@@ -776,7 +847,7 @@ with tab_explorer:
     # View selector
     view_mode = st.radio(
         "view",
-        ["📍 Set Location", "🌞 Sun Path", "🔄 Year Summary"],
+        ["Step 1 — 📍 Set Location", "Step 2 — 🌞 Sun Path", "Step 3 — 🔄 Year Summary"],
         horizontal=True, key="view_mode", label_visibility="collapsed"
     )
 
@@ -785,12 +856,12 @@ with tab_explorer:
         city_info, sim_time, radius_meters, lat, lon)
 
     if m_el <= 0:
-        st.warning(f"🌅 The sun is below the horizon at this time ({m_el:.1f}°). Try adjusting the Hour slider.")
+        st.warning(f"🌙 Sun is below the horizon at {sim_time.strftime('%H:%M')} — sunrise is {rise_t.strftime('%H:%M')}, sunset is {set_t.strftime('%H:%M')}.")
 
     st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
 
     # ── VIEW BRANCHES ─────────────────────────────────────────────────────────
-    if view_mode == "📍 Set Location":
+    if view_mode == "Step 1 — 📍 Set Location":
         _slc1, _slc2 = st.columns([4, 1])
         with _slc1:
             st.markdown(f"""
@@ -826,29 +897,41 @@ with tab_explorer:
                 st.session_state.coords = new_coords
                 st.rerun()
 
-    elif view_mode == "🌞 Sun Path":
+    elif view_mode == "Step 2 — 🌞 Sun Path":
         rise_edge = solarlogic.get_edge(lat, lon, azimuth(city_info.observer, rise_t), radius_meters)
         set_edge  = solarlogic.get_edge(lat, lon, azimuth(city_info.observer, set_t),  radius_meters)
 
-        # Controls above the map
         if "live_view_type" not in st.session_state:
             st.session_state.live_view_type = "3d"
 
-        # Animate toggle — centered
-        _ca, _cb, _cc = st.columns([2, 1, 2])
-        with _cb:
-            animate_trigger = st.toggle("▶ Animate Sun Path", value=True, key="anim_toggle_live")
+        # Row 1: sliders left (only when paused) | toggle center | 3D/2D right
+        _rl, _rc, _rr = st.columns([2, 1, 2])
 
-        # Map style — right aligned
-        _ma, _mb = st.columns([3, 2])
-        with _mb:
+        with _rc:
+            animate_trigger = st.toggle("▶ Play Live / Pause", value=True, key="anim_toggle_live")
+
+        with _rr:
+            st.markdown("<div style='display:flex;justify-content:flex-end'>", unsafe_allow_html=True)
             live_view_type = st.radio(
-                "mapstyle",
-                ["🏙 3D Shadow", "🗺 2D View"],
+                "mapstyle", ["🏙 3D Shadow", "🗺 2D View"],
                 horizontal=True, key="live_view_radio", label_visibility="collapsed",
                 index=0 if st.session_state.live_view_type == "3d" else 1
             )
             st.session_state.live_view_type = "3d" if live_view_type == "🏙 3D Shadow" else "2d"
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        if not animate_trigger:
+            with _rl:
+                shour = st.slider("Hour",   0, 23, st.session_state.shour, key="hour_slider")
+                smin  = st.slider("Minute", 0, 59, st.session_state.smin,  key="min_slider", step=5)
+                st.session_state.shour = shour
+                st.session_state.smin  = smin
+            # recompute sim_time and all derived solar values immediately
+            sim_time = local_tz.localize(
+                datetime.combine(target_date, datetime.min.time())
+            ) + timedelta(hours=shour, minutes=smin)
+            m_slat, m_slon, m_shlat, m_shlon, m_az, m_el = solarlogic.get_solar_pos(
+                city_info, sim_time, radius_meters, lat, lon)
 
         # HUD above map
         st.markdown(f"""
