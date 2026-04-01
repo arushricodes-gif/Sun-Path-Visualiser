@@ -490,27 +490,38 @@ tab_info, tab_explorer = st.tabs(["📖 Getting Started", "☀️ Sun Scout"])
 # ══════════════════════════════════════════════════════════════════════════════
 with tab_info:
     st.markdown(_CARD_CSS, unsafe_allow_html=True)
-    st.markdown(f"""
+
+    # ── Hero: single _cmp.html so the button JS actually executes ────────────
+    import streamlit.components.v1 as _cmp
+    _cmp.html(f"""
     <style>
+    * {{ box-sizing: border-box; margin: 0; padding: 0; }}
+    body {{ background: transparent; font-family: 'Plus Jakarta Sans', sans-serif; }}
     .hero {{
         background: linear-gradient(135deg, #FFF8F0 0%, #FFF3E0 60%, #FFE0B2 100%);
         border: 2px solid rgba(224,123,0,0.15);
         border-radius: 24px;
         padding: 56px 52px 52px;
-        position: relative;
-        overflow: hidden;
-        margin-bottom: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 48px;
+        margin-bottom: 0;
     }}
-    .hero::before {{
-        content: '☀️';
-        position: absolute;
-        right: 52px; top: 50%;
-        transform: translateY(-50%);
-        font-size: 140px;
-        opacity: 0.12;
-        filter: blur(3px);
+    .hero-left {{ flex: 1; min-width: 0; }}
+    .hero-right {{
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 24px;
+    }}
+    .hero-sun {{
+        font-size: 120px;
+        opacity: 0.18;
         line-height: 1;
         user-select: none;
+        display: block;
     }}
     .hero-tag {{
         display: inline-block;
@@ -547,37 +558,7 @@ with tab_info:
         -webkit-text-fill-color: {TEXT_MID} !important;
         max-width: 520px;
         line-height: 1.8;
-        margin-bottom: 28px;
-    }}
-    .hero-cta {{
-        display: inline-flex;
-        align-items: center;
-        gap: 10px;
-        background: {ORG};
-        color: #fff !important;
-        -webkit-text-fill-color: #fff !important;
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: 1.05rem;
-        font-weight: 700;
-        padding: 14px 32px;
-        border-radius: 14px;
-        border: none;
-        cursor: pointer;
-        box-shadow: 0 4px 20px rgba(224,123,0,0.35);
-        transition: all .2s;
-        text-decoration: none;
-        letter-spacing: .02em;
-    }}
-    .hero-cta:hover {{
-        background: #C96E00;
-        box-shadow: 0 6px 28px rgba(224,123,0,0.45);
-        transform: translateY(-2px);
-        color: #fff !important;
-        -webkit-text-fill-color: #fff !important;
-    }}
-    .hero-cta * {{
-        color: #fff !important;
-        -webkit-text-fill-color: #fff !important;
+        margin-bottom: 0;
     }}
     .steps-row {{
         display: grid;
@@ -693,56 +674,131 @@ with tab_info:
         -webkit-text-fill-color: {TEXT_MID} !important;
     }}
     @media (max-width: 900px) {{
-        .steps-row {{ grid-template-columns: repeat(2,1fr); }}
-        .usecase-grid {{ grid-template-columns: 1fr; }}
-        .glossary-grid {{ grid-template-columns: 1fr; }}
-        .hero::before {{ display: none; }}
+        .hero {{ flex-direction: column; }}
+    }}
+    .btn {{
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: {ORG};
+        color: #fff;
+        font-family: 'Space Grotesk', Arial, sans-serif;
+        font-size: 1.05rem;
+        font-weight: 700;
+        padding: 15px 34px;
+        border-radius: 14px;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 4px 20px rgba(224,123,0,0.4);
+        transition: all .18s;
+        letter-spacing: .02em;
+        white-space: nowrap;
+    }}
+    .btn:hover {{
+        background: #C96E00;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 26px rgba(224,123,0,0.52);
     }}
     </style>
 
     <div class="hero">
-        <div class="hero-tag">☀️ Sun Scout · Solar Intelligence</div>
-        <div class="hero-title">Know Your <span class="accent">Sunlight</span><br>Before You Buy.</div>
-        <div class="hero-desc">
-            The tool built for one question every house hunter should ask —
-            <em>when does sunlight actually hit that balcony?</em>
+        <div class="hero-left">
+            <div class="hero-tag">☀️ Sun Scout · Solar Intelligence</div>
+            <div class="hero-title">Know Your <span class="accent">Sunlight</span><br>Before You Buy.</div>
+            <div class="hero-desc">
+                The tool built for one question every house hunter should ask —
+                <em>when does sunlight actually hit that balcony?</em>
+            </div>
+        </div>
+        <div class="hero-right">
+            <div class="hero-sun">☀️</div>
+            <button class="btn" onclick="goTab()">☀️ &nbsp;Go to Sun Scout &nbsp;→</button>
         </div>
     </div>
-    """, unsafe_allow_html=True)
 
-    # ── CTA button via components.html so JS actually runs ────────────────────
-    import streamlit.components.v1 as _cmp
-    _cmp.html(f"""
-    <style>
-    .cta-wrap {{ margin: -8px 0 24px 0; }}
-    .hero-cta {{
-        display: inline-flex; align-items: center; gap: 10px;
-        background: {ORG}; color: #fff; font-family: 'Space Grotesk', sans-serif;
-        font-size: 1.05rem; font-weight: 700; padding: 14px 32px;
-        border-radius: 14px; border: none; cursor: pointer;
-        box-shadow: 0 4px 20px rgba(224,123,0,0.35); transition: all .2s;
-        letter-spacing: .02em;
-    }}
-    .hero-cta:hover {{ background: #C96E00; box-shadow: 0 6px 28px rgba(224,123,0,0.45); transform: translateY(-2px); }}
-    </style>
-    <div class="cta-wrap">
-        <button class="hero-cta" onclick="clickSunScoutTab()">☀️ &nbsp; Go to Sun Scout &nbsp; →</button>
-    </div>
     <script>
-    function clickSunScoutTab() {{
-        // st.markdown is in the main Streamlit document; components.html is in an iframe.
-        // window.parent IS the Streamlit document.
+    function goTab() {{
         var doc = window.parent.document;
         var tabs = doc.querySelectorAll('[data-testid="stTabs"] button[role="tab"]');
         if (tabs && tabs.length > 1) {{
             tabs[1].click();
-            window.parent.scrollTo({{top: 0, behavior: 'smooth'}});
+            window.parent.scrollTo({{ top: 0, behavior: 'smooth' }});
         }}
     }}
     </script>
-    """, height=80)
+    """, height=320)
 
     st.markdown(f"""
+    <style>
+    .steps-row {{
+        display: grid; grid-template-columns: repeat(4, 1fr);
+        gap: 16px; margin-bottom: 32px;
+    }}
+    .step-card {{
+        background: {WHITE}; border: 2px solid {ORG_LT};
+        border-radius: 18px; padding: 24px 20px;
+        box-shadow: 0 2px 12px rgba(224,123,0,0.06);
+    }}
+    .step-num {{
+        font-family: 'Space Grotesk', sans-serif; font-size: 2.8rem;
+        font-weight: 800; color: {ORG}; opacity: .15; line-height: 1; margin-bottom: 8px;
+    }}
+    .step-icon {{ font-size: 28px; margin-bottom: 10px; display: block; }}
+    .step-title {{
+        font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 700;
+        color: {ORG} !important; -webkit-text-fill-color: {ORG} !important;
+        margin-bottom: 8px; text-transform: uppercase; letter-spacing: .04em;
+    }}
+    .step-body {{
+        font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.0rem;
+        line-height: 1.7; color: {TEXT_MID} !important; -webkit-text-fill-color: {TEXT_MID} !important;
+    }}
+    .usecase-grid {{
+        display: grid; grid-template-columns: repeat(2, 1fr);
+        gap: 16px; margin-bottom: 32px;
+    }}
+    .usecase-card {{
+        background: {WHITE}; border: 2px solid {ORG_LT}; border-radius: 18px;
+        padding: 24px; display: flex; gap: 16px; align-items: flex-start;
+        box-shadow: 0 2px 12px rgba(224,123,0,0.06);
+    }}
+    .usecase-icon {{
+        font-size: 30px; width: 56px; height: 56px; background: {ORG_LT};
+        border-radius: 14px; display: flex; align-items: center;
+        justify-content: center; flex-shrink: 0;
+    }}
+    .usecase-title {{
+        font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 700;
+        color: {ORG} !important; -webkit-text-fill-color: {ORG} !important;
+        margin-bottom: 6px; text-transform: uppercase; letter-spacing: .04em;
+    }}
+    .usecase-body {{
+        font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.0rem;
+        line-height: 1.7; color: {TEXT_MID} !important; -webkit-text-fill-color: {TEXT_MID} !important;
+    }}
+    .glossary-grid {{
+        display: grid; grid-template-columns: repeat(2, 1fr);
+        gap: 14px; margin-bottom: 32px;
+    }}
+    .glossary-item {{
+        background: {WHITE}; border: 2px solid {ORG_LT}; border-radius: 16px;
+        padding: 18px 20px; display: flex; gap: 14px;
+    }}
+    .glossary-key {{
+        font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 700;
+        color: {ORG} !important; -webkit-text-fill-color: {ORG} !important;
+        white-space: nowrap; min-width: 110px;
+    }}
+    .glossary-val {{
+        font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.0rem;
+        line-height: 1.65; color: {TEXT_MID} !important; -webkit-text-fill-color: {TEXT_MID} !important;
+    }}
+    @media (max-width: 900px) {{
+        .steps-row {{ grid-template-columns: repeat(2,1fr); }}
+        .usecase-grid {{ grid-template-columns: 1fr; }}
+        .glossary-grid {{ grid-template-columns: 1fr; }}
+    }}
+    </style>
     <div class="sc-section">How to Use</div>
     <div class="steps-row">
         <div class="step-card">
