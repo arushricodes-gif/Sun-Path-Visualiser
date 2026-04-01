@@ -9,9 +9,6 @@ def apply_styles(theme="dark"):
     st.session_state["_plot_bg"]   = "rgba(0,0,0,0)"
     st.session_state["_plot_grid"] = "rgba(0,0,0,0.06)"
     st.session_state["_plot_font"] = "#1A1A1A"
-    # Inject ONLY what Streamlit's built-in widgets need that app.py can't reach:
-    # fix selectbox dropdown background (it renders in a portal outside the main DOM)
-    # Inject via a JS-based style tag so it applies at body level and wins over portal styles
     st.components.v1.html("""
 <script>
 (function() {
@@ -35,7 +32,7 @@ def apply_styles(theme="dark"):
     [data-testid="stSelectbox"] div,
     [data-testid="stSelectbox"] p { color: #1A1A1A !important; -webkit-text-fill-color: #1A1A1A !important; }
 
-    /* Dropdown portal — must be on body/document, not scoped */
+    /* Dropdown portal */
     body [data-baseweb="popover"],
     body [data-baseweb="popover"] > div,
     body [data-baseweb="popover"] > div > div,
@@ -68,20 +65,16 @@ def apply_styles(theme="dark"):
     body li[role="option"] span,
     body li[role="option"] div { color: #1A1A1A !important; -webkit-text-fill-color: #1A1A1A !important; }
 
-    /* Form */
     [data-testid="stForm"] { background:#fff !important; border:2px solid #FFF3E0 !important; border-radius:16px !important; padding:16px !important; }
 
-    /* Slider, toggle, alert */
     [data-testid="stSlider"] p, [data-testid="stSlider"] span { color:#1A1A1A !important; -webkit-text-fill-color:#1A1A1A !important; }
     [data-testid="stThumbValue"] { color:#E07B00 !important; -webkit-text-fill-color:#E07B00 !important; font-weight:700 !important; }
     [data-testid="stToggle"] p, [data-testid="stToggle"] span { color:#1A1A1A !important; -webkit-text-fill-color:#1A1A1A !important; }
     [data-testid="stAlert"] p, [data-testid="stAlert"] span { color:#1A1A1A !important; -webkit-text-fill-color:#1A1A1A !important; }
 
-    /* Plotly, maps */
     .js-plotly-plot .plotly .bg { fill:transparent !important; }
     .leaflet-control-attribution, .osmb-attribution { display:none !important; }
 
-    /* Calendar / date picker portal */
     body [data-baseweb="calendar"],
     body [data-baseweb="datepicker"],
     body [class*="react-datepicker"],
@@ -101,31 +94,26 @@ def apply_styles(theme="dark"):
       color: #1A1A1A !important;
       -webkit-text-fill-color: #1A1A1A !important;
     }
-    /* Calendar header nav arrows */
     body [data-baseweb="calendar"] button,
     body [data-baseweb="datepicker"] button {
       background: transparent !important;
       color: #E07B00 !important;
       -webkit-text-fill-color: #E07B00 !important;
     }
-    /* Month/year dropdowns inside calendar */
     body [data-baseweb="calendar"] select,
     body [data-baseweb="calendar"] [data-baseweb="select"] > div {
       background: #fff !important;
       color: #1A1A1A !important;
     }
   `;
-  // Inject into parent document (Streamlit host)
   function inject(doc) {
     var s = doc.createElement('style');
     s.id = 'sunscout-global';
     s.textContent = css;
     (doc.head || doc.documentElement).appendChild(s);
   }
-  // Only inject into parent Streamlit document, NOT this component iframe
   try { inject(window.parent.document); } catch(e) { inject(document); }
 
-  // MutationObserver to re-apply when portals open (dropdowns, calendars, etc)
   function forceWhite(n) {
     if (!n || n.nodeType !== 1) return;
     n.style.setProperty('background-color','#ffffff','important');
@@ -134,8 +122,6 @@ def apply_styles(theme="dark"):
     var all = n.querySelectorAll ? n.querySelectorAll('*') : [];
     for (var i=0; i<all.length; i++) {
       var el = all[i];
-      var tag = el.tagName ? el.tagName.toLowerCase() : '';
-      // Skip the selected-date circle (keep its red/orange color)
       if (el.getAttribute && el.getAttribute('aria-selected') === 'true') continue;
       el.style.setProperty('background-color','#ffffff','important');
       el.style.setProperty('color','#1A1A1A','important');
@@ -147,7 +133,6 @@ def apply_styles(theme="dark"):
     if (!n || !n.getAttribute) return false;
     var bw = n.getAttribute('data-baseweb');
     if (bw === 'popover' || bw === 'menu' || bw === 'datepicker') return true;
-    // Streamlit date picker renders as a div with class containing "CalendarDay" parent
     if (n.querySelector && (
       n.querySelector('[data-baseweb="menu"]') ||
       n.querySelector('[data-baseweb="calendar"]') ||
@@ -165,7 +150,6 @@ def apply_styles(theme="dark"):
         m.addedNodes.forEach(function(n) {
           if (n.nodeType === 1 && isPortal(n)) {
             forceWhite(n);
-            // Also watch children added inside this portal
             var inner = new MutationObserver(function() { forceWhite(n); });
             inner.observe(n, { childList: true, subtree: true, attributes: true });
           }
@@ -175,7 +159,6 @@ def apply_styles(theme="dark"):
     obs.observe(doc.body, { childList: true, subtree: false });
   }
   try { watchPortals(window.parent.document); } catch(e) {}
-  // Never watch the component iframe itself — that would break maps
 })();
 </script>
 """, height=0)
@@ -270,7 +253,6 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger,
     .sun-icon{{font-size:30pt;line-height:1;filter:drop-shadow(0 0 14px rgba(255,200,0,.85));}}
     .custom-sun-icon,.wind-arrow-container{{background:none;border:none;}}
     .leg-dot{{display:inline-block;width:7px;height:7px;border-radius:50%;margin-right:5px;vertical-align:middle;}}
-    /* click pin */
     #click-hint{{
         position:absolute;bottom:46px;left:50%;transform:translateX(-50%);
         z-index:25;background:rgba(7,9,16,.88);border:1px solid rgba(243,156,18,.3);
@@ -278,7 +260,6 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger,
         font-family:'JetBrains Mono',monospace;pointer-events:none;white-space:nowrap;
         letter-spacing:.05em;opacity:0;transition:opacity .4s;
     }}
-    /* Force HUD colors — override Streamlit global resets */
     #hud2d * {{ color: inherit !important; -webkit-text-fill-color: inherit !important; }}
     #hud2d .hud-label {{ color: #9CA3AF !important; -webkit-text-fill-color: #9CA3AF !important; }}
     #hud2d .hud-val-orange {{ color: #F39C12 !important; -webkit-text-fill-color: #F39C12 !important; }}
@@ -320,8 +301,6 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger,
       <div id="click-hint">📍 Pin moved!</div>
     </div>
     <script>
-    // Write click coords to parent sessionStorage so streamlit_js_eval can read them
-
     var TILES={{
       s:'https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png',
       sat:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}'
@@ -339,7 +318,6 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger,
       document.getElementById('bsat').className='tile-btn'+(m==='sat'?' on':'');
     }}
 
-    // ── Click to relocate ──────────────────────────────────────────────────
     var pinMarker = L.marker([{lat},{lon}], {{
         icon: L.divIcon({{
             html: '<div style="font-size:22px;filter:drop-shadow(0 0 6px rgba(243,156,18,.8));">📍</div>',
@@ -353,13 +331,10 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger,
     map2.on('click', function(e) {{
         var newLat = e.latlng.lat;
         var newLon = e.latlng.lng;
-        // Move the pin marker immediately for visual feedback
         pinMarker.setLatLng([newLat, newLon]);
-        // Show brief hint
         clickHint.style.opacity = '1';
         clearTimeout(hintTimer);
         hintTimer = setTimeout(function(){{ clickHint.style.opacity='0'; }}, 1500);
-        // Write to parent sessionStorage — streamlit_js_eval reads this and triggers rerun
         try {{
             window.parent.sessionStorage.setItem('map2d_click',
                 JSON.stringify({{lat: newLat, lon: newLon}}));
@@ -387,7 +362,6 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger,
       document.getElementById('stl').innerHTML=p.time;
       sunM.setOpacity(p.el<0?0:1);
       shad.setStyle({{opacity:p.el<0?0:.7}});
-      // Update HUD live values
       var elEl=document.getElementById('hud2d-el');
       var azEl=document.getElementById('hud2d-az');
       var tmEl=document.getElementById('hud2d-tm');
@@ -395,7 +369,6 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger,
       if(azEl) azEl.textContent=(p.az!=null?p.az.toFixed(1)+'°':'--°');
       if(tmEl) tmEl.textContent=p.time;
     }}
-    // Initial HUD values
     (function(){{
       var elEl=document.getElementById('hud2d-el');
       var azEl=document.getElementById('hud2d-az');
@@ -456,10 +429,10 @@ def render_seasonal_map(lat, lon, radius, seasonal_paths):
     <script>
     var sat=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{{z}}/{{y}}/{{x}}');
     var str=L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png');
-    var ms=L.map('msmap',{{center:[{lat},{lon}],zoom:17,layers:[sat],zoomControl:false,attributionControl:false}});
+    var ms=L.map('msmap',{{center:[{lat},{lon}],zoom:17,layers:[str],zoomControl:false,attributionControl:false}});
     L.control.zoom({{position:'bottomright'}}).addTo(ms);
     L.control.layers({{"🛰 Satellite":sat,"🗺 Street":str}},null,{{position:'topleft',collapsed:false}}).addTo(ms);
-    L.circle([{lat},{lon}],{{radius:{radius},color:'rgba(243,156,18,.15)',weight:1,fillOpacity:.02}}).addTo(ms);
+    L.circle([{lat},{lon}],{{radius:{radius},color:'rgba(243,156,18,.55)',weight:2,fillColor:'rgba(243,156,18,.06)',fillOpacity:1,dashArray:'6,6'}}).addTo(ms);
     L.circleMarker([{lat},{lon}],{{radius:8,color:'#F39C12',weight:2,fillColor:'#F39C12',fillOpacity:.9}}).addTo(ms);
     L.marker({sc},{{opacity:0}}).addTo(ms).bindTooltip("SUNSET",{{permanent:true,direction:'center',className:'loclbl ss'}});
     L.marker({rc},{{opacity:0}}).addTo(ms).bindTooltip("SUNRISE",{{permanent:true,direction:'center',className:'loclbl sr'}});
@@ -524,6 +497,9 @@ def render_3d_shadow_component(lat, lon, radius_meters, path_data, animate_trigg
         }]
     })
 
+    # Pin ring — height set dynamically in JS based on nearby buildings
+    pin_ring_js = json.dumps(ring)
+
     init_rot  = float(init_rot)  % 360
     init_tilt = max(0.0, min(70.0, float(init_tilt)))
 
@@ -554,6 +530,7 @@ html,body{{background:#0A0C10;overflow:hidden;}}
 .cb:hover{{border-color:#E07B00;color:#E07B00;background:#FFF3E0;}}
 .cb.N{{border-color:rgba(224,123,0,.4);color:#E07B00;font-size:11px;
        font-family:'Plus Jakarta Sans',sans-serif;font-weight:800;letter-spacing:.06em;}}
+
 </style>
 </head><body>
 <div style="position:relative;width:100%;height:600px;">
@@ -567,11 +544,15 @@ html,body{{background:#0A0C10;overflow:hidden;}}
   <div class="tbadge">☀️ &nbsp;<span id="stm">{cur_time}</span></div>
   <div class="hint">{hint_txt}</div>
 
-  <div style="position:absolute;top:50%;right:14px;transform:translateY(-50%);z-index:25;
+  <!-- Viewing angle controls — top right -->
+  <div style="position:absolute;top:14px;right:14px;z-index:25;
     display:flex;flex-direction:column;gap:6px;align-items:center;
-    background:rgba(255,255,255,0.92);border:2px solid rgba(224,123,0,0.25);
+    background:rgba(255,255,255,0.95);border:2px solid rgba(224,123,0,0.25);
     border-radius:16px;padding:12px 10px;
     box-shadow:0 4px 20px rgba(0,0,0,0.12);">
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:10px;font-weight:800;
+         color:#E07B00;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;
+         white-space:nowrap;">Set viewing angle</div>
     <button class="cb" onclick="aT(-10)">▲</button>
     <div style="display:flex;gap:5px;">
       <button class="cb" onclick="aR(-15)">◀</button>
@@ -581,7 +562,8 @@ html,body{{background:#0A0C10;overflow:hidden;}}
     <button class="cb" onclick="aT(10)">▼</button>
   </div>
 
-  <div style="position:absolute;top:110px;right:14px;z-index:25;width:42px;height:42px;
+  <!-- Compass — below the controls box -->
+  <div style="position:absolute;top:198px;right:22px;z-index:25;width:42px;height:42px;
     pointer-events:none;background:rgba(7,9,16,.88);border:1px solid rgba(255,255,255,.07);
     border-radius:50%;display:flex;align-items:center;justify-content:center;">
     <svg id="cmp" width="34" height="34" viewBox="-20 -20 40 40" style="transition:transform .2s;">
@@ -597,6 +579,13 @@ html,body{{background:#0A0C10;overflow:hidden;}}
 
   <svg id="arc-svg"></svg>
   <div id="sun">☀️</div>
+  <!-- Pin dot: always visible at map center -->
+  <div id="pin-wrap" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+       pointer-events:none;z-index:22;">
+    <div id="pin-dot" style="width:14px;height:14px;border-radius:50%;
+         background:#E07B00;border:3px solid #fff;
+         box-shadow:0 0 0 3px rgba(224,123,0,0.45);"></div>
+  </div>
   <div id="coord">📍 &nbsp;<span id="ctxt"></span></div>
 </div>
 
@@ -625,26 +614,8 @@ map.setDate(new Date('{sim_iso}'));
 tL = map.addMapTiles(TILES.s);
 map.addGeoJSONTiles('https://{{s}}.data.osmbuildings.org/0.2/59fcc2e8/tile/{{z}}/{{x}}/{{y}}.json');
 
-map.addGeoJSON({obs_gj}, {{color:'#F39C12'}});
-map.addGeoJSON({sun_path_gj}, {{color:'#F39C12'}});
 
-(function(){{
-  const rd=0.000022, steps=16, ring=[];
-  for(let i=0;i<=steps;i++){{
-    const a=2*Math.PI*i/steps;
-    const cosLat=Math.cos({lat}*Math.PI/180);
-    ring.push([{lon}+rd*Math.cos(a)/cosLat, {lat}+rd*Math.sin(a)]);
-  }}
-  map.addGeoJSON({{
-    type:"FeatureCollection",
-    features:[
-      {{type:"Feature",properties:{{color:"#F39C12",height:22,minHeight:0}},
-        geometry:{{type:"Polygon",coordinates:[ring]}}}},
-      {{type:"Feature",properties:{{color:"#ffffff",height:24,minHeight:20}},
-        geometry:{{type:"Polygon",coordinates:[ring]}}}}
-    ]
-  }},{{color:'#F39C12'}});
-}})();
+
 
 function setT(m) {{
   if(m===curT) return; curT=m;
@@ -654,6 +625,16 @@ function setT(m) {{
   document.getElementById('bsat').className= 'tile-btn'+(m==='sat'?' on':'');
 }}
 
+// ── Fetch building height async, just for reference ──────────────────────────
+(function() {{
+  const q = '[out:json][timeout:10];(way["building"](around:60,{lat},{lon});relation["building"](around:60,{lat},{lon}););out center tags;';
+  fetch('https://overpass-api.de/api/interpreter', {{
+    method: 'POST', body: 'data=' + encodeURIComponent(q)
+  }})
+  .then(r => r.json())
+  .catch(() => {{}});
+}})();
+
 const allPts  = {all_pts};
 const isoList = {iso_list};
 allPts.forEach((p,i) => p.iso = isoList[i] || '');
@@ -661,7 +642,7 @@ allPts.forEach((p,i) => p.iso = isoList[i] || '');
 const sunEl = document.getElementById('sun');
 const coord = document.getElementById('coord');
 const ctxt  = document.getElementById('ctxt');
-let curEl = {mel}, curAz = {maz}, pinLayer = null;
+let curEl = {mel}, curAz = {maz};
 
 function saveCam() {{
   try {{
@@ -707,7 +688,6 @@ const arcSvg = document.getElementById('arc-svg');
 function projectToScreen(az, el) {{
   const W = document.getElementById('map').clientWidth  || 800;
   const H = document.getElementById('map').clientHeight || 600;
-  // f=0 at horizon → arc endpoints touch map edges; f=1 at zenith → center
   const f  = Math.max(0, el) / 90;
   const rx = W * 0.48 * (1 - f);
   const ry = H * 0.44 * (1 - f);
@@ -817,7 +797,9 @@ if(anim) {{
 
 map.on('change', () => {{ moveSun(curAz, curEl); if(!HIDE_SUN) drawArc(); }});
 
-function makePinGeoJSON(plat, plon) {{
+function makePinGeoJSON(plat, plon, pinH) {{
+  pinH = pinH || 60;
+  const capH = pinH + 3;
   const rd=0.000022, steps=16, ring=[];
   for(let i=0;i<=steps;i++){{
     const a=2*Math.PI*i/steps;
@@ -827,9 +809,9 @@ function makePinGeoJSON(plat, plon) {{
   return {{
     type:"FeatureCollection",
     features:[
-      {{type:"Feature",properties:{{color:"#E74C3C",height:22,minHeight:0}},
+      {{type:"Feature",properties:{{color:"#F39C12",height:pinH,minHeight:0}},
         geometry:{{type:"Polygon",coordinates:[ring]}}}},
-      {{type:"Feature",properties:{{color:"#ffffff",height:24,minHeight:20}},
+      {{type:"Feature",properties:{{color:"#E07B00",height:capH,minHeight:pinH}},
         geometry:{{type:"Polygon",coordinates:[ring]}}}}
     ]
   }};
@@ -837,7 +819,7 @@ function makePinGeoJSON(plat, plon) {{
 
 function drop(plat, plon) {{
   if(pinLayer) map.remove(pinLayer);
-  pinLayer = map.addGeoJSON(makePinGeoJSON(plat, plon), {{color:'#E74C3C'}});
+  pinLayer = map.addGeoJSON(makePinGeoJSON(plat, plon, 60), {{color:'#F39C12'}});
 }}
 
 const SEL = {sel_js};
@@ -1093,10 +1075,6 @@ def render_live_component(lat, lon, radius_meters, path_data, animate_trigger,
                           sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el, m_az,
                           rise_edge, set_edge, rise_time, set_time,
                           init_view='3d', init_rot=0, init_tilt=45, init_zoom=1.3):
-    """
-    init_view='3d'  -> render_3d_shadow_component (OSMBuildings, Street/Satellite toggle on map)
-    init_view='2d'  -> render_map_component (Leaflet, Street/Satellite toggle on map)
-    """
     if init_view == '3d':
         render_3d_shadow_component(
             lat, lon, radius_meters, path_data, animate_trigger,
