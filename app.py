@@ -132,6 +132,9 @@ p, li, span, label, div {{ color: {TEXT_DARK} !important; }}
     color: {WHITE} !important;
     border: none !important;
 }}
+[data-testid="stTextInput"] [data-testid="InputInstructions"] {{
+    display: none !important;
+}}
 [data-testid="stTabs"] button[role="tab"][aria-selected="true"] p {{
     color: {WHITE} !important;
     -webkit-text-fill-color: {WHITE} !important;
@@ -346,7 +349,7 @@ with st.sidebar:
         "🍂 Autumn Equinox (Sep 22)":  date(2026, 9, 22),
         "❄️ Winter Solstice (Dec 21)": date(2026, 12, 21),
     }
-    date_preset = st.selectbox("Season Selection", list(celestial_dates.keys()))
+    date_preset = st.selectbox("Key Dates", list(celestial_dates.keys()))
     target_date = st.date_input("Custom Date", date.today()) \
                   if date_preset == "Manual Selection" else celestial_dates[date_preset]
 
@@ -847,7 +850,7 @@ with tab_explorer:
     # View selector
     view_mode = st.radio(
         "view",
-        ["Step 1 — 📍 Set Location", "Step 2 — 🌞 Sun Path", "Step 3 — 🔄 Year Summary"],
+        ["📍 Set Location", "🌞 Sun Path", "🔄 Year Summary"],
         horizontal=True, key="view_mode", label_visibility="collapsed"
     )
 
@@ -861,7 +864,7 @@ with tab_explorer:
     st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
 
     # ── VIEW BRANCHES ─────────────────────────────────────────────────────────
-    if view_mode == "Step 1 — 📍 Set Location":
+    if view_mode == "📍 Set Location":
         _slc1, _slc2 = st.columns([4, 1])
         with _slc1:
             st.markdown(f"""
@@ -897,7 +900,7 @@ with tab_explorer:
                 st.session_state.coords = new_coords
                 st.rerun()
 
-    elif view_mode == "Step 2 — 🌞 Sun Path":
+    elif view_mode == "🌞 Sun Path":
         rise_edge = solarlogic.get_edge(lat, lon, azimuth(city_info.observer, rise_t), radius_meters)
         set_edge  = solarlogic.get_edge(lat, lon, azimuth(city_info.observer, set_t),  radius_meters)
 
