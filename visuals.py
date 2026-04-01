@@ -271,8 +271,8 @@ def render_map_component(lat, lon, radius_meters, path_data, animate_trigger,
     <div style="position:relative;height:560px;">
       <div id="map2" style="height:560px;width:100%;"></div>
       <div class="tile-row">
-        <button class="tile-btn on" id="bs" onclick="setTile('s')">🗺 Street</button>
-        <button class="tile-btn"    id="bsat" onclick="setTile('sat')">🛰 Satellite</button>
+        <button class="tile-btn on" id="bs" onclick="setTile('s')">Street</button>
+        <button class="tile-btn"    id="bsat" onclick="setTile('sat')">Satellite</button>
       </div>
       <div style="position:absolute;bottom:48px;left:14px;z-index:9999;
         background:rgba(255,255,255,0.97);border:2px solid rgba(224,123,0,0.2);
@@ -445,7 +445,7 @@ def render_seasonal_map(lat, lon, radius, seasonal_paths):
 def render_3d_shadow_component(lat, lon, radius_meters, path_data, animate_trigger,
                                sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el,
                                m_az, rise_time, set_time, allow_location_select=False,
-                               init_rot=0, init_tilt=45, init_zoom=1.3):
+                               init_rot=0, init_tilt=0, init_zoom=1.3):
     import json, math as _m
 
     all_pts = json.dumps([{
@@ -1074,7 +1074,7 @@ cv.addEventListener('touchmove',e=>{{
 def render_live_component(lat, lon, radius_meters, path_data, animate_trigger,
                           sim_time, m_slat, m_slon, m_shlat, m_shlon, m_el, m_az,
                           rise_edge, set_edge, rise_time, set_time,
-                          init_view='3d', init_rot=0, init_tilt=45, init_zoom=1.3):
+                          init_view='3d', init_rot=0, init_tilt=0, init_zoom=1.3):
     if init_view == '3d':
         render_3d_shadow_component(
             lat, lon, radius_meters, path_data, animate_trigger,
